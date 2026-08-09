@@ -394,6 +394,9 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 
 # 1. Email daalne aur OTP bhejne ka view
+# Views.py ke andar sirf is function ko replace kar do
+import traceback # Ise top par imports ke sath dal dena agar nahi hai
+
 def forgot_password_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -402,7 +405,7 @@ def forgot_password_view(request):
             # 6-digit OTP Generate karo
             otp = str(random.randint(100000, 999999))
             
-            # OTP aur Email ko session mein save karo taaki aage verify kar sakein
+            # OTP aur Email ko session mein save karo
             request.session['reset_otp'] = otp
             request.session['reset_email'] = email
             
@@ -412,13 +415,19 @@ def forgot_password_view(request):
             email_from = settings.EMAIL_HOST_USER
             recipient_list = [email]
             
-            send_mail(subject, message, email_from, recipient_list)
+            # Agar error aaya toh server crash hone se bachayega
+            send_mail(subject, message, email_from, recipient_list, fail_silently=False)
             
             messages.success(request, "OTP has been sent to your email!")
             return redirect('verify_reset_otp')
             
         except User.DoesNotExist:
             messages.error(request, "This email is not registered with us!")
+            return redirect('forgot_password')
+        except Exception as e:
+            # White page aane ke bajaye, yeh tujhe exact error screen par dikhayega
+            error_msg = f"Email System Error: {str(e)}"
+            messages.error(request, error_msg)
             return redirect('forgot_password')
             
     return render(request, 'forgot_password.html')
