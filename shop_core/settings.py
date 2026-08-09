@@ -151,9 +151,10 @@ SOCIALACCOUNT_PROVIDERS = {
 # ==========================================================
 # REAL GMAIL SMTP SETTINGS (For Forgot Password & OTP)
 # ==========================================================
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'prizelessstore@gmail.com'       # Yahan apna real Gmail daal
-EMAIL_HOST_PASSWORD = 'prrhfktfttkpvddv'      # Yahan wo 16-digit wala App Password daal
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_PORT = 587
+#EMAIL_USE_TLS = True
+#EMAIL_HOST_USER = 'prizelessstore@gmail.com'       # Yahan apna real Gmail daal
+#EMAIL_HOST_PASSWORD = 'prrhfktfttkpvddv'      # Yahan wo 16-digit wala App Password daal
