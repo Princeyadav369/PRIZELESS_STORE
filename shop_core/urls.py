@@ -5,6 +5,7 @@ urlpatterns = [
     path('signup/', views.register_view, name='register'),
     path('signin/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('forgot-password/', views.forgot_password_view, name='forgot_password'),
     # ==========================================
     # 🌍 GOOGLE LOGIN / ALLAUTH URLs
     # ==========================================

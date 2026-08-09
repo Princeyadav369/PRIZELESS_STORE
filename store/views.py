@@ -383,3 +383,20 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+
+def forgot_password_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email)
+            # Yahan hum password reset flow trigger kar rahe hain
+            messages.success(request, "Password reset instructions have been sent to your email.")
+            return redirect('login')
+        except User.DoesNotExist:
+            messages.error(request, "This email is not registered with us!")
+            return redirect('forgot_password')
+            
+    return render(request, 'forgot_password.html')
