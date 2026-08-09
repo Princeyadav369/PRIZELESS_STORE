@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Login - Prizeless Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-96 border border-gray-700 text-center">
+        <h1 class="text-2xl font-bold mb-2">Seller Portal</h1>
+        <p class="text-gray-400 text-sm mb-6">Authorized personnel only</p>
+
+        <!-- Error Messages System -->
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <p class="text-red-500 text-sm font-semibold bg-red-900/30 p-2 rounded border border-red-800">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" class="space-y-4 text-left">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Username</label>
+                <input type="text" name="username" required class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Password</label>
+                <input type="password" name="password" required class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            </div>
+            
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg transition shadow-lg mt-4 cursor-pointer">
+                Login to Dashboard
+            </button>
+        </form>
+        
+        <div class="mt-6 text-center">
+            <!-- Yahi line error de rahi thi, isko fix kar diya hai -->
+            <a href="{% url 'home' %}" class="text-sm text-gray-400 hover:text-white transition">&larr; Back to Website</a>
+        </div>
+    </div>
+
+</body>
+</html>

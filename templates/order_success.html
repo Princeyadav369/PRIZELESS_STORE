@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Placed Successfully - Prizeless Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center space-y-6">
+        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mx-auto">
+            ✓
+        </div>
+        
+        <div>
+            <h1 class="text-2xl font-black text-gray-900">Order Placed Successfully!</h1>
+            <p class="text-sm text-gray-500 mt-1">Thank you for shopping with Prizeless Store.</p>
+            <p class="text-xs font-bold text-orange-500 mt-2">ORDER ID: #PRZ-000{{ order_id }}</p>
+        </div>
+
+        <!-- Notification Message -->
+        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-center text-xs font-medium text-gray-600">
+            <p>✉️ If you provided an email, an order confirmation has been sent automatically!</p>
+        </div>
+
+        <!-- Return Home Button -->
+        <div>
+            <a href="{% url 'home' %}" class="block w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl shadow-md transition text-sm">
+                Return to Home Store 🏠
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

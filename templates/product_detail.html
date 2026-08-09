@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }} - Prizeless Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+    <div class="max-w-6xl mx-auto px-4 py-10">
+        <a href="{% url 'home' %}" class="inline-block mb-6 text-sm font-bold text-orange-600 hover:underline">← Back to Store</a>
+
+        <div class="bg-white rounded-2xl shadow-md border p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <!-- Product Image -->
+            <div>
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-96 object-cover rounded-xl border">
+                {% else %}
+                <div class="w-full h-96 bg-gray-100 flex items-center justify-center rounded-xl text-gray-400">No Image</div>
+                {% endif %}
+            </div>
+
+            <!-- Product Details -->
+            <div class="space-y-4">
+                <span class="bg-orange-100 text-orange-600 text-xs font-bold px-3 py-1 rounded-full uppercase">{{ product.category.name }}</span>
+                <h1 class="text-3xl font-black text-gray-900">{{ product.name }}</h1>
+                <p class="text-3xl font-black text-orange-600">₹{{ product.price }}</p>
+                
+                <p class="text-gray-600 text-sm leading-relaxed">
+                    {{ product.description|default:"Premium quality steel product designed for durability and daily use in modern kitchens." }}
+                </p>
+
+                <!-- Stock Status -->
+                <div>
+                    {% if product.is_available %}
+                    <span class="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">✅ In Stock</span>
+                    {% else %}
+                    <span class="inline-block bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full">❌ Out of Stock</span>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons: Add to Cart & Wishlist -->
+                <div class="pt-4 flex space-x-4">
+                    {% if product.is_available %}
+                    <a href="{% url 'add_to_cart' product.id %}" class="flex-1 text-center bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl shadow transition">
+                        Add to Cart 🛒
+                    </a>
+                    {% else %}
+                    <button disabled class="flex-1 text-center bg-gray-300 text-gray-500 font-bold py-3.5 rounded-xl cursor-not-allowed">
+                        Out of Stock
+                    </button>
+                    {% endif %}
+
+                    {% if in_wishlist %}
+                    <a href="{% url 'remove_from_wishlist' product.id %}" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-5 py-3.5 rounded-xl font-bold transition flex items-center justify-center">
+                        ❤️ Saved
+                    </a>
+                    {% else %}
+                    <a href="{% url 'add_to_wishlist' product.id %}" class="bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 px-5 py-3.5 rounded-xl font-bold transition flex items-center justify-center">
+                        🤍 Save for Later
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

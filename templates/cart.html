@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Prizeless Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <!-- NAVBAR WITH NOTIFICATION ICON -->
+    <nav class="bg-white shadow-sm border-b border-gray-100 w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 md:h-20">
+                <a href="{% url 'home' %}" class="flex items-center space-x-2 text-xl md:text-2xl font-bold text-gray-900">
+                    <span>⬅️</span>
+                    <span>Shopping Cart</span>
+                </a>
+                
+                <div class="flex items-center space-x-5 text-2xl md:text-xl">
+                    <a href="{% url 'notifications' %}" class="text-gray-700 hover:text-orange-500">🔔</a>
+                    <a href="{% url 'wishlist' %}" class="text-gray-700 hover:text-red-500">❤️</a>
+                    <a href="{% url 'account_profile' %}" class="text-gray-700 hover:text-orange-500">👤</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        {% if cart_items %}
+            <div class="space-y-4 mb-8">
+                {% for item in cart_items %}
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" class="w-20 h-20 md:w-24 md:h-24 object-cover rounded-md border border-gray-100">
+                        {% else %}
+                            <div class="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-2xl">📷</div>
+                        {% endif %}
+                        
+                        <div>
+                            <h3 class="text-lg md:text-xl font-bold text-gray-900">{{ item.product.name }}</h3>
+                            <p class="text-xl font-black text-orange-500 mt-1">₹{{ item.product.price }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-end space-y-3">
+                        <a href="{% url 'remove_from_cart' item.product.id %}" class="text-red-500 hover:text-red-700 p-2 text-2xl">🗑️</a>
+                        <div class="flex items-center space-x-3 bg-gray-100 px-3 py-1.5 rounded-lg text-lg font-bold">
+                            <span class="text-gray-500">Qty:</span>
+                            <span>{{ item.quantity }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- ORDER SUMMARY -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-20">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Order Summary</h3>
+                <div class="flex justify-between text-lg text-gray-600 mb-3">
+                    <span>Subtotal</span>
+                    <span>₹{{ cart_total }}</span>
+                </div>
+                <div class="flex justify-between text-lg text-green-600 font-bold mb-4">
+                    <span>Delivery Charge</span>
+                    <span>FREE</span>
+                </div>
+                <div class="flex justify-between text-2xl font-black text-gray-900 border-t pt-4">
+                    <span>Total Amount</span>
+                    <span>₹{{ cart_total }}</span>
+                </div>
+                
+                <a href="{% url 'checkout' %}" class="block w-full mt-6 bg-green-600 hover:bg-green-700 text-white text-center text-xl font-bold py-4 rounded-lg shadow-md transition">
+                    Proceed to Checkout 🚀
+                </a>
+            </div>
+        {% else %}
+            <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-200">
+                <span class="text-6xl">🛒</span>
+                <h2 class="text-2xl font-bold text-gray-900 mt-4">Your cart is empty!</h2>
+                <p class="text-gray-500 text-lg mt-2 mb-6">Looks like you haven't added anything yet.</p>
+                <a href="{% url 'home' %}" class="bg-orange-500 text-white font-bold text-lg px-8 py-3 rounded-lg">Browse Products</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

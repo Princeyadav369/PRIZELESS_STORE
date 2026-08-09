@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prizeless Store - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind Dark Mode Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans antialiased flex h-screen overflow-hidden transition-colors duration-300">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col justify-between shadow-sm transition-colors duration-300 z-20">
+        <div>
+            <div class="h-16 flex items-center px-6 border-b border-gray-100 dark:border-gray-700">
+                <span class="text-blue-600 dark:text-blue-400 text-2xl mr-2">✴</span>
+                <h1 class="text-xl font-bold tracking-wide text-gray-900 dark:text-white">Prizeless Store</h1>
+            </div>
+            <nav class="mt-4 px-4 space-y-1">
+                <a href="{% url 'custom_dashboard' %}" class="flex items-center px-4 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg font-medium">
+                    <span class="mr-3">❖</span> Dashboard
+                </a>
+                <button onclick="comingSoon('Products')" class="w-full flex items-center px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition font-medium">
+                    <span class="mr-3">📦</span> Products
+                </button>
+                <!-- NAYA BANNERS BUTTON -->
+                <a href="{% url 'dashboard_banners' %}" class="w-full flex items-center px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition font-medium">
+    <span class="mr-3">🖼️</span> Banners
+</a>
+                <button onclick="comingSoon('Orders')" class="w-full flex items-center px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition font-medium">
+                    <span class="mr-3">🛒</span> Orders
+                </button>
+                <button onclick="comingSoon('Statistics')" class="w-full flex items-center px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition font-medium">
+                    <span class="mr-3">📊</span> Statistics
+                </button>
+                <button onclick="comingSoon('Reviews')" class="w-full flex items-center px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition font-medium">
+                    <span class="mr-3">⭐</span> Reviews
+                </button>
+                <button onclick="comingSoon('Customers')" class="w-full flex items-center px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition font-medium">
+                    <span class="mr-3">👥</span> Customers
+                </button>
+                <button onclick="comingSoon('Transactions')" class="w-full flex items-center px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition font-medium">
+                    <span class="mr-3">💳</span> Transactions
+                </button>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        <!-- Top Navbar -->
+        <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-8 shadow-sm z-10 transition-colors duration-300">
+            <div class="flex items-center w-96 bg-gray-50 dark:bg-gray-700 rounded-lg px-4 py-2 border border-gray-200 dark:border-gray-600">
+                <span class="text-gray-400 mr-2">🔍</span>
+                <input type="text" placeholder="Search..." class="bg-transparent border-none focus:outline-none text-sm w-full dark:text-white">
+            </div>
+            
+            <div class="flex items-center space-x-5">
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl focus:outline-none">
+                    🌓
+                </button>
+
+                <!-- Notifications -->
+                <div class="relative">
+                    <button onclick="toggleDropdown('notificationMenu')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl relative focus:outline-none">
+                        🔔 <span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <!-- Notification Box -->
+                    <div id="notificationMenu" class="hidden absolute right-0 mt-3 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50">
+                        <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 font-bold dark:text-white">Notifications</div>
+                        <a href="#" class="block px-4 py-3 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">No new orders yet!</a>
+                    </div>
+                </div>
+                
+                <!-- Profile Dropdown -->
+                <div class="relative">
+                    <button onclick="toggleDropdown('profileMenu')" class="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 flex items-center justify-center font-bold text-blue-600 dark:text-blue-300 text-sm focus:outline-none cursor-pointer">
+                        {{ request.user.username|slice:":1"|upper }}
+                    </button>
+                    <!-- Profile Box -->
+                    <div id="profileMenu" class="hidden absolute right-0 mt-3 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden">
+                        <a href="#" onclick="comingSoon('Settings')" class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700">⚙️ Settings</a>
+                        <a href="#" onclick="comingSoon('Change Password')" class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700">🔑 Change Password</a>
+                        <form action="{% url 'custom_logout' %}" method="POST" class="block">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 cursor-pointer">
+                                🚪 Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="flex-1 p-8 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Orders Overview</h2>
+                <div class="space-x-3">
+                    <a href="{% url 'add_category' %}" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+                        + Add Category
+                    </a>
+                    <a href="{% url 'add_product' %}" class="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+                        + Add Product
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-between border-l-4 border-l-teal-500 transition-colors">
+                    <div>
+                        <h3 class="text-gray-500 dark:text-gray-400 text-xs font-bold tracking-wider mb-1">ORDERS COMPLETED</h3>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white">0</p>
+                    </div>
+                    <div class="text-teal-500 text-2xl">✔️</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-between border-l-4 border-l-blue-500 transition-colors">
+                    <div>
+                        <h3 class="text-gray-500 dark:text-gray-400 text-xs font-bold tracking-wider mb-1">ORDERS CONFIRMED</h3>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white">0</p>
+                    </div>
+                    <div class="text-blue-500 text-2xl">📦</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-between border-l-4 border-l-red-500 transition-colors">
+                    <div>
+                        <h3 class="text-gray-500 dark:text-gray-400 text-xs font-bold tracking-wider mb-1">ORDERS CANCELED</h3>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white">0</p>
+                    </div>
+                    <div class="text-red-500 text-2xl">🚫</div>
+                </div>
+            </div>
+
+            <!-- Products Table -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                        <tr class="text-gray-500 dark:text-gray-400 text-xs tracking-wider uppercase font-semibold">
+                            <th class="py-4 px-6">Products</th>
+                            <th class="py-4 px-6">SKU</th>
+                            <th class="py-4 px-6">Price</th>
+                            <th class="py-4 px-6">Categories</th>
+                            <th class="py-4 px-6">Status</th>
+                            <th class="py-4 px-6 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+                        {% for p in products %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition group">
+                            <td class="py-4 px-6 flex items-center">
+                                <!-- Photo System -->
+                                {% if p.image %}
+                                    <img src="{{ p.image.url }}" class="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-gray-600 mr-4 shadow-sm">
+                                {% else %}
+                                    <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 mr-4 flex items-center justify-center text-gray-400 dark:text-gray-500 text-xl shadow-sm">📷</div>
+                                {% endif %}
+                                
+                                <div>
+                                    <p class="font-bold text-gray-900 dark:text-white">{{ p.name }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Prizeless Store</p>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6 text-gray-600 dark:text-gray-300 font-medium">PRZ-{{ p.id }}</td>
+                            <td class="py-4 px-6 text-gray-900 dark:text-white font-bold">₹{{ p.price }}</td>
+                            <td class="py-4 px-6 text-gray-600 dark:text-gray-300">{{ p.category }}</td>
+                            <td class="py-4 px-6">
+                                {% if p.is_available %}
+                                    <span class="bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 text-xs px-3 py-1.5 rounded-full font-bold border border-teal-200 dark:border-teal-800">Active</span>
+                                {% else %}
+                                    <span class="bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs px-3 py-1.5 rounded-full font-bold border border-orange-200 dark:border-orange-800">Out of Stock</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-6 text-right space-x-2 flex justify-end">
+                                <!-- Edit Button -->
+                                <a href="{% url 'edit_product' p.id %}" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-md font-medium transition">
+                                    ✏️ Edit
+                                </a>
+                                
+                                <!-- Delete Button (Form format taaki secure rahe) -->
+                                <form action="{% url 'delete_product' p.id %}" method="POST" class="inline" onsubmit="return confirm('Bhai, sach mein delete karna hai kya?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 px-3 py-1.5 rounded-md font-medium transition cursor-pointer">
+                                        🗑️ Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript For All Interactions -->
+    <script>
+        // Dropdown Toggle
+        function toggleDropdown(menuId) {
+            // Pehle saare menus band karo
+            document.getElementById('profileMenu').classList.add('hidden');
+            document.getElementById('notificationMenu').classList.add('hidden');
+            
+            // Ab jis par click kiya hai usko kholo
+            document.getElementById(menuId).classList.remove('hidden');
+            // Dropdown click hone par event bubble na ho
+            event.stopPropagation(); 
+        }
+
+        // Dark/Light Theme Toggle
+        function toggleTheme() {
+            var html = document.getElementById("html-root");
+            if (html.classList.contains("dark")) {
+                html.classList.remove("dark");
+            } else {
+                html.classList.add("dark");
+            }
+        }
+
+        // Coming Soon Alert
+        function comingSoon(pageName) {
+            alert("Bhai, '" + pageName + "' ka backend page abhi banana baaki hai! Agle steps mein hum yahi banayenge.");
+        }
+
+        // Bahar click karne par menu band ho jaye
+        window.onclick = function(event) {
+            document.getElementById('profileMenu').classList.add('hidden');
+            document.getElementById('notificationMenu').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

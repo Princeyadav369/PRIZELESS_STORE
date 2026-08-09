@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order #{{ order.id }} - Prizeless Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex items-center justify-center p-6">
+
+    <div class="bg-white max-w-2xl w-full p-8 rounded-2xl shadow-xl border border-gray-100 text-center relative">
+        <a href="{% url 'home' %}" class="absolute top-6 left-6 text-orange-500 font-bold text-sm">← Back to Store</a>
+        
+        <div class="text-6xl mb-4">📦</div>
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Order Tracking</h1>
+        <p class="text-gray-500 mb-8">Order ID: <span class="font-bold text-gray-900">#PRZ-000{{ order.id }}</span></p>
+
+        <!-- Status Stage -->
+        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8 inline-block w-full">
+            <p class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Current Status</p>
+            {% if order.status == 'Pending' or order.status == 'Confirmed' %}
+                <h2 class="text-2xl font-black text-blue-500">Order {{ order.status }} ⏳</h2>
+                <p class="text-gray-600 text-sm mt-2">Your order will be shipped in 2-3 business days.</p>
+            {% elif order.status == 'Shipped' %}
+                <h2 class="text-2xl font-black text-orange-500">Shipped 🚚</h2>
+                <p class="text-gray-600 text-sm mt-2">Your item is on the way!</p>
+            {% elif order.status == 'Out_for_Delivery' %}
+                <h2 class="text-2xl font-black text-orange-500">Out for Delivery 🛵</h2>
+                <p class="text-gray-600 text-sm mt-2">Our delivery partner will reach you today.</p>
+            {% elif order.status == 'Delivered' %}
+                <h2 class="text-2xl font-black text-green-500">Delivered 🎉</h2>
+                <p class="text-gray-600 text-sm mt-2">Thank you for shopping with Prizeless Store!</p>
+            {% elif order.status == 'Cancelled' %}
+                <h2 class="text-2xl font-black text-red-500">Cancelled 🚫</h2>
+                <p class="text-gray-600 text-sm mt-2">This order has been cancelled.</p>
+            {% endif %}
+        </div>
+
+        <!-- Cancel Order Button (Only show if not shipped/delivered/cancelled) -->
+        {% if order.status == 'Pending' or order.status == 'Confirmed' %}
+            <form action="{% url 'cancel_order' order.id %}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                {% csrf_token %}
+                <button type="submit" class="text-red-500 border border-red-500 hover:bg-red-50 px-6 py-2 rounded-lg font-bold transition">
+                    Cancel Order
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+</body>
+</html>

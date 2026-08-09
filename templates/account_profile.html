@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Prizeless Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <!-- NAVBAR WITH NOTIFICATION ICON -->
+    <nav class="bg-white shadow-sm border-b border-gray-100 w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 md:h-20">
+                <a href="{% url 'home' %}" class="flex items-center space-x-2 text-xl md:text-2xl font-bold text-gray-900">
+                    <span>⬅️</span>
+                    <span>Prizeless<span class="text-orange-500">.</span> Profile</span>
+                </a>
+                
+                <!-- MOBILE ICONS (BIG SIZES) -->
+                <div class="flex items-center space-x-5 text-2xl md:text-xl">
+                    <a href="{% url 'notifications' %}" class="text-gray-700 hover:text-orange-500">🔔</a>
+                    <a href="{% url 'wishlist' %}" class="text-gray-700 hover:text-red-500">❤️</a>
+                    <a href="{% url 'cart_page' %}" class="text-gray-700 hover:text-orange-500">🛒</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">My Account</h1>
+            <p class="text-base text-gray-500 mt-1">Manage your orders, profile, and settings.</p>
+        </div>
+
+        <!-- QUICK DASHBOARD BUTTONS -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+            <a href="{% url 'my_orders' %}" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-blue-50 text-blue-600 p-3 rounded-full text-2xl">📦</div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg">My Orders</h3>
+                        <p class="text-sm text-gray-500">Track & Cancel</p>
+                    </div>
+                </div>
+                <span class="text-gray-300 text-2xl">➔</span>
+            </a>
+
+            <a href="{% url 'account_settings' %}" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-gray-100 text-gray-700 p-3 rounded-full text-2xl">⚙️</div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg">Settings</h3>
+                        <p class="text-sm text-gray-500">Change Password</p>
+                    </div>
+                </div>
+                <span class="text-gray-300 text-2xl">➔</span>
+            </a>
+
+            <a href="{% url 'wishlist' %}" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hover:shadow-md transition flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-red-50 text-red-500 p-3 rounded-full text-2xl">❤️</div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg">Wishlist</h3>
+                        <p class="text-sm text-gray-500">Saved Items</p>
+                    </div>
+                </div>
+                <span class="text-gray-300 text-2xl">➔</span>
+            </a>
+        </div>
+
+        <!-- PROFILE UPDATE FORM -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center border-b pb-4">
+                <span class="mr-2 text-blue-500">👤</span> Personal Information
+            </h2>
+            
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 uppercase mb-2">Username / ID</label>
+                    <input type="text" value="{{ request.user.username }}" disabled class="w-full bg-gray-100 border border-gray-200 text-gray-600 px-4 py-3 rounded-lg text-lg cursor-not-allowed">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 uppercase mb-2">Email Address</label>
+                    <input type="email" name="email" value="{{ request.user.email }}" class="w-full border border-gray-300 text-gray-900 px-4 py-3 rounded-lg text-lg focus:ring-2 focus:ring-orange-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 uppercase mb-2">First Name</label>
+                        <input type="text" name="first_name" value="{{ request.user.first_name }}" class="w-full border border-gray-300 text-gray-900 px-4 py-3 rounded-lg text-lg focus:ring-2 focus:ring-orange-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 uppercase mb-2">Last Name</label>
+                        <input type="text" name="last_name" value="{{ request.user.last_name }}" class="w-full border border-gray-300 text-gray-900 px-4 py-3 rounded-lg text-lg focus:ring-2 focus:ring-orange-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-6">
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg px-8 py-4 rounded-lg transition shadow-md">
+                        Update Profile ⚡
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

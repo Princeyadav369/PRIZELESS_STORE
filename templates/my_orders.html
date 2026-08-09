@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Orders - Prizeless Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen pt-20">
+    <nav class="bg-white shadow-md fixed w-full z-50 top-0">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+            <a href="{% url 'home' %}" class="font-bold text-xl text-orange-500">Prizeless. Orders</a>
+            <a href="{% url 'home' %}" class="text-sm font-bold text-gray-600">← Back to Store</a>
+        </div>
+    </nav>
+    <div class="max-w-3xl mx-auto px-4 py-10">
+        <h2 class="text-2xl font-bold mb-6">📦 My Orders & Cancellation</h2>
+        {% if orders %}
+        <div class="space-y-4">
+            {% for order in orders %}
+            <div class="bg-white border p-5 rounded-xl shadow-sm flex justify-between items-center">
+                <div>
+                    <p class="text-xs font-bold text-gray-400">Order #PRZ-000{{ order.id }}</p>
+                    <h4 class="font-bold text-gray-900">{{ order.first_name }} {{ order.last_name }}</h4>
+                    <p class="text-sm text-gray-600">₹{{ order.total_amount }} • <span class="text-orange-500 font-bold">{{ order.get_status_display }}</span></p>
+                </div>
+                <div class="space-x-2 flex">
+                    <a href="{% url 'order_track' order.id %}" class="bg-blue-500 text-white px-3 py-1.5 rounded text-xs font-bold">Track</a>
+                    <a href="{% url 'home' %}" class="bg-green-500 text-white px-3 py-1.5 rounded text-xs font-bold">Buy Again 🔄</a>
+                    {% if order.status == 'Pending' or order.status == 'Confirmed' %}
+                    <form action="{% url 'cancel_order' order.id %}" method="POST" onsubmit="return confirm('Cancel this order?');">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-red-500 text-white px-3 py-1.5 rounded text-xs font-bold">Cancel</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500">No orders found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
