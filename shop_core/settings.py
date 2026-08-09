@@ -153,7 +153,8 @@ SOCIALACCOUNT_PROVIDERS = {
 # ==========================================================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_PORT = 465                 # 587 hata kar 465 kar diya
+EMAIL_USE_SSL = True             # Naya SSL on kar diya
+EMAIL_USE_TLS = False            # Purana TLS band kar diya
 EMAIL_HOST_USER = 'prizelessstore@gmail.com'
-EMAIL_HOST_PASSWORD = 'opqspbcfismpsnpp'
+EMAIL_HOST_PASSWORD = 'prrhfktfttkpvddv' # Yahan apna password daal dena
