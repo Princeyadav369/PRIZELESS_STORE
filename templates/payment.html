@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Payment - Prizeless Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .payment-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .qr-container {
+            border: 2px solid #eee;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 15px;
+            background: #fdfdfd;
+        }
+        .btn-confirm {
+            background: #ff8c00;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-confirm:hover {
+            background: #e07b00;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="payment-card">
+        <h2>Scan & Pay</h2>
+        <p>Use PhonePe, GPay, or any UPI App</p>
+        
+        <div class="amount">₹{{ order.total_amount }}</div>
+        
+        <div class="qr-container">
+            <!-- Yeh UPI ka dummy QR Code generate karega -->
+            <img src="{{ qr_url }}" alt="UPI QR Code" width="200" height="200">
+        </div>
+        
+        <p style="font-size: 14px; color: #555;">Paying to: <strong>Prizeless Store</strong></p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn-confirm">I have done my payment ✅</button>
+        </form>
+    </div>
+
+</body>
+</html>

@@ -2,33 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Order Placed Successfully - Prizeless Store</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Yeh line mobile view theek karti hai -->
+    <title>Order Success - Prizeless Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .success-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px; /* Mobile par apne aap set ho jayega */
+        }
+        .success-icon {
+            font-size: 50px;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+        .order-id {
+            font-weight: bold;
+            color: #ff8c00;
+            margin: 15px 0;
+            font-size: 18px;
+        }
+        .btn-home {
+            display: inline-block;
+            background: #ff8c00;
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 20px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center space-y-6">
-        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mx-auto">
-            ✓
-        </div>
+    <div class="success-card">
+        <div class="success-icon">✅</div>
+        <h2>Order Placed Successfully!</h2>
+        <p>Thank you for shopping with Prizeless Store</p>
         
-        <div>
-            <h1 class="text-2xl font-black text-gray-900">Order Placed Successfully!</h1>
-            <p class="text-sm text-gray-500 mt-1">Thank you for shopping with Prizeless Store.</p>
-            <p class="text-xs font-bold text-orange-500 mt-2">ORDER ID: #PRZ-000{{ order_id }}</p>
-        </div>
-
-        <!-- Notification Message -->
-        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-center text-xs font-medium text-gray-600">
-            <p>✉️ If you provided an email, an order confirmation has been sent automatically!</p>
-        </div>
-
-        <!-- Return Home Button -->
-        <div>
-            <a href="{% url 'home' %}" class="block w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl shadow-md transition text-sm">
-                Return to Home Store 🏠
-            </a>
-        </div>
+        <div class="order-id">ORDER ID: #PRZ-00{{ order_id }}</div>
+        
+        <p style="font-size: 13px; background: #eef2f7; padding: 10px; border-radius: 5px; margin-top: 15px;">
+            We will process your order soon.
+        </p>
+        
+        <a href="{% url 'home' %}" class="btn-home">Return to Home Store 🏠</a>
     </div>
 
 </body>

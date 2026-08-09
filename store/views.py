@@ -14,6 +14,7 @@ from django.utils.encoding import force_bytes
 import random
 import json
 import urllib.request
+import urllib.parse
 import os
 import traceback
 
@@ -154,13 +155,9 @@ def checkout_view(request):
     total_price = sum(float(item['price']) * item['quantity'] for item in cart.values())
     
     if request.method == 'POST':
-        # FIX 1: Safely grab first name, preventing 'null' error
         first_name = request.POST.get('first_name') or request.POST.get('full_name') or request.user.first_name or 'Customer'
         last_name = request.POST.get('last_name', '')
-        
-        # FIX 2: Grab email directly from logged in user if not in form
         email = request.user.email if request.user.is_authenticated else request.POST.get('email', '')
-        
         phone = request.POST.get('phone', 'N/A')
         address = request.POST.get('address', 'N/A')
         city = request.POST.get('city', '')
@@ -191,6 +188,13 @@ def checkout_view(request):
             )
             
         request.session['cart'] = {}
+        
+        # AGAR ONLINE PAYMENT HAI TOH QR PAGE PAR BHEJO
+        if payment_method == 'Online':
+            request.session['pending_order_id'] = order.id
+            return redirect('payment_page')
+            
+        # AGAR COD HAI TOH DIRECT SUCCESS
         return redirect('order_success', order_id=order.id)
         
     cart_count = sum(item['quantity'] for item in cart.values())
@@ -201,7 +205,24 @@ def checkout_view(request):
     })
 
 def payment_page_view(request):
-    return HttpResponse("Payment Logic Handled in Checkout Submission context.")
+    order_id = request.session.get('pending_order_id')
+    if not order_id:
+        return redirect('home')
+        
+    order = get_object_or_404(Order, id=order_id)
+    
+    if request.method == 'POST':
+        # Jab button click hoga tab order Confirm ho jayega
+        order.status = 'Confirmed'
+        order.save()
+        del request.session['pending_order_id']
+        return redirect('order_success', order_id=order.id)
+        
+    # Prizeless Store Fake UPI Link Generation
+    upi_string = f"upi://pay?pa=prizeless@ybl&pn=Prizeless%20Store&am={order.total_amount}&cu=INR"
+    qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={urllib.parse.quote(upi_string)}"
+    
+    return render(request, 'payment.html', {'order': order, 'qr_url': qr_url})
 
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id)
