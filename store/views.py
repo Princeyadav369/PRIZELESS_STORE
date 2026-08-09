@@ -1,10 +1,4 @@
-import random
-import json
-import urllib.request
-import os
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User
-from django.contrib import messages
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail
@@ -411,6 +405,14 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.shortcuts import render, redirect
 
+import random
+import json
+import urllib.request
+import os
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.shortcuts import render, redirect
+
 def forgot_password_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -423,9 +425,7 @@ def forgot_password_view(request):
             request.session['reset_otp'] = otp
             request.session['reset_email'] = email
             
-            # ==========================================
-            # BREVO API CODE (Bypasses Render SMTP Block)
-            # ==========================================
+            # Brevo API Request Setup
             api_url = "https://api.brevo.com/v3/smtp/email"
             
             data = {
@@ -435,13 +435,27 @@ def forgot_password_view(request):
                 "htmlContent": f"<div style='font-family: Arial; padding: 20px;'><h2>Password Reset</h2><p>Hello {user.username},</p><p>Your 6-digit OTP for Prizeless Store is: <strong style='font-size: 24px; color: #ffca28;'>{otp}</strong></p><p>Do not share this OTP with anyone.</p></div>"
             }
             
-            # Data ko JSON format mein convert karna
             json_data = json.dumps(data).encode('utf-8')
             
-            # Request setup karna
             req = urllib.request.Request(api_url, data=json_data)
             req.add_header('accept', 'application/json')
             req.add_header('content-type', 'application/json')
+            req.add_header('api-key', os.environ.get('BREVO_API_KEY'))
+            
+            try:
+                response = urllib.request.urlopen(req)
+                messages.success(request, "OTP has been sent to your email!")
+                return redirect('verify_reset_otp')
+                
+            except Exception as api_error:
+                messages.error(request, f"Brevo API Error: {str(api_error)}")
+                return redirect('forgot_password')
+                
+        except User.DoesNotExist:
+            messages.error(request, "This email is not registered with us!")
+            return redirect('forgot_password')
+            
+    return render(request, 'forgot_password.html')
             
             # 🚨 YAHAN APNI BREVO KI API KEY DAALNA (Jo abhi tune copy ki hai) 🚨
             import os
