@@ -155,24 +155,26 @@ def checkout_view(request):
     total_price = sum(float(item['price']) * item['quantity'] for item in cart.values())
     
     if request.method == 'POST':
-        first_name = request.POST.get('first_name') or request.POST.get('full_name') or request.user.first_name or 'Customer'
+        first_name = request.POST.get('first_name') or request.user.first_name or 'Customer'
         last_name = request.POST.get('last_name', '')
         email = request.user.email if request.user.is_authenticated else request.POST.get('email', '')
         phone = request.POST.get('phone', 'N/A')
-        address = request.POST.get('address', 'N/A')
+        
+        # Address step by step
+        room_no = request.POST.get('room_no', '')
+        street = request.POST.get('street', '')
         city = request.POST.get('city', '')
-        state = request.POST.get('state', '')
         pincode = request.POST.get('pincode', '')
-        payment_method = request.POST.get('payment_method', 'COD')
+        
+        full_address = f"{room_no}, {street}"
         
         order = Order.objects.create(
             first_name=first_name,
             last_name=last_name,
             email=email,
             phone=phone,
-            address=address,
+            address=full_address,
             city=city,
-            state=state,
             pincode=pincode,
             total_amount=total_price,
             status='Pending'
@@ -188,14 +190,9 @@ def checkout_view(request):
             )
             
         request.session['cart'] = {}
+        request.session['pending_order_id'] = order.id
         
-        # AGAR ONLINE PAYMENT HAI TOH QR PAGE PAR BHEJO
-        if payment_method == 'Online':
-            request.session['pending_order_id'] = order.id
-            return redirect('payment_page')
-            
-        # AGAR COD HAI TOH DIRECT SUCCESS
-        return redirect('order_success', order_id=order.id)
+        return redirect('payment_page')
         
     cart_count = sum(item['quantity'] for item in cart.values())
     return render(request, 'checkout.html', {
@@ -212,17 +209,28 @@ def payment_page_view(request):
     order = get_object_or_404(Order, id=order_id)
     
     if request.method == 'POST':
-        # Jab button click hoga tab order Confirm ho jayega
-        order.status = 'Confirmed'
-        order.save()
-        del request.session['pending_order_id']
-        return redirect('order_success', order_id=order.id)
+        action = request.POST.get('action')
         
-    # Prizeless Store Fake UPI Link Generation
-    upi_string = f"upi://pay?pa=prizeless@ybl&pn=Prizeless%20Store&am={order.total_amount}&cu=INR"
-    qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={urllib.parse.quote(upi_string)}"
-    
-    return render(request, 'payment.html', {'order': order, 'qr_url': qr_url})
+        if action == 'select_method':
+            method = request.POST.get('payment_method')
+            
+            if method == 'UPI':
+                upi_string = f"upi://pay?pa=prizeless@ybl&pn=Prizeless%20Store&am={order.total_amount}&cu=INR"
+                qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={urllib.parse.quote(upi_string)}"
+                return render(request, 'payment.html', {'order': order, 'qr_url': qr_url, 'step': 'qr'})
+            else:
+                order.status = 'Confirmed'
+                order.save()
+                del request.session['pending_order_id']
+                return redirect('order_success', order_id=order.id)
+                
+        elif action == 'confirm_upi':
+            order.status = 'Confirmed'
+            order.save()
+            del request.session['pending_order_id']
+            return redirect('order_success', order_id=order.id)
+            
+    return render(request, 'payment.html', {'order': order, 'step': 'selection'})
 
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -414,7 +422,6 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
-# --- FORGOT PASSWORD (BREVO HTTP API SYSTEM) ---
 def forgot_password_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
