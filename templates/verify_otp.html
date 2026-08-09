@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - Prizeless Store</title>
+    <style>
+        /* Wahi same purana CSS jo login.html mein tha */
+        body { font-family: 'Segoe UI', sans-serif; background: #121212; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: rgba(30, 30, 30, 0.85); padding: 40px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 100%; max-width: 400px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); color: #fff; box-sizing: border-box; }
+        h2 { text-align: center; margin-bottom: 10px; color: #ffca28; }
+        p.subtitle { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-size: 14px; color: #ccc; }
+        input { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 16px; box-sizing: border-box; letter-spacing: 5px; text-align: center; font-weight: bold;}
+        input:focus { border-color: #ffca28; outline: none; }
+        .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, #ffca28, #ffa000); border: none; border-radius: 6px; color: #121212; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { opacity: 0.9; }
+        .error-msg { background: rgba(255,0,0,0.2); color: #ff6b6b; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 14px; }
+        .success-msg { background: rgba(0,255,0,0.2); color: #6bff6b; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 14px; }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <h2>Enter OTP</h2>
+    <p class="subtitle">Check your email for the 6-digit code</p>
+    {% if messages %}{% for message in messages %}
+        <div class="{% if message.tags == 'error' %}error-msg{% else %}success-msg{% endif %}">{{ message }}</div>
+    {% endfor %}{% endif %}
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>6-Digit OTP</label>
+            <input type="text" name="otp" required placeholder="------" maxlength="6">
+        </div>
+        <button type="submit" class="btn-submit">Verify OTP</button>
+    </form>
+</div>
+</body>
+</html>

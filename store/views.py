@@ -387,16 +387,83 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 
+import random
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib import messages
+
+# 1. Email daalne aur OTP bhejne ka view
 def forgot_password_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         try:
             user = User.objects.get(email=email)
-            # Yahan hum password reset flow trigger kar rahe hain
-            messages.success(request, "Password reset instructions have been sent to your email.")
-            return redirect('login')
+            # 6-digit OTP Generate karo
+            otp = str(random.randint(100000, 999999))
+            
+            # OTP aur Email ko session mein save karo taaki aage verify kar sakein
+            request.session['reset_otp'] = otp
+            request.session['reset_email'] = email
+            
+            # Asli Email Bhejne ka code
+            subject = 'Password Reset OTP - Prizeless Store'
+            message = f'Hello {user.username},\n\nYour 6-digit OTP for password reset is: {otp}\n\nPlease do not share this with anyone.'
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [email]
+            
+            send_mail(subject, message, email_from, recipient_list)
+            
+            messages.success(request, "OTP has been sent to your email!")
+            return redirect('verify_reset_otp')
+            
         except User.DoesNotExist:
             messages.error(request, "This email is not registered with us!")
             return redirect('forgot_password')
             
     return render(request, 'forgot_password.html')
+
+# 2. OTP Verify karne ka view
+def verify_reset_otp_view(request):
+    if request.method == 'POST':
+        user_otp = request.POST.get('otp')
+        real_otp = request.session.get('reset_otp')
+        
+        if user_otp == real_otp:
+            messages.success(request, "OTP Verified! Enter your new password.")
+            return redirect('reset_new_password')
+        else:
+            messages.error(request, "Invalid OTP! Please try again.")
+            return redirect('verify_reset_otp')
+            
+    return render(request, 'verify_otp.html')
+
+# 3. Naya Password set karne ka view
+def reset_new_password_view(request):
+    reset_email = request.session.get('reset_email')
+    
+    # Agar bina OTP verify kiye koi yahan aaye toh wapas bhej do
+    if not reset_email:
+        return redirect('forgot_password')
+        
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match!")
+            return redirect('reset_new_password')
+            
+        # Password update karo
+        user = User.objects.get(email=reset_email)
+        user.set_password(new_password)
+        user.save()
+        
+        # Session clean karo
+        del request.session['reset_otp']
+        del request.session['reset_email']
+        
+        messages.success(request, "Password reset successful! Please login.")
+        return redirect('login')
+        
+    return render(request, 'reset_password.html')
