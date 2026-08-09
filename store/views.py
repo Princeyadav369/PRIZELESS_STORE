@@ -104,14 +104,14 @@ def clear_cart(request):
     request.session['cart'] = {}
     return redirect('cart_page')
 
-@login_required(login_url='/custom-login/')
+@login_required(login_url='/signin/')
 def wishlist_view(request):
     wishlist_items = Wishlist.objects.filter(user=request.user)
     cart = request.session.get('cart', {})
     cart_count = sum(item['quantity'] for item in cart.values())
     return render(request, 'wishlist.html', {'wishlist_items': wishlist_items, 'cart_count': cart_count})
 
-@login_required(login_url='/custom-login/')
+@login_required(login_url='/signin/')
 def add_to_wishlist(request, id):
     product = get_object_or_404(Product, id=id)
     wishlist_item = Wishlist.objects.filter(user=request.user, product=product)
@@ -128,7 +128,7 @@ def add_to_wishlist(request, id):
         
     return redirect(request.META.get('HTTP_REFERER', 'home'))
 
-@login_required(login_url='/custom-login/')
+@login_required(login_url='/signin/')
 def remove_from_wishlist(request, id):
     product = get_object_or_404(Product, id=id)
     Wishlist.objects.filter(user=request.user, product=product).delete()
@@ -210,7 +210,7 @@ def notification_list(request):
     notifications = Notification.objects.all().order_by('-created_at')
     return render(request, 'notifications.html', {'notifications': notifications})
 
-@login_required(login_url='/custom-login/')
+@login_required(login_url='/signin/')
 def account_profile_view(request):
     user = request.user
     if request.method == 'POST':
@@ -221,12 +221,12 @@ def account_profile_view(request):
         return redirect('account_profile')
     return render(request, 'account_profile.html', {'user': user})
 
-@login_required(login_url='/custom-login/')
+@login_required(login_url='/signin/')
 def my_orders_view(request):
-    orders = Order.objects.all().order_by('-created_at')
+    orders = Order.objects.filter(email=request.user.email).order_by('-created_at')
     return render(request, 'my_orders.html', {'orders': orders})
 
-@login_required(login_url='/custom-login/')
+@login_required(login_url='/signin/')
 def account_settings_view(request):
     return render(request, 'account_settings.html')
 
@@ -341,13 +341,18 @@ def custom_logout(request):
     return redirect('home')
 
 # ==========================================================
-# NEW EMAIL SIGNUP & SIGNIN VIEWS (With Smart ?next Redirect)
+# EMAIL SIGNUP & SIGNIN VIEWS (With Confirm Password & Smart Redirect)
 # ==========================================================
 def register_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
         
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match!")
+            return redirect('register')
+            
         if User.objects.filter(username=email).exists():
             messages.error(request, "This email is already registered!")
             return redirect('register')
