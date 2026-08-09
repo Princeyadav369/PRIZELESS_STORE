@@ -134,3 +134,17 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+# Permanent Google Login Fix
+SITE_ID = 1
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
