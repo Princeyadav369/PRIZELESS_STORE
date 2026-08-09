@@ -154,15 +154,19 @@ def checkout_view(request):
     total_price = sum(float(item['price']) * item['quantity'] for item in cart.values())
     
     if request.method == 'POST':
-        first_name = request.POST.get('first_name')
+        # FIX 1: Safely grab first name, preventing 'null' error
+        first_name = request.POST.get('first_name') or request.POST.get('full_name') or request.user.first_name or 'Customer'
         last_name = request.POST.get('last_name', '')
-        email = request.POST.get('email', '')
-        phone = request.POST.get('phone')
-        address = request.POST.get('address')
+        
+        # FIX 2: Grab email directly from logged in user if not in form
+        email = request.user.email if request.user.is_authenticated else request.POST.get('email', '')
+        
+        phone = request.POST.get('phone', 'N/A')
+        address = request.POST.get('address', 'N/A')
         city = request.POST.get('city', '')
         state = request.POST.get('state', '')
         pincode = request.POST.get('pincode', '')
-        payment_method = request.POST.get('payment_method')
+        payment_method = request.POST.get('payment_method', 'COD')
         
         order = Order.objects.create(
             first_name=first_name,
