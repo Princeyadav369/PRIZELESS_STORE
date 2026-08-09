@@ -148,3 +148,10 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+# Email Backend Configuration (Gmail SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'prizelessstore@gmail.com'  # Yahan apni real Gmail ID daal dena
+EMAIL_HOST_PASSWORD = 'prrh fktf ttkp vddv' # Yahan Gmail ka App Password daal dena (Normal password nahi!)
