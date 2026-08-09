@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail
@@ -9,6 +8,14 @@ from .forms import ProductForm, CategoryForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+import random
+import json
+import urllib.request
+import os
+import traceback
 
 def store_home(request):
     query = request.GET.get('q')
@@ -341,9 +348,6 @@ def custom_logout(request):
     logout(request)
     return redirect('home')
 
-# ==========================================================
-# EMAIL SIGNUP & SIGNIN VIEWS (With Confirm Password & Smart Redirect)
-# ==========================================================
 def register_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -384,48 +388,18 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
 
-import random
-from django.core.mail import send_mail
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.contrib import messages
-
-# 1. Email daalne aur OTP bhejne ka view
-# Views.py ke andar sirf is function ko replace kar do
-import traceback # Ise top par imports ke sath dal dena agar nahi hai
-
-import random
-import json
-import urllib.request
-from django.contrib.auth.models import User
-from django.contrib import messages
-from django.shortcuts import render, redirect
-
-import random
-import json
-import urllib.request
-import os
-from django.contrib.auth.models import User
-from django.contrib import messages
-from django.shortcuts import render, redirect
-
+# --- FORGOT PASSWORD (BREVO HTTP API SYSTEM) ---
 def forgot_password_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         try:
             user = User.objects.get(email=email)
-            # 6-digit OTP Generate karo
             otp = str(random.randint(100000, 999999))
             
-            # OTP aur Email ko session mein save karo
             request.session['reset_otp'] = otp
             request.session['reset_email'] = email
             
-            # Brevo API Request Setup
             api_url = "https://api.brevo.com/v3/smtp/email"
             
             data = {
@@ -456,34 +430,7 @@ def forgot_password_view(request):
             return redirect('forgot_password')
             
     return render(request, 'forgot_password.html')
-            
-            # 🚨 YAHAN APNI BREVO KI API KEY DAALNA (Jo abhi tune copy ki hai) 🚨
-            import os
 
-# ... baaki code waisa hi rahega ...
-
-# API key ko code ki jagah Render ke environment variable se uthayega
-req.add_header('api-key', os.environ.get('BREVO_API_KEY'))
-            
-            try:
-                # API Call Hit Karna
-                response = urllib.request.urlopen(req)
-                messages.success(request, "OTP has been sent to your email!")
-                return redirect('verify_reset_otp')
-                
-            except Exception as api_error:
-                # Agar koi error aaya toh screen par dikha dega
-                messages.error(request, f"Brevo API Error: {str(api_error)}")
-                return redirect('forgot_password')
-            # ==========================================
-            
-        except User.DoesNotExist:
-            messages.error(request, "This email is not registered with us!")
-            return redirect('forgot_password')
-            
-    return render(request, 'forgot_password.html')
-
-# 2. OTP Verify karne ka view
 def verify_reset_otp_view(request):
     if request.method == 'POST':
         user_otp = request.POST.get('otp')
@@ -498,11 +445,9 @@ def verify_reset_otp_view(request):
             
     return render(request, 'verify_otp.html')
 
-# 3. Naya Password set karne ka view
 def reset_new_password_view(request):
     reset_email = request.session.get('reset_email')
     
-    # Agar bina OTP verify kiye koi yahan aaye toh wapas bhej do
     if not reset_email:
         return redirect('forgot_password')
         
@@ -514,14 +459,14 @@ def reset_new_password_view(request):
             messages.error(request, "Passwords do not match!")
             return redirect('reset_new_password')
             
-        # Password update karo
         user = User.objects.get(email=reset_email)
         user.set_password(new_password)
         user.save()
         
-        # Session clean karo
-        del request.session['reset_otp']
-        del request.session['reset_email']
+        if 'reset_otp' in request.session:
+            del request.session['reset_otp']
+        if 'reset_email' in request.session:
+            del request.session['reset_email']
         
         messages.success(request, "Password reset successful! Please login.")
         return redirect('login')
