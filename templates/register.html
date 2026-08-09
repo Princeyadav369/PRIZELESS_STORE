@@ -72,7 +72,8 @@
         {% endfor %}
     {% endif %}
 
-    <form method="POST">
+    <!-- GLITCH FIX APPLIED HERE -->
+    <form method="POST" autocomplete="off" onsubmit="this.querySelector('.btn-submit').disabled = true; this.querySelector('.btn-submit').innerText = 'Please wait...';">
         {% csrf_token %}
         <div class="form-group">
             <label>Email Address</label>
