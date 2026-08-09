@@ -2,6 +2,9 @@ from django.urls import path, include
 from store import views
 
 urlpatterns = [
+    path('signup/', views.register_view, name='register'),
+    path('signin/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     # ==========================================
     # 🌍 GOOGLE LOGIN / ALLAUTH URLs
     # ==========================================

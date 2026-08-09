@@ -6,6 +6,8 @@ from django.http import HttpResponse, JsonResponse
 from .models import Product, Category, Order, OrderItem, Notification, StoreSetting, Wishlist, Banner
 from .forms import ProductForm, CategoryForm
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
 def store_home(request):
@@ -364,3 +366,39 @@ def custom_login(request):
 def custom_logout(request):
     logout(request)
     return redirect('home')
+# --- EMAIL SIGNUP & SIGNIN VIEWS ---
+
+def register_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "This email is already registered!")
+            return redirect('register')
+            
+        user = User.objects.create_user(username=email, email=email, password=password)
+        user.save()
+        messages.success(request, "Account created successfully! Please login.")
+        return redirect('login')
+        
+    return render(request, 'register.html')
+
+def login_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, "Invalid email or password!")
+            return redirect('login')
+            
+    return render(request, 'login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
