@@ -4,101 +4,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Prizeless Store</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .user-status {
+            background: #eef2f7;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn-checkout {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: pointer;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-checkout:hover {
+            background: #218838;
+        }
+        .btn-login-prompt {
+            display: block;
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .btn-login-prompt:hover {
+            background: #0056b3;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body>
 
-    <!-- Header -->
-    <header class="bg-gray-900 text-white p-4 shadow-md text-center">
-        <h1 class="text-2xl font-bold">Secure Checkout</h1>
-    </header>
+<div class="container">
+    <h2>Checkout & Shipping Details</h2>
 
-    <div class="max-w-6xl mx-auto p-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        <!-- Left Side: Address & Payment Form -->
-        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-            <h2 class="text-xl font-bold mb-4 border-b pb-2">1. Delivery Address</h2>
+    {% if request.user.is_authenticated %}
+        <!-- User is logged in, show the complete checkout form -->
+        <div class="user-status">
+            Logged in as: <strong>{{ request.user.email }}</strong> | <a href="{% url 'logout' %}" style="color: red;">Logout</a>
+        </div>
+
+        <form method="POST" action="{% url 'checkout' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" required placeholder="Enter your full name">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" name="phone" required placeholder="Enter 10-digit mobile number">
+            </div>
+
+            <div class="form-group">
+                <label for="address">Shipping Address</label>
+                <textarea id="address" name="address" rows="4" required placeholder="House No, Street, Landmark, City, Pincode"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_method">Payment Method</label>
+                <select id="payment_method" name="payment_method">
+                    <option value="COD">Cash on Delivery (COD)</option>
+                    <option value="Online">Online Payment (UPI / Card)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-checkout">Place Order</button>
+        </form>
+
+    {% else %}
+        <!-- User is NOT logged in, force them to login/signup first with redirect back to checkout -->
+        <div style="text-align: center; padding: 40px 0;">
+            <h3>Please login or create an account to proceed with your order.</h3>
+            <p style="color: #666;">It takes less than 30 seconds to secure your order details!</p>
             
-            <form method="POST" action="{% url 'checkout' %}" class="space-y-4">
-                {% csrf_token %}
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700">First Name</label>
-                        <input type="text" name="first_name" required class="w-full bg-gray-50 border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700">Last Name</label>
-                        <input type="text" name="last_name" required class="w-full bg-gray-50 border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700">Email</label>
-                        <input type="email" name="email" class="w-full bg-gray-50 border border-gray-300 rounded p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700">Phone</label>
-                        <input type="text" name="phone" required class="w-full bg-gray-50 border border-gray-300 rounded p-2">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700">Full Address</label>
-                    <textarea name="address" required class="w-full bg-gray-50 border border-gray-300 rounded p-2"></textarea>
-                </div>
-
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700">City</label>
-                        <input type="text" name="city" required class="w-full bg-gray-50 border border-gray-300 rounded p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700">State</label>
-                        <input type="text" name="state" required class="w-full bg-gray-50 border border-gray-300 rounded p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700">Pincode</label>
-                        <input type="text" name="pincode" required class="w-full bg-gray-50 border border-gray-300 rounded p-2">
-                    </div>
-                </div>
-
-                <h2 class="text-xl font-bold mt-8 mb-4 border-b pb-2">2. Payment Method</h2>
-                
-                <div class="space-y-3">
-                    <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="payment_method" value="UPI" required class="w-5 h-5 text-blue-600">
-                        <span class="font-semibold">UPI / Net Banking / Card</span>
-                    </label>
-                    <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input type="radio" name="payment_method" value="COD" required class="w-5 h-5 text-blue-600">
-                        <span class="font-semibold">Cash on Delivery (COD)</span>
-                    </label>
-                </div>
-
-                <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3.5 rounded-lg transition shadow-lg mt-6 text-lg">
-                    Place Order & Pay
-                </button>
-            </form>
+            <a href="{% url 'login' %}?next={% url 'checkout' %}" class="btn-login-prompt">
+                Login / Create Account to Continue
+            </a>
         </div>
+    {% endif %}
 
-        <!-- Right Side: Order Summary -->
-        <div class="bg-gray-50 p-6 rounded-xl shadow-lg border border-gray-200 h-fit">
-            <h2 class="text-xl font-bold mb-4 border-b pb-2">Order Summary</h2>
-            <div class="space-y-4 mb-4">
-                {% for item_id, item in cart.items %}
-                <div class="flex justify-between text-sm">
-                    <span>{{ item.name }} (x{{ item.quantity }})</span>
-                    <span class="font-bold">₹{{ item.price }}</span>
-                </div>
-                {% endfor %}
-            </div>
-            <div class="border-t pt-4 flex justify-between text-lg font-bold">
-                <span>Total Amount:</span>
-                <span class="text-red-600">₹{{ total_price }}</span>
-            </div>
-        </div>
+</div>
 
-    </div>
 </body>
 </html>

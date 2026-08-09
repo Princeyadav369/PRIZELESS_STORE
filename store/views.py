@@ -7,7 +7,6 @@ from .models import Product, Category, Order, OrderItem, Notification, StoreSett
 from .forms import ProductForm, CategoryForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
 def store_home(request):
@@ -80,7 +79,6 @@ def decrease_cart(request, id):
 
 def cart_page(request):
     cart = request.session.get('cart', {})
-    # Modifying logic to use session cart structure safely in templates
     cart_items = []
     cart_total = 0
     for p_id, item in cart.items():
@@ -138,35 +136,26 @@ def remove_from_wishlist(request, id):
         return JsonResponse({'status': 'success', 'action': 'removed'})
     return redirect(request.META.get('HTTP_REFERER', 'home'))
 
-def checkout_view(request):
-    from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from .models import Order, OrderItem, Product
-
-# Ye lock insure karega ki bina account wale checkout na kar payein
-@login_required(login_url='/custom-login/')
+@login_required(login_url='/signin/')
 def checkout_view(request):
     cart = request.session.get('cart', {})
     
-    # Agar cart khali hai toh wapas home par bhej do
     if not cart:
         return redirect('home')
         
     total_price = sum(float(item['price']) * item['quantity'] for item in cart.values())
     
     if request.method == 'POST':
-        # Form se data uthana
         first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
+        last_name = request.POST.get('last_name', '')
         email = request.POST.get('email', '')
         phone = request.POST.get('phone')
         address = request.POST.get('address')
-        city = request.POST.get('city')
-        state = request.POST.get('state')
-        pincode = request.POST.get('pincode')
-        payment_method = request.POST.get('payment_method') # UPI ya COD
+        city = request.POST.get('city', '')
+        state = request.POST.get('state', '')
+        pincode = request.POST.get('pincode', '')
+        payment_method = request.POST.get('payment_method')
         
-        # Order Database mein save karna
         order = Order.objects.create(
             first_name=first_name,
             last_name=last_name,
@@ -177,10 +166,9 @@ def checkout_view(request):
             state=state,
             pincode=pincode,
             total_amount=total_price,
-            status='Pending' # Jab real payment gateway aayega toh isko update karenge
+            status='Pending'
         )
         
-        # Cart ke items ko OrderItems mein save karna
         for product_id, item_data in cart.items():
             product = Product.objects.get(id=product_id)
             OrderItem.objects.create(
@@ -190,10 +178,7 @@ def checkout_view(request):
                 quantity=item_data['quantity']
             )
             
-        # Order place hone ke baad cart khali karna
         request.session['cart'] = {}
-        
-        # Success page par redirect karna
         return redirect('order_success', order_id=order.id)
         
     cart_count = sum(item['quantity'] for item in cart.values())
@@ -245,9 +230,6 @@ def my_orders_view(request):
 def account_settings_view(request):
     return render(request, 'account_settings.html')
 
-# ==========================================================
-# SECURE ADMIN DASHBOARD & BANNERS (Only for Staff/Owner)
-# ==========================================================
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def custom_dashboard(request):
     products = Product.objects.all()
@@ -279,9 +261,6 @@ def delete_banner(request, id):
         banner.delete()
     return redirect('dashboard_banners')
 
-# ==========================================================
-# PRODUCT MANAGEMENT VIEWS (Secure)
-# ==========================================================
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def add_product_view(request):
     if request.method == 'POST':
@@ -323,9 +302,6 @@ def delete_product_view(request, id):
         product.delete()
     return redirect('custom_dashboard')
 
-# ==========================================================
-# 🛑 SELLER PORTAL LOGIN (AMAZON SELLER STYLE)
-# ==========================================================
 def seller_login_view(request):
     if request.user.is_authenticated and request.user.is_staff:
         return redirect('custom_dashboard')
@@ -348,9 +324,6 @@ def seller_login_view(request):
             
     return render(request, 'seller_login.html')
 
-# ==========================================================
-# 👥 CUSTOMER PORTAL LOGIN/LOGOUT
-# ==========================================================
 def custom_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -366,8 +339,10 @@ def custom_login(request):
 def custom_logout(request):
     logout(request)
     return redirect('home')
-# --- EMAIL SIGNUP & SIGNIN VIEWS ---
 
+# ==========================================================
+# NEW EMAIL SIGNUP & SIGNIN VIEWS (With Smart ?next Redirect)
+# ==========================================================
 def register_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -392,7 +367,8 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')
+            next_url = request.GET.get('next', 'home')
+            return redirect(next_url)
         else:
             messages.error(request, "Invalid email or password!")
             return redirect('login')
