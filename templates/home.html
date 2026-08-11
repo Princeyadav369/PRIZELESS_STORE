@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Confetti for Animation -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
@@ -28,10 +29,12 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans transition-colors duration-300" id="main-body" data-theme="{{ active_festival }}">
 
+    <!-- RELAXING BACKGROUND MUSIC (Hidden) -->
     <audio id="relaxing-bg-music" loop>
         <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- DYNAMIC FESTIVAL TICKER -->
     <div class="bg-orange-500 text-white text-xs py-2 text-center font-bold tracking-wider uppercase" id="offer-ticker">
         {% if active_festival == 'independence' %}
             🇮🇳 Independence Day Special: Extra 15% OFF on all Steel Cookware! Use Code: INDIA15
@@ -44,10 +47,12 @@
         {% endif %}
     </div>
 
+    <!-- NAVBAR -->
     <nav class="bg-white shadow-md w-full z-50 transition-colors duration-300 relative" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 
+                <!-- Left: Mobile Menu Button & Logo -->
                 <div class="flex items-center space-x-3">
                     <button onclick="toggleMobileMenu()" class="md:hidden text-gray-700 text-2xl focus:outline-none">
                         <i class="fa-solid fa-bars"></i>
@@ -64,6 +69,7 @@
                     </div>
                 </div>
                 
+                <!-- Search Bar (Desktop) -->
                 <div class="hidden md:flex flex-1 max-w-xl mx-6">
                     <form method="GET" action="{% url 'home' %}" class="w-full flex">
                         <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search for Kitchenware, Steel Appliances..." class="w-full border border-gray-300 rounded-l-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm">
@@ -71,6 +77,7 @@
                     </form>
                 </div>
 
+                <!-- RIGHT SIDE ICONS (Desktop) -->
                 <div class="hidden md:flex items-center space-x-4">
                     <a href="{% url 'notifications' %}" class="text-gray-600 hover:text-orange-500 text-xl relative" title="Notifications">🔔</a>
                     <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-red-500 text-xl relative" title="Wishlist">❤️</a>
@@ -79,6 +86,7 @@
                         🛒 <span class="ml-1" id="cart-count-badge">Cart ({{ cart_count|default:0 }})</span>
                     </a>
 
+                    <!-- USER ACCOUNT DROPDOWN (Desktop) -->
                     <div class="relative group">
                         <button class="flex items-center space-x-1 text-gray-700 hover:text-orange-500 font-bold text-sm focus:outline-none py-2">
                             <span class="bg-orange-100 text-orange-600 px-2.5 py-1 rounded-full border border-orange-200">👤</span>
@@ -103,6 +111,7 @@
                     </div>
                 </div>
 
+                <!-- Mobile Right Icons -->
                 <div class="flex md:hidden items-center space-x-3.5">
                     <a href="{% if request.user.is_authenticated %}{% url 'account_profile' %}{% else %}{% url 'custom_login' %}{% endif %}" class="text-gray-600 hover:text-orange-500 text-lg">👤</a>
                     <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-red-500 text-lg">❤️</a>
@@ -110,6 +119,7 @@
                 </div>
             </div>
 
+            <!-- Mobile Search Bar -->
             <div class="md:hidden pb-4">
                 <form method="GET" action="{% url 'home' %}" class="w-full flex">
                     <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search products..." class="w-full border border-gray-300 rounded-l-md px-3 py-1.5 focus:outline-none text-xs">
@@ -118,6 +128,7 @@
             </div>
         </div>
 
+        <!-- MOBILE SIDEBAR MENU -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-3 shadow-lg absolute w-full left-0 z-50">
             <a href="{% url 'notifications' %}" class="block text-gray-700 font-medium py-1.5 border-b border-gray-50">🔔 Notifications</a>
             <a href="{% url 'wishlist' %}" class="block text-gray-700 font-medium py-1.5 border-b border-gray-50">❤️ My Wishlist</a>
@@ -139,12 +150,13 @@
         </div>
     </nav>
 
+    <!-- 🚀 SUPER SMART DYNAMIC SLIDER -->
     <div class="relative w-full max-w-7xl mx-auto mt-4 overflow-hidden rounded-xl shadow-lg h-[200px] md:h-[400px]">
         <div id="slider" class="slider-container h-full w-full flex transition-transform duration-500">
             
             {% if banners %}
                 {% for b in banners %}
-                <div class="min-w-full h-full relative flex items-center justify-between px-6 md:px-20 text-white bg-gray-900">
+                <div class="min-w-full h-full relative flex items-center justify-between px-6 md:px-20 text-white bg-gray-900 slide-item">
                     {% if b.image %}
                         <img src="{{ b.image.url }}" class="absolute inset-0 w-full h-full object-cover opacity-60">
                     {% endif %}
@@ -160,7 +172,8 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="min-w-full h-full bg-gradient-to-r from-gray-900 to-gray-700 flex items-center justify-between px-6 md:px-20 text-white">
+                <!-- Agar koi banner upload nahi kiya hai to ye 2 default slides dikhengi -->
+                <div class="min-w-full h-full bg-gradient-to-r from-gray-900 to-gray-700 flex items-center justify-between px-6 md:px-20 text-white slide-item">
                     <div>
                         <h2 class="text-xl md:text-5xl font-bold mb-2 md:mb-4">
                             {% if active_festival == 'independence' %}Independence Day Sale{% elif active_festival == 'diwali' %}Happy Diwali Festival{% elif active_festival == 'newyear' %}New Year Special Collection{% else %}Premium Steel Cookware{% endif %}
@@ -170,21 +183,24 @@
                     </div>
                     <div class="hidden md:block text-8xl">🍳</div>
                 </div>
+                <div class="min-w-full h-full bg-gradient-to-r from-orange-600 to-orange-400 flex items-center justify-between px-6 md:px-20 text-white slide-item">
+                    <div>
+                        <h2 class="text-xl md:text-5xl font-bold mb-2 md:mb-4">Mega Discounts!</h2>
+                        <p class="text-xs md:text-lg mb-4 md:mb-6">Up to 50% Off on all categories.</p>
+                        <button class="bg-white text-orange-600 px-4 md:px-6 py-2 rounded-md font-bold text-xs md:text-base">View Offers</button>
+                    </div>
+                    <div class="hidden md:block text-8xl">🎁</div>
+                </div>
             {% endif %}
 
         </div>
         
-        <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-20">
-            {% if banners %}
-                {% for b in banners %}
-                    <button onclick="goToSlide({{ forloop.counter0 }})" class="h-2 w-2 md:h-3 md:w-3 bg-white rounded-full opacity-50 hover:opacity-100 transition slide-dot"></button>
-                {% endfor %}
-            {% else %}
-                <button onclick="goToSlide(0)" class="h-2 w-2 md:h-3 md:w-3 bg-white rounded-full opacity-50 hover:opacity-100 transition slide-dot"></button>
-                <button onclick="goToSlide(1)" class="h-2 w-2 md:h-3 md:w-3 bg-white rounded-full opacity-50 hover:opacity-100 transition slide-dot"></button>
-            {% endif %}
+        <!-- Yahan par Dots (Bindu) automatically create honge Javascript ke through -->
+        <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-20" id="slider-dots">
         </div>
     </div>
+
+    <!-- PRODUCTS GRID -->
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8 md:py-16">
         <div class="text-center mb-6 md:mb-10">
             <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="arrivals-title">New Arrivals</h2>
@@ -235,6 +251,7 @@
         </div>
     </div>
 
+    <!-- FOOTER -->
     <footer class="bg-gray-900 text-white py-8 md:py-12 mt-10">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <h3 class="text-base md:text-xl font-bold mb-2 md:mb-4">Prizeless Store</h3>
@@ -242,8 +259,9 @@
         </div>
     </footer>
 
+    <!-- SCRIPTS -->
     <script>
-        // MUSIC LOGIC: Autoplays calming music on the first click anywhere
+        // MUSIC LOGIC
         let musicStarted = false;
         document.body.addEventListener('click', function() {
             if (!musicStarted) {
@@ -263,9 +281,8 @@
             menu.classList.toggle('hidden');
         }
 
-        // AJAX Add to Cart with Theme Animation
+        // AJAX Add to Cart
         function addToCartAjax(productId, btn) {
-            // CONFETTI ANIMATION LOGIC
             const currentTheme = document.body.getAttribute('data-theme');
             if (currentTheme === 'independence') {
                 confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#FF9933', '#FFFFFF', '#138808'] });
@@ -315,26 +332,53 @@
             .catch(error => console.error('Error:', error));
         }
 
-        // Slider Script
-        let currentSlide = 0;
-        const totalSlides = document.querySelectorAll('.slide-dot').length || 2;
+        // 🚀 SUPER SMART DYNAMIC SLIDER SCRIPT
         const slider = document.getElementById('slider');
+        const slides = document.querySelectorAll('.slide-item');
+        const dotsContainer = document.getElementById('slider-dots');
+        let currentSlide = 0;
+        const totalSlides = slides.length; // Ab ye apne aap gin lega kitni photos hain!
+
+        // Generate Dots Dynamically
+        dotsContainer.innerHTML = '';
+        for(let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('button');
+            dot.className = `h-2 w-2 md:h-3 md:w-3 bg-white rounded-full transition slide-dot ${i === 0 ? 'opacity-100 md:w-6' : 'opacity-50'}`;
+            dot.onclick = () => goToSlide(i);
+            dotsContainer.appendChild(dot);
+        }
+        
         const dots = document.querySelectorAll('.slide-dot');
 
         function updateSlider() {
             if(slider){
                 slider.style.transform = `translateX(-${currentSlide * 100}%)`;
                 dots.forEach((dot, index) => {
-                    dot.classList.toggle('opacity-100', index === currentSlide);
-                    dot.classList.toggle('md:w-6', index === currentSlide);
-                    dot.classList.toggle('opacity-50', index !== currentSlide);
+                    if(index === currentSlide) {
+                        dot.classList.add('opacity-100', 'md:w-6');
+                        dot.classList.remove('opacity-50');
+                    } else {
+                        dot.classList.add('opacity-50');
+                        dot.classList.remove('opacity-100', 'md:w-6');
+                    }
                 });
             }
         }
-        function nextSlide() { currentSlide = (currentSlide + 1) % totalSlides; updateSlider(); }
-        function goToSlide(index) { currentSlide = index; updateSlider(); }
-        setInterval(nextSlide, 4000);
-        updateSlider();
+        function nextSlide() { 
+            if(totalSlides > 1) {
+                currentSlide = (currentSlide + 1) % totalSlides; 
+                updateSlider(); 
+            }
+        }
+        function goToSlide(index) { 
+            currentSlide = index; 
+            updateSlider(); 
+        }
+        
+        // Agar 1 se zyada photo hongi, tabhi slider chalega
+        if(totalSlides > 1) {
+            setInterval(nextSlide, 4000);
+        }
 
         // Dark/Light Mode Theme Toggle
         const body = document.getElementById('main-body');
