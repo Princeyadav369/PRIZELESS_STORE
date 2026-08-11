@@ -17,7 +17,7 @@ import urllib.request
 import urllib.parse
 import os
 import traceback
-import datetime  # <-- Added for automatic festival checking
+import datetime
 
 def store_home(request):
     query = request.GET.get('q')
@@ -26,6 +26,8 @@ def store_home(request):
     else:
         products = Product.objects.all()
         
+    categories = Category.objects.all()[:6] # Top 6 categories dikhane ke liye
+        
     cart = request.session.get('cart', {})
     cart_count = sum(item['quantity'] for item in cart.values())
     setting, created = StoreSetting.objects.get_or_create(id=1)
@@ -33,13 +35,27 @@ def store_home(request):
     # === AUTOMATIC FESTIVAL LOGIC ===
     today = datetime.date.today()
     auto_theme = 'normal'
+    festival_title = "🔥 Trending New Arrivals"
     
-    if today.month == 8 and 10 <= today.day <= 16:
+    # Independence Day (9 Aug to 16 Aug)
+    if today.month == 8 and 9 <= today.day <= 16:
         auto_theme = 'independence'
+        festival_title = "🇮🇳 Independence Day Special Picks"
+        
+    # Raksha Bandhan (Eg: 17 Aug to 21 Aug)
+    elif today.month == 8 and 17 <= today.day <= 21:
+        auto_theme = 'rakshabandhan'
+        festival_title = "🎁 Raksha Bandhan Gifting Specials"
+        
+    # Diwali (20 Oct to 5 Nov)
     elif (today.month == 10 and today.day >= 20) or (today.month == 11 and today.day <= 5):
         auto_theme = 'diwali'
-    elif (today.month == 12 and today.day >= 25) or (today.month == 1 and today.day <= 5):
+        festival_title = "🪔 Diwali Dhamaka Offers"
+        
+    # New Year (20 Dec to 5 Jan)
+    elif (today.month == 12 and today.day >= 20) or (today.month == 1 and today.day <= 5):
         auto_theme = 'newyear'
+        festival_title = "❄️ Year-End Blockbuster Deals"
     else:
         auto_theme = 'normal'
 
@@ -50,8 +66,13 @@ def store_home(request):
         user_wishlist = list(Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True))
         
     return render(request, 'home.html', {
-        'products': products, 'query': query, 'cart_count': cart_count, 
-        'active_festival': auto_theme, 'user_wishlist': user_wishlist,
+        'products': products, 
+        'categories': categories,
+        'query': query, 
+        'cart_count': cart_count, 
+        'active_festival': auto_theme, 
+        'festival_title': festival_title,
+        'user_wishlist': user_wishlist,
         'banners': banners
     })
 
