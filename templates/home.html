@@ -13,6 +13,13 @@
     <style>
         .slider-container { display: flex; transition: transform 0.5s ease-in-out; }
         
+        /* ✨ NEW: PREMIUM SUBTLE BACKGROUND PATTERN ✨ */
+        /* यह बैकग्राउंड को खालीपन से बचाएगा और एक बहुत प्रीमियम लक्ज़री टेक्सचर देगा */
+        body {
+            background-color: #f8f9fa;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
         /* Auto Theme CSS Overrides */
         body[data-theme="independence"] .bg-orange-500 { background: linear-gradient(90deg, #FF9933, #138808) !important; color: white !important; border:none;}
         body[data-theme="independence"] .text-orange-500 { color: #138808 !important; }
@@ -27,7 +34,7 @@
         body[data-theme="newyear"] #offer-ticker { background-color: #007bff !important; color: white !important; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans transition-colors duration-300" id="main-body" data-theme="{{ active_festival }}">
+<body class="text-gray-800 font-sans transition-colors duration-300" id="main-body" data-theme="{{ active_festival }}">
 
     <!-- RELAXING BACKGROUND MUSIC (Hidden) -->
     <audio id="relaxing-bg-music" loop>
@@ -172,7 +179,6 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <!-- Agar koi banner upload nahi kiya hai to ye 2 default slides dikhengi -->
                 <div class="min-w-full h-full bg-gradient-to-r from-gray-900 to-gray-700 flex items-center justify-between px-6 md:px-20 text-white slide-item">
                     <div>
                         <h2 class="text-xl md:text-5xl font-bold mb-2 md:mb-4">
@@ -195,7 +201,6 @@
 
         </div>
         
-        <!-- Yahan par Dots (Bindu) automatically create honge Javascript ke through -->
         <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-20" id="slider-dots">
         </div>
     </div>
@@ -332,14 +337,13 @@
             .catch(error => console.error('Error:', error));
         }
 
-        // 🚀 SUPER SMART DYNAMIC SLIDER SCRIPT
+        // DYNAMIC SLIDER SCRIPT
         const slider = document.getElementById('slider');
         const slides = document.querySelectorAll('.slide-item');
         const dotsContainer = document.getElementById('slider-dots');
         let currentSlide = 0;
-        const totalSlides = slides.length; // Ab ye apne aap gin lega kitni photos hain!
+        const totalSlides = slides.length;
 
-        // Generate Dots Dynamically
         dotsContainer.innerHTML = '';
         for(let i = 0; i < totalSlides; i++) {
             const dot = document.createElement('button');
@@ -375,10 +379,7 @@
             updateSlider(); 
         }
         
-        // Agar 1 se zyada photo hongi, tabhi slider chalega
-        if(totalSlides > 1) {
-            setInterval(nextSlide, 4000);
-        }
+        if(totalSlides > 1) { setInterval(nextSlide, 4000); }
 
         // Dark/Light Mode Theme Toggle
         const body = document.getElementById('main-body');
@@ -400,6 +401,7 @@
 
         function enableDarkMode() {
             body.style.backgroundColor = '#121212';
+            body.style.backgroundImage = 'none'; /* Remove texture in dark mode */
             body.style.color = '#ffffff';
             nav.style.backgroundColor = '#1e1e1e';
             nav.style.color = '#ffffff';
@@ -414,7 +416,9 @@
         }
 
         function enableLightMode() {
-            body.style.backgroundColor = '#f9fafb';
+            body.style.backgroundColor = '#f8f9fa';
+            /* Re-add texture */
+            body.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")";
             body.style.color = '#1f2937';
             nav.style.backgroundColor = '#ffffff';
             nav.style.color = '#1f2937';
