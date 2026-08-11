@@ -6,11 +6,32 @@
     <title>Prizeless Store - Premium Quality Products</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>.slider-container { display: flex; transition: transform 0.5s ease-in-out; }</style>
-</head>
-<body class="bg-gray-50 text-gray-800 font-sans transition-colors duration-300" id="main-body">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <!-- DYNAMIC FESTIVAL TICKER -->
+    <style>
+        .slider-container { display: flex; transition: transform 0.5s ease-in-out; }
+        
+        /* Auto Theme CSS Overrides */
+        body[data-theme="independence"] .bg-orange-500 { background: linear-gradient(90deg, #FF9933, #138808) !important; color: white !important; border:none;}
+        body[data-theme="independence"] .text-orange-500 { color: #138808 !important; }
+        body[data-theme="independence"] #offer-ticker { background: linear-gradient(90deg, #FF9933, #FFFFFF, #138808) !important; color: #000 !important; }
+
+        body[data-theme="diwali"] .bg-orange-500 { background-color: #800000 !important; color: #FFD700 !important; border:none;}
+        body[data-theme="diwali"] .text-orange-500 { color: #800000 !important; }
+        body[data-theme="diwali"] #offer-ticker { background-color: #FFD700 !important; color: #800000 !important; }
+
+        body[data-theme="newyear"] .bg-orange-500 { background-color: #007bff !important; color: white !important; border:none;}
+        body[data-theme="newyear"] .text-orange-500 { color: #007bff !important; }
+        body[data-theme="newyear"] #offer-ticker { background-color: #007bff !important; color: white !important; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans transition-colors duration-300" id="main-body" data-theme="{{ active_festival }}">
+
+    <audio id="relaxing-bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
+    </audio>
+
     <div class="bg-orange-500 text-white text-xs py-2 text-center font-bold tracking-wider uppercase" id="offer-ticker">
         {% if active_festival == 'independence' %}
             🇮🇳 Independence Day Special: Extra 15% OFF on all Steel Cookware! Use Code: INDIA15
@@ -23,14 +44,11 @@
         {% endif %}
     </div>
 
-    <!-- NAVBAR -->
     <nav class="bg-white shadow-md w-full z-50 transition-colors duration-300 relative" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 
-                <!-- Left: Mobile Menu Button & Logo -->
                 <div class="flex items-center space-x-3">
-                    <!-- Mobile Hamburger Toggle Button -->
                     <button onclick="toggleMobileMenu()" class="md:hidden text-gray-700 text-2xl focus:outline-none">
                         <i class="fa-solid fa-bars"></i>
                     </button>
@@ -46,7 +64,6 @@
                     </div>
                 </div>
                 
-                <!-- Search Bar (Desktop) -->
                 <div class="hidden md:flex flex-1 max-w-xl mx-6">
                     <form method="GET" action="{% url 'home' %}" class="w-full flex">
                         <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search for Kitchenware, Steel Appliances..." class="w-full border border-gray-300 rounded-l-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm">
@@ -54,7 +71,6 @@
                     </form>
                 </div>
 
-                <!-- RIGHT SIDE ICONS (Desktop) -->
                 <div class="hidden md:flex items-center space-x-4">
                     <a href="{% url 'notifications' %}" class="text-gray-600 hover:text-orange-500 text-xl relative" title="Notifications">🔔</a>
                     <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-red-500 text-xl relative" title="Wishlist">❤️</a>
@@ -63,7 +79,6 @@
                         🛒 <span class="ml-1" id="cart-count-badge">Cart ({{ cart_count|default:0 }})</span>
                     </a>
 
-                    <!-- USER ACCOUNT DROPDOWN (Desktop) -->
                     <div class="relative group">
                         <button class="flex items-center space-x-1 text-gray-700 hover:text-orange-500 font-bold text-sm focus:outline-none py-2">
                             <span class="bg-orange-100 text-orange-600 px-2.5 py-1 rounded-full border border-orange-200">👤</span>
@@ -88,16 +103,13 @@
                     </div>
                 </div>
 
-                <!-- Mobile Right Icons (Account, Wishlist, Cart Quick Icons) -->
                 <div class="flex md:hidden items-center space-x-3.5">
-                    <!-- Added Account Icon here for Mobile -->
                     <a href="{% if request.user.is_authenticated %}{% url 'account_profile' %}{% else %}{% url 'custom_login' %}{% endif %}" class="text-gray-600 hover:text-orange-500 text-lg">👤</a>
                     <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-red-500 text-lg">❤️</a>
                     <a href="{% url 'cart_page' %}" class="text-gray-600 hover:text-orange-500 text-lg">🛒</a>
                 </div>
             </div>
 
-            <!-- Mobile Search Bar -->
             <div class="md:hidden pb-4">
                 <form method="GET" action="{% url 'home' %}" class="w-full flex">
                     <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search products..." class="w-full border border-gray-300 rounded-l-md px-3 py-1.5 focus:outline-none text-xs">
@@ -106,7 +118,6 @@
             </div>
         </div>
 
-        <!-- MOBILE SIDEBAR MENU (Hidden by default) -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-3 shadow-lg absolute w-full left-0 z-50">
             <a href="{% url 'notifications' %}" class="block text-gray-700 font-medium py-1.5 border-b border-gray-50">🔔 Notifications</a>
             <a href="{% url 'wishlist' %}" class="block text-gray-700 font-medium py-1.5 border-b border-gray-50">❤️ My Wishlist</a>
@@ -128,8 +139,7 @@
         </div>
     </nav>
 
-    <!-- SLIDER -->
-<div class="relative w-full max-w-7xl mx-auto mt-4 overflow-hidden rounded-xl shadow-lg h-[200px] md:h-[400px]">
+    <div class="relative w-full max-w-7xl mx-auto mt-4 overflow-hidden rounded-xl shadow-lg h-[200px] md:h-[400px]">
         <div id="slider" class="slider-container h-full w-full flex transition-transform duration-500">
             
             {% if banners %}
@@ -175,7 +185,6 @@
             {% endif %}
         </div>
     </div>
-    <!-- PRODUCTS GRID -->
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8 md:py-16">
         <div class="text-center mb-6 md:mb-10">
             <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="arrivals-title">New Arrivals</h2>
@@ -210,11 +219,9 @@
                 </div>
 
                 <div class="p-2.5 md:p-5 pt-0 space-y-1.5 md:space-y-2">
-                    <!-- AJAX Add to Cart Button -->
-                    <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer">
+                    <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer add-cart-btn">
                         Add to Cart 🛒
                     </button>
-                    <!-- AJAX Wishlist Button -->
                     <button onclick="toggleWishlistAjax('{{ p.id }}', this)" id="wishlist-btn-{{ p.id }}" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
                         {% if p.id in user_wishlist %}❤️ Saved{% else %}🤍 Save{% endif %}
                     </button>
@@ -228,7 +235,6 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="bg-gray-900 text-white py-8 md:py-12 mt-10">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <h3 class="text-base md:text-xl font-bold mb-2 md:mb-4">Prizeless Store</h3>
@@ -236,16 +242,39 @@
         </div>
     </footer>
 
-    <!-- SCRIPTS -->
     <script>
+        // MUSIC LOGIC: Autoplays calming music on the first click anywhere
+        let musicStarted = false;
+        document.body.addEventListener('click', function() {
+            if (!musicStarted) {
+                let bgMusic = document.getElementById('relaxing-bg-music');
+                bgMusic.volume = 0.2; 
+                let playPromise = bgMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => { console.log("Waiting for more user interaction."); });
+                }
+                musicStarted = true;
+            }
+        });
+
         // Toggle Mobile Menu Drawer
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
         }
 
-        // AJAX Add to Cart
+        // AJAX Add to Cart with Theme Animation
         function addToCartAjax(productId, btn) {
+            // CONFETTI ANIMATION LOGIC
+            const currentTheme = document.body.getAttribute('data-theme');
+            if (currentTheme === 'independence') {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#FF9933', '#FFFFFF', '#138808'] });
+            } else if (currentTheme === 'diwali') {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#FFD700', '#FF0000'] });
+            } else {
+                confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 }, colors: ['#ff8c00', '#007bff'] });
+            }
+
             fetch(`/add-to-cart/${productId}/`, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
@@ -255,12 +284,11 @@
                     document.getElementById('cart-count-badge').innerText = `Cart (${data.cart_count})`;
                     let originalText = btn.innerText;
                     btn.innerText = 'Added! ✓';
-                    btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
-                    btn.classList.add('bg-green-600');
+                    btn.style.backgroundColor = '#28a745';
+                    btn.style.color = '#fff';
                     setTimeout(() => {
                         btn.innerText = originalText;
-                        btn.classList.remove('bg-green-600');
-                        btn.classList.add('bg-orange-500', 'hover:bg-orange-600');
+                        btn.style.backgroundColor = '';
                     }, 1000);
                 }
             })
@@ -289,17 +317,19 @@
 
         // Slider Script
         let currentSlide = 0;
-        const totalSlides = 2;
+        const totalSlides = document.querySelectorAll('.slide-dot').length || 2;
         const slider = document.getElementById('slider');
         const dots = document.querySelectorAll('.slide-dot');
 
         function updateSlider() {
-            slider.style.transform = `translateX(-${currentSlide * 100}%)`;
-            dots.forEach((dot, index) => {
-                dot.classList.toggle('opacity-100', index === currentSlide);
-                dot.classList.toggle('md:w-6', index === currentSlide);
-                dot.classList.toggle('opacity-50', index !== currentSlide);
-            });
+            if(slider){
+                slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('opacity-100', index === currentSlide);
+                    dot.classList.toggle('md:w-6', index === currentSlide);
+                    dot.classList.toggle('opacity-50', index !== currentSlide);
+                });
+            }
         }
         function nextSlide() { currentSlide = (currentSlide + 1) % totalSlides; updateSlider(); }
         function goToSlide(index) { currentSlide = index; updateSlider(); }

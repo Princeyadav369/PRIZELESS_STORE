@@ -17,6 +17,7 @@ import urllib.request
 import urllib.parse
 import os
 import traceback
+import datetime  # <-- Added for automatic festival checking
 
 def store_home(request):
     query = request.GET.get('q')
@@ -29,6 +30,19 @@ def store_home(request):
     cart_count = sum(item['quantity'] for item in cart.values())
     setting, created = StoreSetting.objects.get_or_create(id=1)
 
+    # === AUTOMATIC FESTIVAL LOGIC ===
+    today = datetime.date.today()
+    auto_theme = 'normal'
+    
+    if today.month == 8 and 10 <= today.day <= 16:
+        auto_theme = 'independence'
+    elif (today.month == 10 and today.day >= 20) or (today.month == 11 and today.day <= 5):
+        auto_theme = 'diwali'
+    elif (today.month == 12 and today.day >= 25) or (today.month == 1 and today.day <= 5):
+        auto_theme = 'newyear'
+    else:
+        auto_theme = 'normal'
+
     banners = Banner.objects.filter(is_active=True)
 
     user_wishlist = []
@@ -37,7 +51,7 @@ def store_home(request):
         
     return render(request, 'home.html', {
         'products': products, 'query': query, 'cart_count': cart_count, 
-        'active_festival': setting.active_festival, 'user_wishlist': user_wishlist,
+        'active_festival': auto_theme, 'user_wishlist': user_wishlist,
         'banners': banners
     })
 
