@@ -1,14 +1,16 @@
 from django.urls import path, include
 from store import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('signup/', views.register_view, name='register'),
     path('signin/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('forgot-password/', views.forgot_password_view, name='forgot_password'),
-    path('forgot-password/', views.forgot_password_view, name='forgot_password'),
-path('verify-otp/', views.verify_reset_otp_view, name='verify_reset_otp'),
-path('reset-new-password/', views.reset_new_password_view, name='reset_new_password'),
+    path('verify-otp/', views.verify_reset_otp_view, name='verify_reset_otp'),
+    path('reset-new-password/', views.reset_new_password_view, name='reset_new_password'),
+    
     # ==========================================
     # 🌍 GOOGLE LOGIN / ALLAUTH URLs
     # ==========================================
@@ -65,3 +67,7 @@ path('reset-new-password/', views.reset_new_password_view, name='reset_new_passw
     path('custom-login/', views.custom_login, name='custom_login'),
     path('custom-logout/', views.custom_logout, name='custom_logout'),
 ]
+
+# Media files serving for development/production storage display fix
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
