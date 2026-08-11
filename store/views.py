@@ -97,12 +97,18 @@ def add_to_cart(request, id):
     product = get_object_or_404(Product, id=id)
     cart = request.session.get('cart', {})
     product_id = str(id)
+    
     if product_id in cart:
         cart[product_id]['quantity'] += 1
     else:
-        cart[product_id] = {'name': product.name, 'price': float(product.price), 'quantity': 1, 'image': product.image.url if product.image else ''}
+        cart[product_id] = {
+            'name': product.name, 
+            'price': float(product.price), 
+            'quantity': 1, 
+            'image': product.image.url if product.image else ''
+        }
+        
     request.session['cart'] = cart
-    
     cart_count = sum(item['quantity'] for item in cart.values())
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -113,18 +119,21 @@ def add_to_cart(request, id):
 def decrease_cart(request, id):
     cart = request.session.get('cart', {})
     product_id = str(id)
+    
     if product_id in cart:
         if cart[product_id]['quantity'] > 1:
             cart[product_id]['quantity'] -= 1
         else:
             del cart[product_id]
         request.session['cart'] = cart
+        
     return redirect('cart_page')
 
 def cart_page(request):
     cart = request.session.get('cart', {})
     cart_items = []
     cart_total = 0
+    
     for p_id, item in cart.items():
         try:
             prod = Product.objects.get(id=int(p_id))
@@ -134,14 +143,21 @@ def cart_page(request):
             continue
             
     cart_count = sum(item['quantity'] for item in cart.values())
-    return render(request, 'cart.html', {'cart_items': cart_items, 'cart_total': cart_total, 'cart_count': cart_count})
+    
+    return render(request, 'cart.html', {
+        'cart_items': cart_items, 
+        'cart_total': cart_total, 
+        'cart_count': cart_count
+    })
 
 def remove_from_cart(request, id):
     cart = request.session.get('cart', {})
     product_id = str(id)
+    
     if product_id in cart:
         del cart[product_id]
         request.session['cart'] = cart
+        
     return redirect('cart_page')
 
 def clear_cart(request):
@@ -153,7 +169,11 @@ def wishlist_view(request):
     wishlist_items = Wishlist.objects.filter(user=request.user)
     cart = request.session.get('cart', {})
     cart_count = sum(item['quantity'] for item in cart.values())
-    return render(request, 'wishlist.html', {'wishlist_items': wishlist_items, 'cart_count': cart_count})
+    
+    return render(request, 'wishlist.html', {
+        'wishlist_items': wishlist_items, 
+        'cart_count': cart_count
+    })
 
 @login_required(login_url='/signin/')
 def add_to_wishlist(request, id):
@@ -176,8 +196,10 @@ def add_to_wishlist(request, id):
 def remove_from_wishlist(request, id):
     product = get_object_or_404(Product, id=id)
     Wishlist.objects.filter(user=request.user, product=product).delete()
+    
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({'status': 'success', 'action': 'removed'})
+        
     return redirect(request.META.get('HTTP_REFERER', 'home'))
 
 @login_required(login_url='/signin/')
@@ -230,6 +252,7 @@ def checkout_view(request):
         return redirect('payment_page')
         
     cart_count = sum(item['quantity'] for item in cart.values())
+    
     return render(request, 'checkout.html', {
         'cart': cart, 
         'total_price': total_price, 
@@ -238,6 +261,7 @@ def checkout_view(request):
 
 def payment_page_view(request):
     order_id = request.session.get('pending_order_id')
+    
     if not order_id:
         return redirect('home')
         
@@ -306,19 +330,47 @@ def my_orders_view(request):
 def account_settings_view(request):
     return render(request, 'account_settings.html')
 
+# 🚀 CUSTOM DASHBOARD REAL ENGINE LINKING
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def custom_dashboard(request):
     products = Product.objects.all()
+    categories = Category.objects.all()
+    orders = Order.objects.all().order_by('-created_at')
+    customers = User.objects.filter(is_staff=False)
+    
+    total_orders = orders.count()
+    total_revenue = sum(o.total_amount for o in orders if o.status == 'Confirmed')
+    pending_orders = orders.filter(status='Pending').count()
+    completed_orders = orders.filter(status='Confirmed').count()
+    canceled_orders = orders.filter(status='Cancelled').count()
+
+    recent_notifications = orders[:5]
+
     setting, created = StoreSetting.objects.get_or_create(id=1)
+    
     if request.method == 'POST':
         setting.active_festival = request.POST.get('festival_theme', 'normal')
         setting.save()
         return redirect('custom_dashboard')
-    return render(request, 'dashboard.html', {'products': products, 'setting': setting})
+        
+    return render(request, 'dashboard.html', {
+        'products': products, 
+        'categories': categories, 
+        'orders': orders, 
+        'customers': customers,
+        'total_orders': total_orders, 
+        'total_revenue': total_revenue, 
+        'pending_orders': pending_orders,
+        'completed_orders': completed_orders, 
+        'canceled_orders': canceled_orders, 
+        'recent_notifications': recent_notifications, 
+        'setting': setting
+    })
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def dashboard_banners(request):
     banners = Banner.objects.all().order_by('-id')
+    
     if request.method == 'POST':
         title = request.POST.get('title')
         image = request.FILES.get('image')
@@ -346,6 +398,7 @@ def add_product_view(request):
             return redirect('custom_dashboard')
     else:
         form = ProductForm()
+        
     return render(request, 'add_product.html', {'form': form})
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
@@ -357,11 +410,13 @@ def add_category_view(request):
             return redirect('custom_dashboard')
     else:
         form = CategoryForm()
+        
     return render(request, 'add_category.html', {'form': form})
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def edit_product_view(request, id):
     product = get_object_or_404(Product, id=id)
+    
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
@@ -369,6 +424,7 @@ def edit_product_view(request, id):
             return redirect('custom_dashboard')
     else:
         form = ProductForm(instance=product)
+        
     return render(request, 'edit_product.html', {'form': form, 'product': product})
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
@@ -405,11 +461,13 @@ def custom_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
+        
         if user is not None:
             login(request, user)
             return redirect('home')
         else:
             messages.error(request, 'Invalid credentials.')
+            
     return render(request, 'login.html')
 
 def custom_logout(request):
@@ -443,6 +501,7 @@ def login_view(request):
         password = request.POST.get('password')
         
         user = authenticate(request, username=email, password=password)
+        
         if user is not None:
             login(request, user)
             next_url = request.GET.get('next', 'home')

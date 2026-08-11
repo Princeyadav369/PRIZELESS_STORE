@@ -13,25 +13,28 @@ class Store(models.Model):
         return self.name
 
 class Category(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True) # <-- NAYA CONNECTION
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
+    
     def __str__(self):
         return self.name
 
 class Product(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True) # <-- NAYA CONNECTION
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0, help_text="Kitne items bache hain?")
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
+    colors = models.CharField(max_length=255, blank=True, null=True, help_text="Colors comma laga kar likhein (Jaise: Red, Blue, Black)")
     is_available = models.BooleanField(default=True)
+    
     def __str__(self):
         return self.name
 
 class Order(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True) # <-- NAYA CONNECTION
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(blank=True, null=True)
@@ -43,6 +46,7 @@ class Order(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=50, default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    
     def __str__(self):
         return f"Order #{self.id} - {self.first_name}"
 
@@ -53,15 +57,14 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
 
 class Notification(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True) # <-- NAYA CONNECTION
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
 class StoreSetting(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True) # <-- NAYA CONNECTION
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     active_festival = models.CharField(max_length=50, default='normal')
 
-# Wishlist Model
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -73,11 +76,8 @@ class Wishlist(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"
 
-# ==========================================
-# 1. BANNERS KE LIYE MODEL
-# ==========================================
 class Banner(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True) # <-- NAYA CONNECTION
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=200, help_text="Banner ka naam (jaise: Diwali Sale)")
     image = models.ImageField(upload_to='banners/')
     is_active = models.BooleanField(default=True, help_text="Isko untick karega toh banner website se hat jayega")
@@ -86,9 +86,6 @@ class Banner(models.Model):
     def __str__(self):
         return self.title
 
-# ==========================================
-# 2. EK PRODUCT KI MULTIPLE PHOTOS KE LIYE
-# ==========================================
 class ProductGallery(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='gallery_images')
     image = models.ImageField(upload_to='products/gallery/')
@@ -96,11 +93,8 @@ class ProductGallery(models.Model):
     def __str__(self):
         return f"{self.product.name} - Gallery Image"
 
-# ==========================================
-# 3. PRODUCT KE COLORS/VARIATIONS KE LIYE
-# ==========================================
 class ProductColor(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='colors')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='color_variations')
     color_name = models.CharField(max_length=50, help_text="Jaise: Red, Silver, Black")
     
     def __str__(self):
