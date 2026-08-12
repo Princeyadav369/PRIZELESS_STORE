@@ -3,20 +3,16 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
-from .models import Product, Category, Order, OrderItem, Notification, StoreSetting, Wishlist, Banner, VideoReview
+from .models import Product, Category, Order, OrderItem, Notification, StoreSetting, Wishlist, Banner, StoreVideoReview
 from .forms import ProductForm, CategoryForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
 import random
 import json
 import urllib.request
 import urllib.parse
 import os
-import traceback
 import datetime
 
 def store_home(request):
@@ -32,46 +28,38 @@ def store_home(request):
     cart_count = sum(item['quantity'] for item in cart.values())
     setting, created = StoreSetting.objects.get_or_create(id=1)
 
-    # === AUTOMATIC 5-DAY FESTIVAL DECORATION LOGIC ===
     auto_theme = setting.active_festival
-    decoration_level = 'normal' # Can be 'normal', 'high' (5 days before), or 'ultra' (on the day)
+    decoration_level = 'normal'
 
     if auto_theme == 'normal':
         today = datetime.date.today()
         m = today.month
         d = today.day
         
-        # 1. Independence Day: 15 Aug (Decorate from Aug 10)
         if m == 8 and 10 <= d <= 15:
             auto_theme = 'independence'
             decoration_level = 'ultra' if d == 15 else 'high'
             
-        # 2. Raksha Bandhan: Aug 28 (Decorate from Aug 23)
         elif m == 8 and 23 <= d <= 28:
             auto_theme = 'rakshabandhan'
             decoration_level = 'ultra' if d == 28 else 'high'
             
-        # 3. Diwali: Nov 1 (Decorate from Oct 26)
         elif (m == 10 and d >= 26) or (m == 11 and d <= 1):
             auto_theme = 'diwali'
             decoration_level = 'ultra' if (m == 11 and d == 1) else 'high'
             
-        # 4. New Year: Jan 1 (Decorate Dec 27 - Jan 1)
         elif (m == 12 and d >= 27) or (m == 1 and d == 1):
             auto_theme = 'newyear'
             decoration_level = 'ultra' if (m == 1 and d == 1) else 'high'
             
-        # 5. Holi: March 25 (Decorate Mar 20 - 25)
         elif m == 3 and 20 <= d <= 25:
             auto_theme = 'holi'
             decoration_level = 'ultra' if d == 25 else 'high'
             
-        # 6. Ganpati: Sept 7 (Decorate Sept 2 - 7)
         elif m == 9 and 2 <= d <= 7:
             auto_theme = 'ganpati'
             decoration_level = 'ultra' if d == 7 else 'high'
 
-    # Set Titles dynamically
     festival_titles = {
         'independence': "🇮🇳 Independence Day Special Picks",
         'rakshabandhan': "🎁 Raksha Bandhan Gifting Specials",
@@ -83,14 +71,13 @@ def store_home(request):
     }
     festival_title = festival_titles.get(auto_theme, "🔥 Trending New Arrivals")
 
-    # Section mapping based on forms.py choice
-    trending_products = products.filter(section='trending')
-    combo_products = products.filter(section='combo')
-    bestseller_products = products.filter(section='bestseller')
+    trending_products = products.filter(display_section='trending')
+    combo_products = products.filter(display_section='combo')
+    bestseller_products = products.filter(display_section='bestseller')
 
     banners = Banner.objects.filter(is_active=True)
     try:
-        videos = VideoReview.objects.filter(is_active=True)
+        videos = StoreVideoReview.objects.filter(is_active=True)[:3]
     except:
         videos = []
 
@@ -111,7 +98,7 @@ def store_home(request):
         'user_wishlist': user_wishlist,
         'banners': banners,
         'videos': videos,
-        'festival_music_url': setting.festival_music_url
+        'bg_music_link': setting.bg_music_link
     })
 
 def product_detail(request, id):
@@ -312,7 +299,7 @@ def custom_dashboard(request):
     orders = Order.objects.all().order_by('-created_at')
     customers = User.objects.filter(is_staff=False)
     try:
-        videos = VideoReview.objects.all()
+        videos = StoreVideoReview.objects.all()
     except:
         videos = []
     
@@ -329,11 +316,11 @@ def custom_dashboard(request):
         if action == 'update_festival':
             setting.active_festival = request.POST.get('festival_theme', 'normal')
             if request.POST.get('music_url'):
-                setting.festival_music_url = request.POST.get('music_url')
+                setting.bg_music_link = request.POST.get('music_url')
             setting.save()
             messages.success(request, "Store Custom Dashboard Configurations Saved!")
         elif action == 'add_video':
-            VideoReview.objects.create(
+            StoreVideoReview.objects.create(
                 title=request.POST.get('v_title'),
                 thumbnail_url=request.POST.get('v_thumb'),
                 video_url=request.POST.get('v_url')
