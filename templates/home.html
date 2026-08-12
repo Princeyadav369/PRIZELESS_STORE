@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Confetti for Animation -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
@@ -17,56 +16,53 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .modal-enter { animation: modalFadeIn 0.3s ease-out forwards; }
+        .modal-enter { animation: modalFadeIn 0.2s ease-out forwards; }
         @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.95); }
+            from { opacity: 0; transform: scale(0.98); }
             to { opacity: 1; transform: scale(1); }
         }
 
         .trust-badge { display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 10px; color: #555; }
         
         /* 🌟 DYNAMIC FESTIVAL COLORS 🌟 */
-        /* Normal State */
         .theme-bg { background-color: #ff8c00; color: white; }
         .hover-theme-text:hover { color: #ff8c00 !important; transition: 0.2s; }
         
-        /* Independence Day */
         body[data-theme="independence"] .theme-bg { background: linear-gradient(90deg, #FF9933, #FFFFFF, #138808); color: #000; }
         body[data-theme="independence"] .hover-theme-text:hover { color: #138808 !important; }
         body[data-theme="independence"] .bg-orange-500 { background: linear-gradient(90deg, #FF9933, #138808) !important; color: white !important; border:none;}
         body[data-theme="independence"] .text-orange-500 { color: #138808 !important; }
         
-        /* Raksha Bandhan */
         body[data-theme="rakshabandhan"] .theme-bg { background-color: #e91e63; color: white; }
         body[data-theme="rakshabandhan"] .hover-theme-text:hover { color: #e91e63 !important; }
         body[data-theme="rakshabandhan"] .bg-orange-500 { background: linear-gradient(90deg, #e91e63, #ff4081) !important; color: white !important; border:none;}
         body[data-theme="rakshabandhan"] .text-orange-500 { color: #e91e63 !important; }
 
-        /* Diwali */
         body[data-theme="diwali"] .theme-bg { background-color: #800000; color: #FFD700; }
         body[data-theme="diwali"] .hover-theme-text:hover { color: #800000 !important; }
         body[data-theme="diwali"] .bg-orange-500 { background-color: #800000 !important; color: #FFD700 !important; border:none;}
         body[data-theme="diwali"] .text-orange-500 { color: #800000 !important; }
 
-        /* New Year */
         body[data-theme="newyear"] .theme-bg { background-color: #007bff; color: white; }
         body[data-theme="newyear"] .hover-theme-text:hover { color: #007bff !important; }
         body[data-theme="newyear"] .bg-orange-500 { background-color: #007bff !important; color: white !important; border:none;}
         body[data-theme="newyear"] .text-orange-500 { color: #007bff !important; }
 
-        /* Sale Pulse Animation */
         @keyframes subtlePulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .pulse-text { animation: subtlePulse 2s infinite; display: inline-block; }
+
+        /* 🔍 PRODUCT IMAGE ZOOM EFFECT */
+        .zoom-effect { overflow: hidden; position: relative; }
+        .zoom-effect img { transition: transform 0.3s ease; }
+        .zoom-effect:hover img { transform: scale(1.15); }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans transition-colors duration-300" id="main-body" data-theme="{{ active_festival }}">
 
-    <!-- RELAXING BACKGROUND MUSIC -->
     <audio id="relaxing-bg-music" loop>
         <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- TOP TICKER -->
     <div class="theme-bg text-xs py-2 text-center font-bold tracking-wider uppercase shadow-sm" id="offer-ticker">
         {% if active_festival == 'independence' %}
             🇮🇳 Independence Day Special: Extra 15% OFF on all Steel Cookware! Use Code: INDIA15
@@ -79,7 +75,6 @@
         {% endif %}
     </div>
 
-    <!-- 🌟 ORIGINAL FULL NAVBAR RESTORED 🌟 -->
     <nav class="bg-white shadow-md w-full z-50 transition-colors duration-300 relative" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
@@ -100,7 +95,6 @@
                     </div>
                 </div>
                 
-                <!-- Dekh bhai tera search bar ki decoration wapas aagayi -->
                 <div class="hidden md:flex flex-1 max-w-xl mx-6">
                     <form method="GET" action="{% url 'home' %}" class="w-full flex">
                         <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search for Kitchenware, Steel Appliances..." class="w-full border border-gray-300 rounded-l-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm transition-all duration-300">
@@ -116,7 +110,6 @@
                         🛒 <span class="ml-1" id="cart-count-badge">Cart ({{ cart_count|default:0 }})</span>
                     </a>
 
-                    <!-- Tera Hover Account Dropdown -->
                     <div class="relative group">
                         <button class="flex items-center space-x-1 text-gray-700 hover:text-orange-500 font-bold text-sm focus:outline-none py-2">
                             <span class="bg-orange-100 text-orange-600 px-2.5 py-1 rounded-full border border-orange-200">👤</span>
@@ -148,7 +141,6 @@
                 </div>
             </div>
 
-            <!-- Mobile Search Bar -->
             <div class="md:hidden pb-4">
                 <form method="GET" action="{% url 'home' %}" class="w-full flex">
                     <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search products..." class="w-full border border-gray-300 rounded-l-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500 text-xs">
@@ -157,7 +149,6 @@
             </div>
         </div>
 
-        <!-- ✨ PREMIUM SECONDARY CATEGORY BAR ✨ -->
         <div class="border-t border-gray-100 bg-white transition-colors duration-300" id="secondary-nav">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-auto hide-scroll">
                 <ul class="flex items-center justify-start md:justify-center space-x-5 md:space-x-8 py-2.5 text-[13px] md:text-sm font-semibold text-gray-500 min-w-max" id="secondary-nav-text">
@@ -201,7 +192,6 @@
         </div>
     </nav>
 
-    <!-- SLIDER -->
     <div class="relative w-full max-w-7xl mx-auto mt-4 overflow-hidden rounded-xl shadow-lg h-[200px] md:h-[400px]">
         <div id="slider" class="slider-container h-full w-full flex transition-transform duration-500">
             {% if banners %}
@@ -222,22 +212,16 @@
             {% else %}
                 <div class="min-w-full h-full bg-gradient-to-r from-gray-900 to-gray-700 flex items-center justify-between px-6 md:px-20 text-white slide-item">
                     <div>
-                        <h2 class="text-xl md:text-5xl font-bold mb-2 md:mb-4">
-                            {% if active_festival == 'independence' %}Independence Day Sale{% elif active_festival == 'rakshabandhan' %}Happy Raksha Bandhan{% elif active_festival == 'diwali' %}Happy Diwali Festival{% elif active_festival == 'newyear' %}New Year Special{% else %}Premium Steel Cookware{% endif %}
-                        </h2>
-                        <p class="text-xs md:text-lg mb-4 md:mb-6">Make this season special with Prizeless Kitchenware.</p>
+                        <h2 class="text-xl md:text-5xl font-bold mb-2 md:mb-4">Welcome to Prizeless Store</h2>
+                        <p class="text-xs md:text-lg mb-4 md:mb-6">Premium quality kitchenware and steel appliances.</p>
                         <button class="bg-orange-500 px-4 md:px-6 py-2 rounded-md font-bold text-xs md:text-base">Shop Now</button>
                     </div>
-                    <div class="hidden md:block text-8xl">🍳</div>
                 </div>
             {% endif %}
         </div>
         <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-20" id="slider-dots"></div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SECTION 1: FESTIVAL / NEW ARRIVALS -->
-    <!-- ========================================== -->
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-10 pb-4">
         <div class="text-center mb-8">
             <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="arrivals-title">{{ festival_title }}</h2>
@@ -250,19 +234,15 @@
                 
                 <span class="absolute top-2 left-2 bg-orange-500 text-white text-[9px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded z-10">NEW</span>
 
-                <!-- Image & Quick View Overlay -->
-                <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center">
+                <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center cursor-pointer zoom-effect"
+                     onmouseenter="openQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onclick="window.location.href='{% url 'product_detail' p.id %}'">
+                    
                     {% if p.image %}
-                        <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105">
+                        <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain">
                     {% else %}
                         <div class="text-4xl text-gray-300">📷</div>
                     {% endif %}
-                    
-                    <div class="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
-                        <button onclick="openQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}')" class="bg-white text-gray-900 font-bold text-xs md:text-sm px-4 md:px-6 py-2 rounded-full shadow-lg hover:bg-orange-500 hover:text-white transition transform translate-y-4 group-hover:translate-y-0">
-                            👁️ Quick View
-                        </button>
-                    </div>
                 </div>
                 
                 <div class="p-2.5 md:p-5">
@@ -270,15 +250,19 @@
                     <a href="{% url 'product_detail' p.id %}">
                         <h3 class="text-xs md:text-lg font-bold text-gray-900 mb-1 truncate hover:text-orange-500 transition product-name">{{ p.name }}</h3>
                     </a>
+
+                    {% if p.colors %}
+                    <div class="flex gap-1 mt-1 mb-2 color-swatches" data-colors="{{ p.colors }}"></div>
+                    {% endif %}
+
                     <div class="text-sm md:text-xl font-black text-gray-900 product-price mb-2">₹{{ p.price }}</div>
                 </div>
 
-                <!-- 🌟 TERA PURANA ADD TO CART AUR WISHLIST BUTTON 🌟 -->
                 <div class="p-2.5 md:p-5 pt-0 space-y-1.5 md:space-y-2 mt-auto">
                     <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer add-cart-btn">
                         Add to Cart 🛒
                     </button>
-                    <button onclick="toggleWishlistAjax('{{ p.id }}', this)" id="wishlist-btn-{{ p.id }}" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
+                    <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
                         {% if p.id in user_wishlist %}❤️ Saved{% else %}🤍 Save{% endif %}
                     </button>
                 </div>
@@ -287,9 +271,6 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SECTION 2: EXCLUSIVE COMBOS -->
-    <!-- ========================================== -->
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8 border-t border-gray-200">
         <div class="text-center mb-8">
             <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="arrivals-title">🎁 Exclusive Combos</h2>
@@ -300,25 +281,28 @@
             {% for p in products|slice:"4:8" %}
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 overflow-hidden group product-card flex flex-col justify-between relative">
                 <span class="absolute top-2 left-2 bg-purple-600 text-white text-[9px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded z-10">COMBO DEAL</span>
-                <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center">
+                
+                <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center cursor-pointer zoom-effect"
+                     onmouseenter="openQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onclick="window.location.href='{% url 'product_detail' p.id %}'">
                     {% if p.image %}
-                        <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105">
+                        <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain">
                     {% else %}
                         <div class="text-4xl text-gray-300">📷</div>
                     {% endif %}
-                    <div class="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
-                        <button onclick="openQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}')" class="bg-white text-gray-900 font-bold text-xs md:text-sm px-4 md:px-6 py-2 rounded-full shadow-lg hover:bg-orange-500 hover:text-white transition transform translate-y-4 group-hover:translate-y-0">👁️ Quick View</button>
-                    </div>
                 </div>
+
                 <div class="p-2.5 md:p-5">
                     <p class="text-[9px] md:text-xs text-gray-500 uppercase tracking-wider mb-0.5 md:mb-1 truncate">{{ p.category }}</p>
                     <a href="{% url 'product_detail' p.id %}">
                         <h3 class="text-xs md:text-lg font-bold text-gray-900 mb-1 truncate hover:text-orange-500 transition product-name">{{ p.name }}</h3>
                     </a>
+                    {% if p.colors %}
+                    <div class="flex gap-1 mt-1 mb-2 color-swatches" data-colors="{{ p.colors }}"></div>
+                    {% endif %}
                     <div class="text-sm md:text-xl font-black text-gray-900 product-price mb-2">₹{{ p.price }}</div>
                 </div>
                 
-                <!-- FULL BUTTONS -->
                 <div class="p-2.5 md:p-5 pt-0 space-y-1.5 md:space-y-2 mt-auto">
                     <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer add-cart-btn">Add to Cart 🛒</button>
                     <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
@@ -330,9 +314,6 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SECTION 3: BEST SELLERS -->
-    <!-- ========================================== -->
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8 border-t border-gray-200">
         <div class="text-center mb-8">
             <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="arrivals-title">⭐ Our Best Sellers</h2>
@@ -343,25 +324,28 @@
             {% for p in products|slice:"8:12" %}
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 overflow-hidden group product-card flex flex-col justify-between relative">
                 <span class="absolute top-2 left-2 bg-yellow-400 text-gray-900 text-[9px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded z-10">TOP RATED</span>
-                <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center">
+                
+                <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center cursor-pointer zoom-effect"
+                     onmouseenter="openQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onclick="window.location.href='{% url 'product_detail' p.id %}'">
                     {% if p.image %}
-                        <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105">
+                        <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain">
                     {% else %}
                         <div class="text-4xl text-gray-300">📷</div>
                     {% endif %}
-                    <div class="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
-                        <button onclick="openQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}')" class="bg-white text-gray-900 font-bold text-xs md:text-sm px-4 md:px-6 py-2 rounded-full shadow-lg hover:bg-orange-500 hover:text-white transition transform translate-y-4 group-hover:translate-y-0">👁️ Quick View</button>
-                    </div>
                 </div>
+
                 <div class="p-2.5 md:p-5">
                     <p class="text-[9px] md:text-xs text-gray-500 uppercase tracking-wider mb-0.5 md:mb-1 truncate">{{ p.category }}</p>
                     <a href="{% url 'product_detail' p.id %}">
                         <h3 class="text-xs md:text-lg font-bold text-gray-900 mb-1 truncate hover:text-orange-500 transition product-name">{{ p.name }}</h3>
                     </a>
+                    {% if p.colors %}
+                    <div class="flex gap-1 mt-1 mb-2 color-swatches" data-colors="{{ p.colors }}"></div>
+                    {% endif %}
                     <div class="text-sm md:text-xl font-black text-gray-900 product-price mb-2">₹{{ p.price }}</div>
                 </div>
                 
-                <!-- FULL BUTTONS -->
                 <div class="p-2.5 md:p-5 pt-0 space-y-1.5 md:space-y-2 mt-auto">
                     <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer add-cart-btn">Add to Cart 🛒</button>
                     <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
@@ -373,28 +357,22 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SECTION 4: PRODUCT IN ACTION (VIDEOS) -->
-    <!-- ========================================== -->
     <div class="bg-gray-900 py-16 shadow-inner border-t-4 border-orange-500 mt-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">See Our Products in Action</h2>
             <p class="text-gray-400 text-sm md:text-base mb-10">Watch unboxing and real customer reviews before you buy.</p>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Video 1 Placeholder -->
                 <div class="bg-black rounded-lg overflow-hidden shadow-lg border border-gray-700 relative h-48 md:h-64 flex items-center justify-center group cursor-pointer">
                     <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=500&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition">
                     <i class="fa-brands fa-youtube text-5xl text-red-500 relative z-10 group-hover:scale-110 transition drop-shadow-lg"></i>
                     <p class="absolute bottom-4 left-4 text-white font-bold text-sm z-10 drop-shadow-md">Premium Thali Unboxing</p>
                 </div>
-                <!-- Video 2 Placeholder -->
                 <div class="bg-black rounded-lg overflow-hidden shadow-lg border border-gray-700 relative h-48 md:h-64 flex items-center justify-center group cursor-pointer">
                     <img src="https://images.unsplash.com/photo-1584286595398-a59f21d313f5?w=500&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition">
                     <i class="fa-solid fa-play text-5xl text-white relative z-10 group-hover:scale-110 transition drop-shadow-lg"></i>
                     <p class="absolute bottom-4 left-4 text-white font-bold text-sm z-10 drop-shadow-md">Customer Review (Mumbai)</p>
                 </div>
-                <!-- Video 3 Placeholder -->
                 <div class="bg-black rounded-lg overflow-hidden shadow-lg border border-gray-700 relative h-48 md:h-64 flex items-center justify-center group cursor-pointer hidden md:flex">
                     <img src="https://images.unsplash.com/photo-1590483736622-398541ce1a50?w=500&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition">
                     <i class="fa-brands fa-instagram text-5xl text-pink-500 relative z-10 group-hover:scale-110 transition drop-shadow-lg"></i>
@@ -404,7 +382,6 @@
         </div>
     </div>
 
-    <!-- QUICK VIEW MODAL -->
     <div id="quickViewModal" class="fixed inset-0 z-[100] hidden bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-xl max-w-4xl w-full flex flex-col md:flex-row relative shadow-2xl modal-enter overflow-hidden">
             
@@ -412,22 +389,27 @@
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
 
-            <div class="w-full md:w-1/2 bg-gray-50 p-8 flex items-center justify-center border-r border-gray-100">
-                <img id="modal-img" src="" alt="Product" class="max-h-[300px] md:max-h-[400px] object-contain drop-shadow-md">
-            </div>
+            <a id="modal-img-link" href="#" class="w-full md:w-1/2 bg-gray-50 p-8 flex items-center justify-center border-r border-gray-100 cursor-pointer">
+                <img id="modal-img" src="" alt="Product" class="max-h-[300px] md:max-h-[400px] object-contain drop-shadow-md hover:scale-105 transition duration-300">
+            </a>
 
             <div class="w-full md:w-1/2 p-6 md:p-10 flex flex-col">
                 <p class="text-xs text-orange-500 font-bold uppercase tracking-wider mb-2">Prizeless Exclusive</p>
-                <h2 id="modal-title" class="text-2xl font-bold text-gray-900 leading-tight mb-2">Product Name</h2>
+                <a id="modal-title-link" href="#"><h2 id="modal-title" class="text-2xl font-bold text-gray-900 leading-tight mb-2 hover:text-orange-500 transition">Product Name</h2></a>
                 
                 <div class="flex items-center gap-2 mb-4">
                     <div class="text-yellow-400 text-sm"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></div>
                     <span class="text-blue-600 text-xs font-semibold hover:underline cursor-pointer">124 Reviews</span>
                 </div>
 
-                <div class="flex items-end gap-3 mb-6 border-b border-gray-100 pb-6">
+                <div class="flex items-end gap-3 mb-4 border-b border-gray-100 pb-4">
                     <span id="modal-price" class="text-3xl font-black text-gray-900">₹0</span>
                     <span class="text-sm text-green-600 font-bold mb-1">Inclusive of all taxes</span>
+                </div>
+
+                <div class="mb-4">
+                    <p class="text-xs font-bold text-gray-500 uppercase mb-2">Available Colors:</p>
+                    <div id="modal-colors" class="flex gap-2"></div>
                 </div>
 
                 <div class="flex justify-between mb-8 px-2">
@@ -444,22 +426,19 @@
                         <i class="fa-solid fa-bolt"></i> Buy Now
                     </button>
                 </div>
-                
-                <a id="modal-full-details" href="#" class="text-center text-sm text-gray-500 hover:text-gray-900 mt-4 underline">View full product details</a>
             </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="bg-gray-900 text-white py-8 md:py-12 mt-0">
+    <footer class="bg-gray-900 text-white py-8 md:py-12 mt-10">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <h3 class="text-base md:text-xl font-bold mb-2 md:mb-4">Prizeless Store</h3>
-            <p class="text-gray-400 text-[10px] md:text-sm">Premium quality kitchenware and steel appliances delivered right to your doorstep.</p>
+            <p class="text-gray-400 text-[10px] md:text-sm">Premium quality kitchenware and steel appliances.</p>
         </div>
     </footer>
 
-    <!-- SCRIPTS -->
     <script>
+        // SLIDER ANIMATION SYSTEM
         const slider = document.getElementById('slider');
         const slides = document.querySelectorAll('.slide-item');
         const dotsContainer = document.getElementById('slider-dots');
@@ -469,7 +448,7 @@
         dotsContainer.innerHTML = '';
         for(let i = 0; i < totalSlides; i++) {
             const dot = document.createElement('button');
-            dot.className = `h-1.5 w-1.5 md:h-3 md:w-3 bg-white rounded-full transition slide-dot ${i === 0 ? 'opacity-100 w-4 md:w-6' : 'opacity-50'}`;
+            dot.className = `h-2 w-2 md:h-3 md:w-3 bg-white rounded-full transition slide-dot ${i === 0 ? 'opacity-100 md:w-6' : 'opacity-50'}`;
             dot.onclick = () => goToSlide(i);
             dotsContainer.appendChild(dot);
         }
@@ -480,7 +459,6 @@
                 slider.style.transform = `translateX(-${currentSlide * 100}%)`;
                 dots.forEach((dot, index) => {
                     dot.classList.toggle('opacity-100', index === currentSlide);
-                    dot.classList.toggle('w-4', index === currentSlide);
                     dot.classList.toggle('md:w-6', index === currentSlide);
                     dot.classList.toggle('opacity-50', index !== currentSlide);
                 });
@@ -490,6 +468,7 @@
         function goToSlide(index) { currentSlide = index; updateSlider(); }
         if(totalSlides > 1) { setInterval(nextSlide, 4000); }
 
+        // BACKGROUND MUSIC AUTOPLAY ON INTERACTION
         let musicStarted = false;
         document.body.addEventListener('click', function() {
             if (!musicStarted) {
@@ -502,24 +481,41 @@
         });
 
         function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+            document.getElementById('mobile-menu').classList.toggle('hidden');
         }
 
-        function openQuickView(id, name, price, imgUrl) {
+        // 🚀 INSTANT QUICK VIEW POP-UP SYSTEM ON HOVER 🚀
+        function openQuickView(id, name, price, imgUrl, colorsList) {
             document.getElementById('modal-title').innerText = name;
             document.getElementById('modal-price').innerText = '₹' + price;
             document.getElementById('modal-img').src = imgUrl ? imgUrl : 'https://via.placeholder.com/400?text=No+Image';
             
+            let fullDetailUrl = `/product/${id}/`;
+            document.getElementById('modal-img-link').href = fullDetailUrl;
+            document.getElementById('modal-title-link').href = fullDetailUrl;
+            
             const cartBtn = document.getElementById('modal-cart-btn');
             cartBtn.setAttribute('onclick', `addToCartAjax('${id}', this)`);
-            document.getElementById('modal-full-details').href = `/product/${id}/`;
             
             const buyBtn = document.getElementById('modal-buy-btn');
             buyBtn.onclick = function() {
                 fetch(`/add-to-cart/${id}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' }})
                 .then(() => window.location.href = "/checkout/");
             };
+
+            // Modal Circle choices rendering
+            let mColors = document.getElementById('modal-colors');
+            mColors.innerHTML = '';
+            if(colorsList) {
+                colorsList.split(',').forEach(color => {
+                    let c = color.trim().toLowerCase();
+                    if(c) {
+                        mColors.innerHTML += `<div class="w-5 h-5 rounded-full border border-gray-400 cursor-pointer hover:scale-125 transition" style="background-color: ${c};" title="${c}" onclick="window.location.href='${fullDetailUrl}'"></div>`;
+                    }
+                });
+            } else {
+                mColors.innerHTML = '<span class="text-xs text-gray-400">Standard Pack</span>';
+            }
 
             document.getElementById('quickViewModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden'; 
@@ -534,7 +530,20 @@
             if (e.target === this) { closeQuickView(); }
         });
 
-        // 🌟 TERA PURANA WALA BADHIYA AJAX ADD TO CART 🌟
+        // 🎨 CARD LEVEL COLOR BADGES BUILDER
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.color-swatches').forEach(el => {
+                let colors = el.getAttribute('data-colors').split(',');
+                colors.forEach(color => {
+                    let c = color.trim().toLowerCase();
+                    if(c) {
+                        el.innerHTML += `<div class="w-3 h-3 md:w-4 md:h-4 rounded-full border border-gray-300 shadow-sm" style="background-color: ${c};" title="${c}"></div>`;
+                    }
+                });
+            });
+        });
+
+        // AJAX FUNCTIONAL LAYER
         function addToCartAjax(productId, btn) {
             const currentTheme = document.body.getAttribute('data-theme');
             if (currentTheme === 'independence') {
@@ -549,34 +558,18 @@
             .then(response => response.json())
             .then(data => {
                 if(data.status === 'success') {
-                    document.getElementById('cart-count-badge').innerText = data.cart_count;
-                    
+                    document.getElementById('cart-count-badge').innerText = `Cart (${data.cart_count})`;
                     let originalText = btn.innerHTML;
                     btn.innerHTML = 'Added! ✓';
-                    
-                    if(btn.id === 'modal-cart-btn') {
-                        btn.classList.add('bg-green-600', 'text-white', 'border-green-600');
-                        btn.classList.remove('bg-white', 'text-gray-900', 'border-gray-900');
-                    } else {
-                        btn.classList.add('bg-green-600');
-                        btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
-                    }
-                    
+                    btn.classList.add('bg-green-600');
                     setTimeout(() => {
                         btn.innerHTML = originalText;
-                        if(btn.id === 'modal-cart-btn') {
-                            btn.classList.remove('bg-green-600', 'text-white', 'border-green-600');
-                            btn.classList.add('bg-white', 'text-gray-900', 'border-gray-900');
-                        } else {
-                            btn.classList.remove('bg-green-600');
-                            btn.classList.add('bg-orange-500', 'hover:bg-orange-600');
-                        }
+                        btn.classList.remove('bg-green-600');
                     }, 1500);
                 }
-            }).catch(error => console.error('Error:', error));
+            });
         }
 
-        // 🌟 TERA PURANA WALA BADHIYA AJAX WISHLIST 🌟
         function toggleWishlistAjax(productId, btn) {
             fetch(`/wishlist/add/${productId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(response => response.json())
@@ -590,10 +583,10 @@
                         btn.className = 'w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100';
                     }
                 }
-            }).catch(error => console.error('Error:', error));
+            });
         }
 
-        // 🌟 TERA DARK MODE LOGIC BHI WAPAS AA GAYA 🌟
+        // DARK MODE THEME HANDLER
         const body = document.getElementById('main-body');
         const nav = document.getElementById('navbar');
         const themeBtn = document.getElementById('theme-btn');
@@ -622,16 +615,9 @@
             });
             document.querySelectorAll('.product-name').forEach(name => { name.style.color = '#ffffff'; });
             document.querySelectorAll('.product-price').forEach(price => { price.style.color = '#ffffff'; });
-            document.querySelectorAll('h2').forEach(h2 => { 
-                if(!h2.closest('.bg-gray-900')) h2.style.color = '#ffffff'; 
-            });
-            
-            // Secondary Nav Dark Mode
+            document.querySelectorAll('h2').forEach(h2 => { if(!h2.closest('.bg-gray-900')) h2.style.color = '#ffffff'; });
             const secNav = document.getElementById('secondary-nav');
-            if(secNav) {
-                secNav.classList.remove('bg-white', 'border-gray-100');
-                secNav.classList.add('bg-[#1e1e1e]', 'border-[#333]');
-            }
+            if(secNav) { secNav.classList.remove('bg-white', 'border-gray-100'); secNav.classList.add('bg-[#1e1e1e]', 'border-[#333]'); }
         }
 
         function enableLightMode() {
@@ -646,16 +632,9 @@
             });
             document.querySelectorAll('.product-name').forEach(name => { name.style.color = '#111827'; });
             document.querySelectorAll('.product-price').forEach(price => { price.style.color = '#111827'; });
-            document.querySelectorAll('h2').forEach(h2 => { 
-                if(!h2.closest('.bg-gray-900')) h2.style.color = '#111827'; 
-            });
-            
-            // Secondary Nav Light Mode
+            document.querySelectorAll('h2').forEach(h2 => { if(!h2.closest('.bg-gray-900')) h2.style.color = '#111827'; });
             const secNav = document.getElementById('secondary-nav');
-            if(secNav) {
-                secNav.classList.add('bg-white', 'border-gray-100');
-                secNav.classList.remove('bg-[#1e1e1e]', 'border-[#333]');
-            }
+            if(secNav) { secNav.classList.add('bg-white', 'border-gray-100'); secNav.classList.remove('bg-[#1e1e1e]', 'border-[#333]'); }
         }
     </script>
 </body>
