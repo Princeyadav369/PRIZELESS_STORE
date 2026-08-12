@@ -6,13 +6,10 @@
     <title>Prizeless Store - Premium Quality Products</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         .slider-container { display: flex; transition: transform 0.5s ease-in-out; }
-        
-        /* Hide scrollbar for carousels and sub-nav */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -48,10 +45,12 @@
         body[data-theme="newyear"] .bg-orange-500 { background-color: #007bff !important; color: white !important; border:none;}
         body[data-theme="newyear"] .text-orange-500 { color: #007bff !important; }
 
+        body[data-theme="ganpati"] .theme-bg { background: linear-gradient(90deg, #ff5722, #ff9800); color: white; }
+        body[data-theme="holi"] .theme-bg { background: linear-gradient(90deg, #ff007f, #00f0ff, #ffef00); color: black; }
+
         @keyframes subtlePulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .pulse-text { animation: subtlePulse 2s infinite; display: inline-block; }
 
-        /* 🔍 PRODUCT IMAGE ZOOM EFFECT */
         .zoom-effect { overflow: hidden; position: relative; }
         .zoom-effect img { transition: transform 0.3s ease; }
         .zoom-effect:hover img { transform: scale(1.15); }
@@ -60,19 +59,11 @@
 <body class="bg-gray-50 text-gray-800 font-sans transition-colors duration-300" id="main-body" data-theme="{{ active_festival }}">
 
     <audio id="relaxing-bg-music" loop>
-        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
+        <source src="{{ festival_music_url }}" type="audio/mpeg">
     </audio>
 
     <div class="theme-bg text-xs py-2 text-center font-bold tracking-wider uppercase shadow-sm" id="offer-ticker">
-        {% if active_festival == 'independence' %}
-            🇮🇳 Independence Day Special: Extra 15% OFF on all Steel Cookware! Use Code: INDIA15
-        {% elif active_festival == 'rakshabandhan' %}
-            🎁 Gift Premium Kitchenware to your Sister! Special Rakhi Hampers inside.
-        {% elif active_festival == 'diwali' %}
-            🪔 Diwali Mahotsav: Free Shipping + Up to 50% Off on Kitchenware!
-        {% else %}
-            🚀 Mega Festival Sale Live: Free Delivery on orders above ₹499! Shop Today.
-        {% endif %}
+        📢 Mega Celebration Sale Live! Premium Quality Appliances Delivered at Home!
     </div>
 
     <nav class="bg-white shadow-md w-full z-50 transition-colors duration-300 relative" id="navbar">
@@ -224,22 +215,22 @@
 
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-10 pb-4">
         <div class="text-center mb-8">
-            <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="arrivals-title">{{ festival_title }}</h2>
+            <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="fest-main-title">{{ festival_title }}</h2>
             <div class="h-1 w-16 md:w-20 bg-orange-500 mx-auto mt-2 md:mt-4 rounded"></div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 md:gap-8">
-            {% for p in products|slice:":4" %}
+            {% for p in trending_products %}
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 overflow-hidden group product-card flex flex-col justify-between relative">
-                
                 <span class="absolute top-2 left-2 bg-orange-500 text-white text-[9px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded z-10">NEW</span>
 
                 <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center cursor-pointer zoom-effect"
-                     onmouseenter="openQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onmouseenter="startQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onmouseleave="cancelQuickView()"
                      onclick="window.location.href='{% url 'product_detail' p.id %}'">
                     
                     {% if p.image %}
-                        <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain">
+                        <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110">
                     {% else %}
                         <div class="text-4xl text-gray-300">📷</div>
                     {% endif %}
@@ -273,23 +264,20 @@
 
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8 border-t border-gray-200">
         <div class="text-center mb-8">
-            <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="arrivals-title">🎁 Exclusive Combos</h2>
+            <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide">🎁 Exclusive Combos</h2>
             <div class="h-1 w-16 md:w-20 bg-orange-500 mx-auto mt-2 md:mt-4 rounded"></div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 md:gap-8">
-            {% for p in products|slice:"4:8" %}
+            {% for p in combo_products %}
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 overflow-hidden group product-card flex flex-col justify-between relative">
                 <span class="absolute top-2 left-2 bg-purple-600 text-white text-[9px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded z-10">COMBO DEAL</span>
                 
                 <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center cursor-pointer zoom-effect"
-                     onmouseenter="openQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onmouseenter="startQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onmouseleave="cancelQuickView()"
                      onclick="window.location.href='{% url 'product_detail' p.id %}'">
-                    {% if p.image %}
-                        <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain">
-                    {% else %}
-                        <div class="text-4xl text-gray-300">📷</div>
-                    {% endif %}
+                    {% if p.image %}<img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110">{% else %}<div class="text-4xl text-gray-300">📷</div>{% endif %}
                 </div>
 
                 <div class="p-2.5 md:p-5">
@@ -297,9 +285,7 @@
                     <a href="{% url 'product_detail' p.id %}">
                         <h3 class="text-xs md:text-lg font-bold text-gray-900 mb-1 truncate hover:text-orange-500 transition product-name">{{ p.name }}</h3>
                     </a>
-                    {% if p.colors %}
-                    <div class="flex gap-1 mt-1 mb-2 color-swatches" data-colors="{{ p.colors }}"></div>
-                    {% endif %}
+                    {% if p.colors %}<div class="flex gap-1 mt-1 mb-2 color-swatches" data-colors="{{ p.colors }}"></div>{% endif %}
                     <div class="text-sm md:text-xl font-black text-gray-900 product-price mb-2">₹{{ p.price }}</div>
                 </div>
                 
@@ -316,23 +302,20 @@
 
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8 border-t border-gray-200">
         <div class="text-center mb-8">
-            <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="arrivals-title">⭐ Our Best Sellers</h2>
+            <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide">⭐ Our Best Sellers</h2>
             <div class="h-1 w-16 md:w-20 bg-orange-500 mx-auto mt-2 md:mt-4 rounded"></div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 md:gap-8">
-            {% for p in products|slice:"8:12" %}
+            {% for p in bestseller_products %}
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 overflow-hidden group product-card flex flex-col justify-between relative">
                 <span class="absolute top-2 left-2 bg-yellow-400 text-gray-900 text-[9px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded z-10">TOP RATED</span>
                 
                 <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center cursor-pointer zoom-effect"
-                     onmouseenter="openQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onmouseenter="startQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onmouseleave="cancelQuickView()"
                      onclick="window.location.href='{% url 'product_detail' p.id %}'">
-                    {% if p.image %}
-                        <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain">
-                    {% else %}
-                        <div class="text-4xl text-gray-300">📷</div>
-                    {% endif %}
+                    {% if p.image %}<img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110">{% else %}<div class="text-4xl text-gray-300">📷</div>{% endif %}
                 </div>
 
                 <div class="p-2.5 md:p-5">
@@ -340,9 +323,7 @@
                     <a href="{% url 'product_detail' p.id %}">
                         <h3 class="text-xs md:text-lg font-bold text-gray-900 mb-1 truncate hover:text-orange-500 transition product-name">{{ p.name }}</h3>
                     </a>
-                    {% if p.colors %}
-                    <div class="flex gap-1 mt-1 mb-2 color-swatches" data-colors="{{ p.colors }}"></div>
-                    {% endif %}
+                    {% if p.colors %}<div class="flex gap-1 mt-1 mb-2 color-swatches" data-colors="{{ p.colors }}"></div>{% endif %}
                     <div class="text-sm md:text-xl font-black text-gray-900 product-price mb-2">₹{{ p.price }}</div>
                 </div>
                 
@@ -357,223 +338,124 @@
         </div>
     </div>
 
-    <div class="bg-gray-900 py-16 shadow-inner border-t-4 border-orange-500 mt-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">See Our Products in Action</h2>
-            <p class="text-gray-400 text-sm md:text-base mb-10">Watch unboxing and real customer reviews before you buy.</p>
-            
+    <div class="bg-gray-900 py-12 mt-8 text-white">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-2xl font-bold mb-8">🎥 See Our Products in Action</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-black rounded-lg overflow-hidden shadow-lg border border-gray-700 relative h-48 md:h-64 flex items-center justify-center group cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=500&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition">
-                    <i class="fa-brands fa-youtube text-5xl text-red-500 relative z-10 group-hover:scale-110 transition drop-shadow-lg"></i>
-                    <p class="absolute bottom-4 left-4 text-white font-bold text-sm z-10 drop-shadow-md">Premium Thali Unboxing</p>
+                {% for v in videos %}
+                <div onclick="window.open('{{ v.video_url }}', '_blank')" class="bg-black rounded border border-gray-700 h-48 flex items-center justify-center relative overflow-hidden group cursor-pointer">
+                    <img src="{{ v.thumbnail_url }}" class="absolute w-full h-full object-cover opacity-50 group-hover:opacity-30 transition">
+                    <i class="fa-solid fa-play text-4xl"></i>
+                    <p class="absolute bottom-2 left-4 text-xs">{{ v.title }}</p>
                 </div>
-                <div class="bg-black rounded-lg overflow-hidden shadow-lg border border-gray-700 relative h-48 md:h-64 flex items-center justify-center group cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1584286595398-a59f21d313f5?w=500&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition">
-                    <i class="fa-solid fa-play text-5xl text-white relative z-10 group-hover:scale-110 transition drop-shadow-lg"></i>
-                    <p class="absolute bottom-4 left-4 text-white font-bold text-sm z-10 drop-shadow-md">Customer Review (Mumbai)</p>
-                </div>
-                <div class="bg-black rounded-lg overflow-hidden shadow-lg border border-gray-700 relative h-48 md:h-64 flex items-center justify-center group cursor-pointer hidden md:flex">
-                    <img src="https://images.unsplash.com/photo-1590483736622-398541ce1a50?w=500&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition">
-                    <i class="fa-brands fa-instagram text-5xl text-pink-500 relative z-10 group-hover:scale-110 transition drop-shadow-lg"></i>
-                    <p class="absolute bottom-4 left-4 text-white font-bold text-sm z-10 drop-shadow-md">Viral Kitchen Hacks</p>
-                </div>
+                {% empty %}
+                <p class="col-span-3 text-gray-500">No videos available right now.</p>
+                {% endfor %}
             </div>
         </div>
     </div>
 
     <div id="quickViewModal" class="fixed inset-0 z-[100] hidden bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-xl max-w-4xl w-full flex flex-col md:flex-row relative shadow-2xl modal-enter overflow-hidden">
-            
-            <button onclick="closeQuickView()" class="absolute top-3 right-4 z-10 bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 w-8 h-8 rounded-full flex items-center justify-center transition">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-
-            <a id="modal-img-link" href="#" class="w-full md:w-1/2 bg-gray-50 p-8 flex items-center justify-center border-r border-gray-100 cursor-pointer">
-                <img id="modal-img" src="" alt="Product" class="max-h-[300px] md:max-h-[400px] object-contain drop-shadow-md hover:scale-105 transition duration-300">
-            </a>
-
-            <div class="w-full md:w-1/2 p-6 md:p-10 flex flex-col">
-                <p class="text-xs text-orange-500 font-bold uppercase tracking-wider mb-2">Prizeless Exclusive</p>
-                <a id="modal-title-link" href="#"><h2 id="modal-title" class="text-2xl font-bold text-gray-900 leading-tight mb-2 hover:text-orange-500 transition">Product Name</h2></a>
-                
-                <div class="flex items-center gap-2 mb-4">
-                    <div class="text-yellow-400 text-sm"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></div>
-                    <span class="text-blue-600 text-xs font-semibold hover:underline cursor-pointer">124 Reviews</span>
+            <button onclick="closeQuickView()" class="absolute top-3 right-4 bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            <a id="modal-img-link" href="#" class="w-full md:w-1/2 bg-gray-50 p-8 flex items-center justify-center border-r"><img id="modal-img" src="" class="max-h-[350px] object-contain hover:scale-105 transition"></a>
+            <div class="w-full md:w-1/2 p-6 flex flex-col justify-between">
+                <div>
+                    <h2 id="modal-title" class="text-2xl font-bold mb-2 hover:text-orange-500 cursor-pointer">Product Name</h2>
+                    <span id="modal-price" class="text-3xl font-black text-gray-900 block mb-4">₹0</span>
+                    
+                    <div class="mb-4">
+                        <p class="text-xs font-bold text-gray-500 uppercase mb-2">Available Colors (Click to Select):</p>
+                        <div id="modal-colors" class="flex gap-2"></div>
+                    </div>
                 </div>
-
-                <div class="flex items-end gap-3 mb-4 border-b border-gray-100 pb-4">
-                    <span id="modal-price" class="text-3xl font-black text-gray-900">₹0</span>
-                    <span class="text-sm text-green-600 font-bold mb-1">Inclusive of all taxes</span>
-                </div>
-
-                <div class="mb-4">
-                    <p class="text-xs font-bold text-gray-500 uppercase mb-2">Available Colors:</p>
-                    <div id="modal-colors" class="flex gap-2"></div>
-                </div>
-
-                <div class="flex justify-between mb-8 px-2">
-                    <div class="trust-badge"><i class="fa-solid fa-rotate-left text-2xl text-blue-500 mb-1.5"></i><span>7 Days<br>Replace</span></div>
-                    <div class="trust-badge"><i class="fa-solid fa-truck-fast text-2xl text-orange-500 mb-1.5"></i><span>Free<br>Delivery</span></div>
-                    <div class="trust-badge"><i class="fa-solid fa-money-bill-wave text-2xl text-green-500 mb-1.5"></i><span>Pay on<br>Delivery</span></div>
-                </div>
-
-                <div class="flex gap-4 mt-auto">
-                    <button id="modal-cart-btn" class="flex-1 bg-white border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white py-3 rounded font-bold transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-cart-shopping"></i> Add to Cart
-                    </button>
-                    <button id="modal-buy-btn" class="flex-1 bg-orange-500 text-white hover:bg-orange-600 py-3 rounded font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-orange-200">
-                        <i class="fa-solid fa-bolt"></i> Buy Now
-                    </button>
+                <div class="flex gap-4 mt-4">
+                    <button id="modal-cart-btn" class="flex-1 border-2 border-gray-900 py-3 rounded font-bold hover:bg-gray-900 hover:text-white transition">Add to Cart</button>
+                    <button id="modal-buy-btn" class="flex-1 bg-orange-500 text-white py-3 rounded font-bold hover:bg-orange-600 transition">Buy Now</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="bg-gray-900 text-white py-8 md:py-12 mt-10">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <h3 class="text-base md:text-xl font-bold mb-2 md:mb-4">Prizeless Store</h3>
-            <p class="text-gray-400 text-[10px] md:text-sm">Premium quality kitchenware and steel appliances.</p>
-        </div>
-    </footer>
-
     <script>
-        // SLIDER ANIMATION SYSTEM
-        const slider = document.getElementById('slider');
-        const slides = document.querySelectorAll('.slide-item');
-        const dotsContainer = document.getElementById('slider-dots');
-        let currentSlide = 0;
-        const totalSlides = slides.length;
-
-        dotsContainer.innerHTML = '';
-        for(let i = 0; i < totalSlides; i++) {
-            const dot = document.createElement('button');
-            dot.className = `h-2 w-2 md:h-3 md:w-3 bg-white rounded-full transition slide-dot ${i === 0 ? 'opacity-100 md:w-6' : 'opacity-50'}`;
-            dot.onclick = () => goToSlide(i);
-            dotsContainer.appendChild(dot);
+        let qvTimer;
+        
+        // 🚀 0.3 SECOND DELAY (Perfect hover experience)
+        function startQuickView(id, name, price, imgUrl, colorsList) {
+            qvTimer = setTimeout(() => {
+                openQuickView(id, name, price, imgUrl, colorsList);
+            }, 300); // Only 300ms so it opens fast but doesn't flicker when moving mouse across screen
         }
-        const dots = document.querySelectorAll('.slide-dot');
+        function cancelQuickView() { clearTimeout(qvTimer); }
 
-        function updateSlider() {
-            if(slider){
-                slider.style.transform = `translateX(-${currentSlide * 100}%)`;
-                dots.forEach((dot, index) => {
-                    dot.classList.toggle('opacity-100', index === currentSlide);
-                    dot.classList.toggle('md:w-6', index === currentSlide);
-                    dot.classList.toggle('opacity-50', index !== currentSlide);
-                });
-            }
-        }
-        function nextSlide() { if(totalSlides > 1) { currentSlide = (currentSlide + 1) % totalSlides; updateSlider(); } }
-        function goToSlide(index) { currentSlide = index; updateSlider(); }
-        if(totalSlides > 1) { setInterval(nextSlide, 4000); }
-
-        // BACKGROUND MUSIC AUTOPLAY ON INTERACTION
-        let musicStarted = false;
-        document.body.addEventListener('click', function() {
-            if (!musicStarted) {
-                let bgMusic = document.getElementById('relaxing-bg-music');
-                bgMusic.volume = 0.2; 
-                let playPromise = bgMusic.play();
-                if (playPromise !== undefined) { playPromise.catch(error => console.log("Waiting for interaction.")); }
-                musicStarted = true;
-            }
-        });
-
-        function toggleMobileMenu() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
-        }
-
-        // 🚀 INSTANT QUICK VIEW POP-UP SYSTEM ON HOVER 🚀
         function openQuickView(id, name, price, imgUrl, colorsList) {
             document.getElementById('modal-title').innerText = name;
             document.getElementById('modal-price').innerText = '₹' + price;
             document.getElementById('modal-img').src = imgUrl ? imgUrl : 'https://via.placeholder.com/400?text=No+Image';
             
-            let fullDetailUrl = `/product/${id}/`;
-            document.getElementById('modal-img-link').href = fullDetailUrl;
-            document.getElementById('modal-title-link').href = fullDetailUrl;
-            
-            const cartBtn = document.getElementById('modal-cart-btn');
-            cartBtn.setAttribute('onclick', `addToCartAjax('${id}', this)`);
-            
-            const buyBtn = document.getElementById('modal-buy-btn');
-            buyBtn.onclick = function() {
-                fetch(`/add-to-cart/${id}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' }})
-                .then(() => window.location.href = "/checkout/");
+            let fullUrl = `/product/${id}/`;
+            document.getElementById('modal-img-link').href = fullUrl;
+            document.getElementById('modal-title').onclick = function() { window.location.href = fullUrl; };
+            document.getElementById('modal-cart-btn').setAttribute('onclick', `addToCartAjax('${id}', this)`);
+            document.getElementById('modal-buy-btn').onclick = function() {
+                fetch(`/add-to-cart/${id}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' }}).then(() => window.location.href = "/checkout/");
             };
-
-            // Modal Circle choices rendering
-            let mColors = document.getElementById('modal-colors');
-            mColors.innerHTML = '';
+            
+            let mc = document.getElementById('modal-colors');
+            mc.innerHTML = '';
             if(colorsList) {
                 colorsList.split(',').forEach(color => {
                     let c = color.trim().toLowerCase();
-                    if(c) {
-                        mColors.innerHTML += `<div class="w-5 h-5 rounded-full border border-gray-400 cursor-pointer hover:scale-125 transition" style="background-color: ${c};" title="${c}" onclick="window.location.href='${fullDetailUrl}'"></div>`;
-                    }
+                    if(c) mc.innerHTML += `<div class="w-6 h-6 rounded-full border-2 border-gray-300 shadow cursor-pointer hover:scale-125 transition" style="background-color: ${c};" onclick="window.location.href='${fullUrl}'"></div>`;
                 });
             } else {
-                mColors.innerHTML = '<span class="text-xs text-gray-400">Standard Pack</span>';
+                mc.innerHTML = '<span class="text-xs text-gray-400">Standard Package</span>';
             }
-
             document.getElementById('quickViewModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; 
         }
+        function closeQuickView() { document.getElementById('quickViewModal').classList.add('hidden'); }
 
-        function closeQuickView() {
-            document.getElementById('quickViewModal').classList.add('hidden');
-            document.body.style.overflow = 'auto'; 
-        }
-
-        document.getElementById('quickViewModal').addEventListener('click', function(e) {
-            if (e.target === this) { closeQuickView(); }
-        });
-
-        // 🎨 CARD LEVEL COLOR BADGES BUILDER
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll('.color-swatches').forEach(el => {
-                let colors = el.getAttribute('data-colors').split(',');
-                colors.forEach(color => {
-                    let c = color.trim().toLowerCase();
-                    if(c) {
-                        el.innerHTML += `<div class="w-3 h-3 md:w-4 md:h-4 rounded-full border border-gray-300 shadow-sm" style="background-color: ${c};" title="${c}"></div>`;
-                    }
-                });
+        document.querySelectorAll('.color-swatches').forEach(el => {
+            el.getAttribute('data-colors').split(',').forEach(color => {
+                let c = color.trim().toLowerCase();
+                if(c) el.innerHTML += `<div class="w-3 h-3 rounded-full border border-gray-300" style="background-color: ${c};"></div>`;
             });
         });
 
-        // AJAX FUNCTIONAL LAYER
-        function addToCartAjax(productId, btn) {
-            const currentTheme = document.body.getAttribute('data-theme');
-            if (currentTheme === 'independence') {
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#FF9933', '#FFFFFF', '#138808'] });
-            } else if (currentTheme === 'diwali') {
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#FFD700', '#FF0000'] });
-            } else {
-                confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 }, colors: ['#ff8c00', '#007bff'] });
+        // 💥 ULTRA DECORATION TRIGGERS ON MAIN FESTIVAL DAY
+        let isFestDay = "{{ is_festival_day }}";
+        if(isFestDay === "true") {
+            let festTitle = document.getElementById('fest-main-title');
+            if(festTitle) {
+                festTitle.style.fontSize = "2.5rem";
+                festTitle.style.color = "#d32f2f";
             }
-
-            fetch(`/add-to-cart/${productId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    document.getElementById('cart-count-badge').innerText = `Cart (${data.cart_count})`;
-                    let originalText = btn.innerHTML;
-                    btn.innerHTML = 'Added! ✓';
-                    btn.classList.add('bg-green-600');
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.classList.remove('bg-green-600');
-                    }, 1500);
-                }
-            });
+            setInterval(() => {
+                confetti({ particleCount: 30, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 30, angle: 120, spread: 55, origin: { x: 1 } });
+            }, 3000);
         }
 
+        // Music Trigger Frame
+        let musicStarted = false;
+        document.body.addEventListener('click', function() {
+            if (!musicStarted) {
+                let m = document.getElementById('relaxing-bg-music');
+                if(m) { m.volume = 0.25; m.play().catch(e => console.log('Music stream queued')); }
+                musicStarted = true;
+            }
+        });
+
+        function addToCartAjax(productId, btn) {
+            fetch(`/add-to-cart/${productId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.json()).then(data => {
+                document.getElementById('cart-count-badge').innerText = `Cart (${data.cart_count})`;
+                btn.innerText = 'Added! ✓'; setTimeout(() => { btn.innerText = 'Add to Cart 🛒'; }, 1000);
+            });
+        }
         function toggleWishlistAjax(productId, btn) {
             fetch(`/wishlist/add/${productId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(response => response.json())
-            .then(data => {
+            .then(res => res.json()).then(data => {
                 if(data.status === 'success') {
                     if(data.action === 'added') {
                         btn.innerText = '❤️ Saved';
@@ -585,57 +467,7 @@
                 }
             });
         }
-
-        // DARK MODE THEME HANDLER
-        const body = document.getElementById('main-body');
-        const nav = document.getElementById('navbar');
-        const themeBtn = document.getElementById('theme-btn');
-
-        if(localStorage.getItem('theme') === 'dark') { enableDarkMode(); }
-
-        function toggleTheme() {
-            if(localStorage.getItem('theme') === 'dark') {
-                localStorage.setItem('theme', 'light');
-                enableLightMode();
-            } else {
-                localStorage.setItem('theme', 'dark');
-                enableDarkMode();
-            }
-        }
-
-        function enableDarkMode() {
-            body.style.backgroundColor = '#121212';
-            body.style.color = '#ffffff';
-            nav.style.backgroundColor = '#1e1e1e';
-            nav.style.color = '#ffffff';
-            themeBtn.innerText = '☀️';
-            document.querySelectorAll('.product-card').forEach(card => {
-                card.style.backgroundColor = '#1e1e1e';
-                card.style.borderColor = '#333333';
-            });
-            document.querySelectorAll('.product-name').forEach(name => { name.style.color = '#ffffff'; });
-            document.querySelectorAll('.product-price').forEach(price => { price.style.color = '#ffffff'; });
-            document.querySelectorAll('h2').forEach(h2 => { if(!h2.closest('.bg-gray-900')) h2.style.color = '#ffffff'; });
-            const secNav = document.getElementById('secondary-nav');
-            if(secNav) { secNav.classList.remove('bg-white', 'border-gray-100'); secNav.classList.add('bg-[#1e1e1e]', 'border-[#333]'); }
-        }
-
-        function enableLightMode() {
-            body.style.backgroundColor = '#fbfbfb';
-            body.style.color = '#1f2937';
-            nav.style.backgroundColor = '#ffffff';
-            nav.style.color = '#1f2937';
-            themeBtn.innerText = '🌙';
-            document.querySelectorAll('.product-card').forEach(card => {
-                card.style.backgroundColor = '#ffffff';
-                card.style.borderColor = '#f3f4f6';
-            });
-            document.querySelectorAll('.product-name').forEach(name => { name.style.color = '#111827'; });
-            document.querySelectorAll('.product-price').forEach(price => { price.style.color = '#111827'; });
-            document.querySelectorAll('h2').forEach(h2 => { if(!h2.closest('.bg-gray-900')) h2.style.color = '#111827'; });
-            const secNav = document.getElementById('secondary-nav');
-            if(secNav) { secNav.classList.add('bg-white', 'border-gray-100'); secNav.classList.remove('bg-[#1e1e1e]', 'border-[#333]'); }
-        }
+        function toggleTheme() { document.getElementById('main-body').classList.toggle('dark'); }
     </script>
 </body>
 </html>

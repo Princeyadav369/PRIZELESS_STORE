@@ -38,12 +38,11 @@
         
         /* Trust Badges */
         .trust-badge { display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 11px; color: #333; font-weight: 600; }
-        .trust-badge img { width: 40px; height: 40px; margin-bottom: 5px; object-fit: contain; }
+        .trust-badge i { margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <!-- Simple Top Nav -->
     <nav class="nav-bar w-full py-4 px-6 flex justify-between items-center sticky top-0 z-50">
         <a href="{% url 'home' %}" class="text-2xl font-bold text-gray-900 tracking-tight">Prizeless<span class="text-orange-500">.</span></a>
         <div class="flex space-x-4">
@@ -52,51 +51,52 @@
     </nav>
 
     <div class="max-w-7xl mx-auto p-4 md:p-8 mt-4">
-        <!-- Breadcrumb -->
         <div class="text-sm text-gray-500 mb-4">
-            <a href="{% url 'home' %}" class="hover:text-orange-500">Home</a> > 
+            <a href="{% url 'home' %}" class="hover:text-orange-500 transition">Home</a> > 
             <span class="text-gray-400">{{ product.category }}</span> > 
             <span class="text-gray-800 font-semibold">{{ product.name }}</span>
         </div>
 
         <div class="bg-white rounded-lg shadow-sm flex flex-col md:flex-row p-4 md:p-8 gap-8">
             
-            <!-- LEFT SIDE: IMAGE WITH HOVER ZOOM -->
             <div class="w-full md:w-5/12 flex flex-col gap-4">
                 <div class="zoom-container" id="zoom-container">
                     {% if product.image %}
                         <img src="{{ product.image.url }}" alt="{{ product.name }}" class="zoom-image" id="zoom-image">
                     {% else %}
-                        <div class="w-full h-96 flex items-center justify-center text-gray-300 text-5xl">📷</div>
+                        <div class="w-full h-96 flex items-center justify-center text-gray-300 text-5xl bg-gray-50">📷</div>
                     {% endif %}
                 </div>
                 
-                <!-- Action Buttons (Mobile: Row, Desktop: Row) -->
                 <div class="flex gap-4 mt-2">
                     <button onclick="addToCartAjax('{{ product.id }}')" id="cart-btn" class="w-1/2 btn-cart py-3 rounded-sm font-bold text-sm md:text-lg shadow-md flex items-center justify-center gap-2">
                         <i class="fa-solid fa-cart-shopping"></i> ADD TO CART
                     </button>
-                    <!-- Buy Now Button triggers add to cart then redirects to checkout -->
                     <button onclick="buyNow('{{ product.id }}')" class="w-1/2 btn-buy py-3 rounded-sm font-bold text-sm md:text-lg shadow-md flex items-center justify-center gap-2">
                         <i class="fa-solid fa-bolt"></i> BUY NOW
                     </button>
                 </div>
             </div>
 
-            <!-- RIGHT SIDE: PRODUCT DETAILS -->
             <div class="w-full md:w-7/12 flex flex-col">
                 <h1 class="text-2xl md:text-3xl font-normal text-gray-900 mb-2">{{ product.name }}</h1>
                 
-                <!-- Ratings Fake Placeholder (Amazon style) -->
                 <div class="flex items-center gap-2 mb-4">
                     <span class="bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-sm flex items-center gap-1">4.4 <i class="fa-solid fa-star text-[10px]"></i></span>
-                    <span class="text-gray-500 text-sm font-semibold">8,452 Ratings & 980 Reviews</span>
+                    <span class="text-blue-600 hover:underline cursor-pointer text-sm font-semibold">8,452 Ratings & 980 Reviews</span>
                 </div>
 
                 <div class="text-3xl font-bold text-gray-900 mb-1">₹{{ product.price }}</div>
                 <div class="text-green-600 text-sm font-bold mb-6">Inclusive of all taxes</div>
 
-                <!-- Offers Section -->
+                {% if product.colors %}
+                <div class="mb-6 bg-gray-50 border border-gray-200 p-4 rounded-lg">
+                    <h3 class="font-bold text-gray-500 mb-3 text-xs uppercase tracking-wider">Select Available Color:</h3>
+                    <div class="flex gap-3" id="detail-colors" data-raw-colors="{{ product.colors }}">
+                        </div>
+                </div>
+                {% endif %}
+
                 <div class="mb-6">
                     <h3 class="font-bold text-gray-900 mb-2">Available offers</h3>
                     <ul class="text-sm text-gray-700 space-y-2">
@@ -105,7 +105,6 @@
                     </ul>
                 </div>
 
-                <!-- Trust Badges (Amazon style replacement, delivery etc) -->
                 <div class="flex justify-start gap-6 border-y border-gray-200 py-4 mb-6">
                     <div class="trust-badge">
                         <i class="fa-solid fa-rotate-left text-3xl text-blue-500 mb-2"></i>
@@ -125,13 +124,11 @@
                     </div>
                 </div>
 
-                <!-- Description -->
                 <div class="mb-6">
                     <h3 class="font-bold text-gray-900 text-lg mb-2">Product Description</h3>
                     <p class="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{{ product.description|default:"Premium quality product by Prizeless Store. Manufactured with high-grade materials for durability and long-lasting performance." }}</p>
                 </div>
                 
-                <!-- Wishlist Toggle -->
                 <div class="mt-auto">
                     <button onclick="toggleWishlistAjax('{{ product.id }}', this)" class="text-sm font-bold text-gray-600 hover:text-red-500 flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-sm transition">
                         {% if in_wishlist %}
@@ -144,9 +141,8 @@
             </div>
         </div>
 
-        <!-- RECOMMENDED PRODUCTS -->
         {% if recommended_products %}
-        <div class="mt-12 bg-white p-6 rounded-lg shadow-sm">
+        <div class="mt-12 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
             <h2 class="text-xl font-bold mb-6 text-gray-900 border-b pb-2">Similar Products You Might Like</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {% for rp in recommended_products %}
@@ -167,7 +163,6 @@
         {% endif %}
     </div>
 
-    <!-- SCRIPTS FOR ZOOM AND AJAX -->
     <script>
         // 🔍 IMAGE ZOOM LOGIC
         const zoomContainer = document.getElementById('zoom-container');
@@ -193,6 +188,20 @@
                 zoomImage.style.transform = "scale(1)";
             });
         }
+
+        // 🎨 COLOR CIRCLES BUILDER
+        document.addEventListener("DOMContentLoaded", function() {
+            let colorBox = document.getElementById('detail-colors');
+            if(colorBox) {
+                let colors = colorBox.getAttribute('data-raw-colors').split(',');
+                colors.forEach(color => {
+                    let c = color.trim().toLowerCase();
+                    if(c) {
+                        colorBox.innerHTML += `<div class="w-8 h-8 rounded-full border-2 border-gray-300 shadow-sm cursor-pointer hover:scale-110 transition hover:border-gray-900" style="background-color: ${c};" title="${c}"></div>`;
+                    }
+                });
+            }
+        });
 
         // AJAX ADD TO CART
         function addToCartAjax(productId) {

@@ -19,17 +19,17 @@
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans flex h-screen overflow-hidden transition-colors duration-300">
 
-    <!-- SIDEBAR -->
     <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col justify-between shadow-sm z-20">
         <div>
             <div class="h-16 flex items-center px-6 border-b border-gray-100 dark:border-gray-700">
                 <span class="text-orange-500 text-2xl mr-2">✴</span>
-                <h1 class="text-xl font-bold tracking-wide text-gray-900 dark:text-white">Prizeless Store</h1>
+                <h1 class="text-xl font-bold tracking-wide text-gray-900 dark:text-white">Prizeless Admin</h1>
             </div>
             <nav class="mt-4 px-2 space-y-1">
                 <button onclick="switchTab('overview-tab', this)" class="nav-item active w-full flex items-center px-4 py-2.5 rounded-lg transition text-sm"><span class="mr-3">❖</span> Dashboard</button>
-                <button onclick="switchTab('products-tab', this)" class="nav-item w-full flex items-center px-4 py-2.5 rounded-lg transition text-sm"><span class="mr-3">📦</span> Products</button>
-                <button onclick="switchTab('orders-tab', this)" class="nav-item w-full flex items-center px-4 py-2.5 rounded-lg transition text-sm"><span class="mr-3">🛒</span> Orders <span class="bg-red-500 text-white text-[10px] ml-auto px-2 py-0.5 rounded-full">{{ pending_orders }}</span></button>
+                <button onclick="switchTab('products-tab', this)" class="nav-item w-full flex items-center px-4 py-2.5 rounded-lg transition text-sm"><span class="mr-3">📦</span> Products Matrix</button>
+                <button onclick="switchTab('orders-tab', this)" class="nav-item w-full flex items-center px-4 py-2.5 rounded-lg transition text-sm"><span class="mr-3">🛒</span> Live Orders <span class="bg-red-500 text-white text-[10px] ml-auto px-2 py-0.5 rounded-full">{{ pending_orders }}</span></button>
+                <button onclick="switchTab('videos-tab', this)" class="nav-item w-full flex items-center px-4 py-2.5 rounded-lg transition text-sm"><span class="mr-3">🎥</span> Action Videos</button>
                 <button onclick="switchTab('categories-tab', this)" class="nav-item w-full flex items-center px-4 py-2.5 rounded-lg transition text-sm"><span class="mr-3">📂</span> Categories</button>
                 <button onclick="switchTab('customers-tab', this)" class="nav-item w-full flex items-center px-4 py-2.5 rounded-lg transition text-sm"><span class="mr-3">👥</span> Customers</button>
                 <a href="{% url 'dashboard_banners' %}" class="flex items-center px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 rounded-lg text-sm font-medium"><span class="mr-3">🖼️</span> Home Banners</a>
@@ -41,13 +41,11 @@
         </div>
     </aside>
 
-    <!-- MAIN INTERACTIVE SECTION -->
     <main class="flex-1 flex flex-col h-full overflow-hidden">
         <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-8 shadow-sm">
             <h2 class="text-xl font-bold" id="page-title">Dashboard Overview</h2>
             <div class="flex items-center space-x-5">
                 <button onclick="toggleTheme()" class="text-xl">🌓</button>
-                <!-- REAL NOTIFICATION BELL -->
                 <div class="relative group">
                     <button class="text-xl relative hover:text-orange-500">
                         🔔 <span class="absolute top-0 right-0 h-2.5 w-2.5 bg-red-500 rounded-full border border-white"></span>
@@ -70,7 +68,13 @@
         </header>
 
         <div class="flex-1 p-8 overflow-y-auto">
-            <!-- 1. OVERVIEW TAB -->
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg shadow-sm border border-green-200 font-bold">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
             <div id="overview-tab" class="tab-content active">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border-l-4 border-l-green-500 shadow-sm">
@@ -91,37 +95,46 @@
                     </div>
                 </div>
 
-                <!-- Theme Controller -->
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                    <h3 class="font-bold mb-4">🎨 Live Store Festive Decoration Controller</h3>
-                    <form method="POST" class="flex gap-4 items-end">
+                    <h3 class="font-bold mb-4 text-lg">🎨 Live Store Festival & Background Music Configuration</h3>
+                    <form method="POST" class="space-y-4">
                         {% csrf_token %}
-                        <div class="w-1/3">
-                            <select name="festival_theme" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-2.5 outline-none">
-                                <option value="normal" {% if setting.active_festival == 'normal' %}selected{% endif %}>Default Normal View</option>
-                                <option value="independence" {% if setting.active_festival == 'independence' %}selected{% endif %}>🇮🇳 Independence Day Theme</option>
-                                <option value="rakshabandhan" {% if setting.active_festival == 'rakshabandhan' %}selected{% endif %}>🎁 Raksha Bandhan Theme</option>
-                                <option value="diwali" {% if setting.active_festival == 'diwali' %}selected{% endif %}>🪔 Diwali Mahotsav Theme</option>
-                            </select>
+                        <input type="hidden" name="action" value="update_festival">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Select Live Theme</label>
+                                <select name="festival_theme" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-2.5 outline-none">
+                                    <option value="normal" {% if setting.active_festival == 'normal' %}selected{% endif %}>Default Normal (Automatic Calendar)</option>
+                                    <option value="independence" {% if setting.active_festival == 'independence' %}selected{% endif %}>🇮🇳 Independence Day Theme</option>
+                                    <option value="rakshabandhan" {% if setting.active_festival == 'rakshabandhan' %}selected{% endif %}>🎁 Raksha Bandhan Theme</option>
+                                    <option value="diwali" {% if setting.active_festival == 'diwali' %}selected{% endif %}>🪔 Diwali Mahotsav Theme</option>
+                                    <option value="ganpati" {% if setting.active_festival == 'ganpati' %}selected{% endif %}>🔱 Ganpati Puja Mahotsav</option>
+                                    <option value="holi" {% if setting.active_festival == 'holi' %}selected{% endif %}>🎨 Holi Rangotsav Theme</option>
+                                    <option value="newyear" {% if setting.active_festival == 'newyear' %}selected{% endif %}>❄️ New Year Deals Theme</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Background Music Stream URL</label>
+                                <input type="url" name="music_url" value="{{ setting.festival_music_url }}" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-2.5 outline-none" placeholder="https://cdn.pixabay.com/...">
+                            </div>
                         </div>
-                        <button type="submit" class="bg-orange-500 text-white font-bold px-6 py-2.5 rounded hover:bg-orange-600 transition shadow-md">Apply Theme</button>
+                        <button type="submit" class="bg-orange-500 text-white font-bold px-8 py-3 rounded hover:bg-orange-600 transition shadow-md">Update Live Store Configuration</button>
                     </form>
                 </div>
             </div>
 
-            <!-- 2. PRODUCTS TAB -->
             <div id="products-tab" class="tab-content">
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-bold">Catalog Matrix</h3>
-                        <div class="space-x-2"><a href="{% url 'add_category' %}" class="border border-gray-300 dark:border-gray-600 px-4 py-2 rounded text-sm">+ Category</a><a href="{% url 'add_product' %}" class="bg-teal-500 text-white px-4 py-2 rounded text-sm font-bold shadow-sm">+ Product</a></div>
+                        <div class="space-x-2"><a href="{% url 'add_category' %}" class="border border-gray-300 dark:border-gray-600 px-4 py-2 rounded text-sm">+ Category</a><a href="{% url 'add_product' %}" class="bg-teal-500 text-white px-4 py-2 rounded text-sm font-bold shadow-sm">+ Add Product</a></div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {% for p in products %}
                         <div class="bg-gray-50 dark:bg-gray-700/50 p-4 border border-gray-100 dark:border-gray-700 rounded-xl group relative">
                             <div class="h-32 bg-white rounded flex items-center justify-center p-2 mb-3">
                                 {% if p.image %}
-                                    <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain" onerror="this.outerHTML='<div class=\'text-3xl text-gray-300\'>📷</div>'">
+                                    <img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain">
                                 {% else %}
                                     📷
                                 {% endif %}
@@ -129,7 +142,8 @@
                             <h4 class="font-bold text-sm truncate">{{ p.name }}</h4>
                             <p class="text-xs text-gray-400 truncate">{{ p.category.name|default:"General" }}</p>
                             
-                            <!-- Displaying Colors -->
+                            <span class="text-[9px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded block w-max mt-1 mb-1">{{ p.get_section_display }}</span>
+
                             {% if p.colors %}
                                 <div class="flex gap-1 mt-1 color-swatches" data-colors="{{ p.colors }}"></div>
                             {% endif %}
@@ -142,7 +156,6 @@
                 </div>
             </div>
 
-            <!-- 3. ORDERS TAB -->
             <div id="orders-tab" class="tab-content">
                 <div class="bg-white dark:bg-gray-800 rounded-xl border shadow-sm overflow-hidden border-gray-200 dark:border-gray-700">
                     <table class="w-full text-left">
@@ -163,7 +176,43 @@
                 </div>
             </div>
 
-            <!-- 4. CATEGORIES TAB -->
+            <div id="videos-tab" class="tab-content">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border shadow-sm border-gray-200 dark:border-gray-700">
+                    <h3 class="font-bold text-lg mb-4">🎥 Add Live Action Unboxing/Review Video</h3>
+                    <form method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_video">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Video Title</label>
+                            <input type="text" name="v_title" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 p-2.5 rounded outline-none" placeholder="e.g. Copper Jug Review" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Thumbnail Image URL</label>
+                            <input type="url" name="v_thumb" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 p-2.5 rounded outline-none" placeholder="https://unsplash.com/..." required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Video URL (YouTube/Insta)</label>
+                            <input type="url" name="v_url" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 p-2.5 rounded outline-none" placeholder="https://youtube.com/..." required>
+                        </div>
+                        <button type="submit" class="bg-gray-900 text-white font-bold py-3 rounded md:col-span-3 hover:bg-orange-500 transition mt-2">Save & Publish Video Review</button>
+                    </form>
+
+                    <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h4 class="font-bold text-sm mb-4">Current Active Videos</h4>
+                        <div class="grid grid-cols-3 gap-4">
+                            {% for v in videos %}
+                            <div class="border border-gray-200 dark:border-gray-700 rounded overflow-hidden">
+                                <img src="{{ v.thumbnail_url }}" class="w-full h-24 object-cover">
+                                <p class="p-2 text-xs font-bold truncate">{{ v.title }}</p>
+                            </div>
+                            {% empty %}
+                            <p class="text-xs text-gray-500 col-span-3">No videos uploaded yet.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="categories-tab" class="tab-content">
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-6 border-gray-200 dark:border-gray-700">
                     <h3 class="font-bold mb-4">Active Categories</h3>
@@ -175,7 +224,6 @@
                 </div>
             </div>
 
-            <!-- 5. CUSTOMERS TAB -->
             <div id="customers-tab" class="tab-content">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {% for customer in customers %}
@@ -200,7 +248,7 @@
         }
         function toggleTheme() { document.getElementById("html-root").classList.toggle("dark"); }
 
-        // Logic for turning Text Colors (Red, Blue) into actual colored circles
+        // Logic for turning Text Colors (Red, Blue) into actual colored circles in dashboard
         document.querySelectorAll('.color-swatches').forEach(el => {
             let colors = el.getAttribute('data-colors').split(',');
             colors.forEach(color => {

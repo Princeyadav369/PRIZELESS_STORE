@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # ==========================================
-# 🏬 MASTER STORE TABLE (For Multi-Website System)
+# 🏬 MASTER STORE TABLE (For Multi-Website)
 # ==========================================
 class Store(models.Model):
     name = models.CharField(max_length=255, help_text="Store ka naam (e.g., Prizeless Store)")
@@ -20,6 +20,12 @@ class Category(models.Model):
         return self.name
 
 class Product(models.Model):
+    SECTION_CHOICES = [
+        ('trending', '🔥 Trending New Arrivals'),
+        ('combo', '🎁 Exclusive Combos & Sets'),
+        ('bestseller', '⭐ Our Best Sellers'),
+    ]
+
     store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
@@ -27,7 +33,8 @@ class Product(models.Model):
     stock = models.IntegerField(default=0, help_text="Kitne items bache hain?")
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
-    colors = models.CharField(max_length=255, blank=True, null=True, help_text="Colors comma laga kar likhein (Jaise: Red, Blue, Black)")
+    colors = models.CharField(max_length=255, blank=True, null=True, help_text="Colors yahan likhein comma laga kar (Jaise: Red, Blue, Black)")
+    section = models.CharField(max_length=20, choices=SECTION_CHOICES, default='trending', help_text="Yeh product website ke kis hisse mein dikhana hai?")
     is_available = models.BooleanField(default=True)
     
     def __str__(self):
@@ -64,6 +71,7 @@ class Notification(models.Model):
 class StoreSetting(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     active_festival = models.CharField(max_length=50, default='normal')
+    festival_music_url = models.URLField(max_length=500, blank=True, null=True, default="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3", help_text="Yahan dashboard se koi bhi song URL paste karein")
 
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -80,8 +88,8 @@ class Banner(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=200, help_text="Banner ka naam (jaise: Diwali Sale)")
     image = models.ImageField(upload_to='banners/')
-    is_active = models.BooleanField(default=True, help_text="Isko untick karega toh banner website se hat jayega")
-    link = models.URLField(blank=True, null=True, help_text="Banner par click karne se kahan jana hai?")
+    is_active = models.BooleanField(default=True)
+    link = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -89,13 +97,16 @@ class Banner(models.Model):
 class ProductGallery(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='gallery_images')
     image = models.ImageField(upload_to='products/gallery/')
-    
-    def __str__(self):
-        return f"{self.product.name} - Gallery Image"
 
 class ProductColor(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='color_variations')
-    color_name = models.CharField(max_length=50, help_text="Jaise: Red, Silver, Black")
-    
+    color_name = models.CharField(max_length=50)
+
+class VideoReview(models.Model):
+    title = models.CharField(max_length=255, help_text="Video ka title")
+    thumbnail_url = models.URLField(help_text="Thumbnail Image Link")
+    video_url = models.URLField(help_text="Video streaming Source URL")
+    is_active = models.BooleanField(default=True)
+
     def __str__(self):
-        return f"{self.product.name} - {self.color_name}"
+        return self.title
