@@ -8,14 +8,29 @@ from .forms import ProductForm, CategoryForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.db import connection
 import random
 import json
 import urllib.request
 import urllib.parse
 import os
+import traceback
 import datetime
 
 def store_home(request):
+    # 🚀==== AUTO DATABASE FIX HACK ====🚀
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('ALTER TABLE store_storesetting ADD COLUMN bg_music_link VARCHAR(500);')
+            cursor.execute('ALTER TABLE store_product ADD COLUMN display_section VARCHAR(20) DEFAULT "trending";')
+            cursor.execute('CREATE TABLE IF NOT EXISTS store_storevideoreview (id INTEGER PRIMARY KEY AUTOINCREMENT, title VARCHAR(255), thumbnail_url VARCHAR(200), video_url VARCHAR(200), is_active bool);')
+    except:
+        pass # Agar column pehle se bana hai toh error ignore karega
+    # 🚀=================================🚀
+
     query = request.GET.get('q')
     if query:
         products = Product.objects.filter(name__icontains=query)
