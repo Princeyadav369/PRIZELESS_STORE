@@ -71,8 +71,7 @@ class Notification(models.Model):
 class StoreSetting(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     active_festival = models.CharField(max_length=50, default='normal')
-festival_music_url = models.URLField(max_length=500, blank=True, null=True, default="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3", help_text="Yahan dashboard se koi bhi song URL paste karein")
-
+    festival_music_url = models.URLField(max_length=500, blank=True, null=True, default="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3", help_text="Yahan dashboard se koi bhi song URL paste karein")
 
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
