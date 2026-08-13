@@ -1,9 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# ==========================================
-# ЁЯПм MASTER STORE TABLE (For Multi-Website)
-# ==========================================
 class Store(models.Model):
     name = models.CharField(max_length=255, help_text="Store ka naam (e.g., Prizeless Store)")
     domain = models.CharField(max_length=255, help_text="Website ka link (e.g., store1.com)", unique=True)
@@ -21,9 +18,9 @@ class Category(models.Model):
 
 class Product(models.Model):
     SECTION_CHOICES = [
-        ('trending', 'ЁЯФе Trending New Arrivals'),
-        ('combo', 'ЁЯОБ Exclusive Combos & Sets'),
-        ('bestseller', 'тнР Our Best Sellers'),
+        ('trending', '🔥 Trending New Arrivals'),
+        ('combo', '🎁 Exclusive Combos & Sets'),
+        ('bestseller', '⭐ Our Best Sellers'),
     ]
 
     store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
@@ -34,7 +31,7 @@ class Product(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     colors = models.CharField(max_length=255, blank=True, null=True, help_text="Colors yahan likhein comma laga kar (Jaise: Red, Blue, Black)")
-    section = models.CharField(max_length=20, choices=SECTION_CHOICES, default='trending', help_text="Yeh product website ke kis hisse mein dikhana hai?")
+    # section = models.CharField(max_length=20, choices=SECTION_CHOICES, default='trending', help_text="Yeh product website ke kis hisse mein dikhana hai?")
     is_available = models.BooleanField(default=True)
     
     def __str__(self):
@@ -107,6 +104,6 @@ class VideoReview(models.Model):
     thumbnail_url = models.URLField(help_text="Thumbnail Image Link")
     video_url = models.URLField(help_text="Video streaming Source URL")
     is_active = models.BooleanField(default=True)
-
+    
     def __str__(self):
         return self.title

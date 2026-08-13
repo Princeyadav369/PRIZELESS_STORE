@@ -4,8 +4,7 @@ from .models import Product, Category
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        # Yahan 'display_section' ko 'section' kar diya gaya hai
-        fields = ['name', 'category', 'price', 'description', 'image', 'colors', 'section', 'is_available']
+        fields = ['name', 'category', 'price', 'description', 'image', 'colors', 'is_available']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'w-full border rounded p-2.5 bg-gray-50 text-gray-900'}),
             'category': forms.Select(attrs={'class': 'w-full border rounded p-2.5 bg-gray-50 text-gray-900'}),
@@ -13,8 +12,6 @@ class ProductForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'w-full border rounded p-2.5 bg-gray-50 text-gray-900', 'rows': 3}),
             'image': forms.ClearableFileInput(attrs={'class': 'w-full border rounded p-2.5 bg-gray-50 text-gray-900'}),
             'colors': forms.TextInput(attrs={'class': 'w-full border rounded p-2.5 bg-gray-50 text-gray-900', 'placeholder': 'e.g. Red, Blue, Black (Optional)'}),
-            # Yahan bhi 'display_section' ko 'section' kar diya gaya hai
-            'section': forms.Select(attrs={'class': 'w-full border rounded p-2.5 bg-gray-50 text-gray-900'}),
             'is_available': forms.CheckboxInput(attrs={'class': 'h-5 w-5 text-orange-600'}),
         }
 
