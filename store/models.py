@@ -31,7 +31,7 @@ class Product(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     colors = models.CharField(max_length=255, blank=True, null=True, help_text="Colors yahan likhein comma laga kar (Jaise: Red, Blue, Black)")
-    # section = models.CharField(max_length=20, choices=SECTION_CHOICES, default='trending', help_text="Yeh product website ke kis hisse mein dikhana hai?")
+    section = models.CharField(max_length=20, choices=SECTION_CHOICES, default='trending', help_text="Yeh product website ke kis hisse mein dikhana hai?")
     is_available = models.BooleanField(default=True)
     
     def __str__(self):
