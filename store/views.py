@@ -333,6 +333,14 @@ def account_settings_view(request):
 # 🚀 CUSTOM DASHBOARD REAL ENGINE LINKING
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def custom_dashboard(request):
+    # DIRECT DATABASE FIX: Dashboard load hote hi missing column add ho jayega
+    from django.db import connection
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("ALTER TABLE store_product ADD COLUMN section VARCHAR(20) DEFAULT 'trending';")
+    except Exception:
+        pass
+
     products = Product.objects.all()
     categories = Category.objects.all()
     orders = Order.objects.all().order_by('-created_at')
