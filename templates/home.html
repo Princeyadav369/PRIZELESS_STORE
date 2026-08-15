@@ -424,7 +424,7 @@
             });
         });
 
-        // 💥 ADVANCED FESTIVAL ANIMATIONS ENGINE (Customized for Every Festival)
+     // 💥 ULTIMATE FESTIVAL ANIMATIONS & CULTURAL EFFECTS ENGINE
         let activeFest = "{{ active_festival }}";
         let festAnim = "{{ fest_config.anim }}";
         let decorationLevel = "{{ decoration_level }}"; 
@@ -434,68 +434,114 @@
             let festTitle = document.getElementById('fest-main-title');
             if (festTitle) {
                 festTitle.innerText = "{{ fest_config.emoji }} {{ fest_config.title }}";
-                festTitle.style.fontSize = "2.2rem";
+                festTitle.style.fontSize = "2.4rem";
                 festTitle.style.color = "var(--fest-c1)";
             }
             
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
-            // 1. DIWALI / CRACKERS (Rocket Fireworks)
+            // 1. DIWALI: Real Rocket Fireworks bursting in sky
             if (festAnim === 'fireworks') {
-                let duration = 12 * 1000;
+                let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
-                let defaults = { startVelocity: 35, spread: 360, ticks: 70, zIndex: 100 };
                 let interval = setInterval(function() {
                     let timeLeft = animationEnd - Date.now();
                     if (timeLeft <= 0) return clearInterval(interval);
-                    let particleCount = (45 * multiplier) * (timeLeft / duration);
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.4), y: Math.random() - 0.2 } }));
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.6, 0.9), y: Math.random() - 0.2 } }));
-                }, 350);
+                    
+                    // Rocket launching from bottom and bursting at top
+                    confetti({
+                        particleCount: (50 * multiplier),
+                        angle: randomInRange(55, 125),
+                        spread: 360,
+                        startVelocity: 45,
+                        origin: { x: randomInRange(0.1, 0.9), y: randomInRange(0.3, 0.7) },
+                        colors: ['#ff0000', '#ffd700', '#ff4500', '#00ffcc', '#ffffff'],
+                        ticks: 100
+                    });
+                }, 500);
 
-            // 2. HOLI COLOR SPLASH (Gulal/Color packets bursting)
+            // 2. HOLI: Multi-color Gulal Splash & Water Balloon Splatters across screen
             } else if (festAnim === 'splash') {
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
-                let defaults = { startVelocity: 50, spread: 360, ticks: 90, zIndex: 100 };
                 function randomHoliColors() { 
-                    return ['#ff0055', '#00ffcc', '#ffcc00', '#7928ca', '#ff4d4d', '#2ecc71', '#3498db']; 
+                    return ['#ff0055', '#00ffcc', '#ffcc00', '#9400d3', '#ff4d4d', '#2ecc71', '#3498db', '#ff1493']; 
                 }
                 let interval = setInterval(function() {
                     let timeLeft = animationEnd - Date.now();
                     if (timeLeft <= 0) return clearInterval(interval);
-                    confetti(Object.assign({}, defaults, { 
-                        particleCount: (50 * multiplier), 
-                        colors: [randomHoliColors(), randomHoliColors(), randomHoliColors()],
-                        origin: { x: randomInRange(0.15, 0.85), y: randomInRange(0.2, 0.8) },
-                        shapes: ['circle', 'square']
-                    }));
+                    
+                    // Splattering random color drops everywhere like a water balloon burst
+                    confetti({
+                        particleCount: (70 * multiplier),
+                        angle: 360,
+                        spread: 360,
+                        startVelocity: 35,
+                        origin: { x: randomInRange(0.1, 0.9), y: randomInRange(0.15, 0.85) },
+                        colors: [randomHoliColors(), randomHoliColors(), randomHoliColors(), randomHoliColors()],
+                        shapes: ['circle', 'square'],
+                        scalar: randomInRange(1.2, 2.0) // Bada chheenta effect
+                    });
+                }, 700);
+
+            // 3. GANPATI: Modak & Auspicious Flower Petals Shower
+            } else if (festAnim === 'confetti' || festAnim === 'flower') {
+                let duration = 15 * 1000;
+                let animationEnd = Date.now() + duration;
+                let interval = setInterval(function() {
+                    let timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) return clearInterval(interval);
+                    
+                    confetti({
+                        particleCount: (40 * multiplier),
+                        angle: 90,
+                        spread: 120,
+                        startVelocity: 25,
+                        origin: { x: randomInRange(0.2, 0.8), y: 0 },
+                        colors: ['#ff9900', '#ffcc00', '#ff3399', '#ffffff', '#ff6600'],
+                        shapes: ['circle'],
+                        scalar: 1.5
+                    });
                 }, 600);
 
-            // 3. SNOWFALL (Christmas & New Year)
+            // 4. NEW YEAR / CHRISTMAS: Gentle Snowfall
             } else if (festAnim === 'snow') {
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
                 (function frame() {
-                    confetti({ particleCount: (2 * multiplier), startVelocity: 0, ticks: 250, origin: { x: Math.random(), y: Math.random() - 0.2 }, colors: ['#ffffff', '#e0f7fa', '#b2ebf2'], shapes: ['circle'], gravity: randomInRange(0.3, 0.6), scalar: randomInRange(0.5, 1.2), drift: randomInRange(-0.5, 0.5), zIndex: 100 });
+                    confetti({ 
+                        particleCount: (3 * multiplier), 
+                        startVelocity: 0, 
+                        ticks: 300, 
+                        origin: { x: Math.random(), y: Math.random() - 0.2 }, 
+                        colors: ['#ffffff', '#e0f7fa', '#b2ebf2'], 
+                        shapes: ['circle'], 
+                        gravity: randomInRange(0.3, 0.5), 
+                        scalar: randomInRange(0.6, 1.4), 
+                        drift: randomInRange(-0.4, 0.4), 
+                        zIndex: 100 
+                    });
                     if (Date.now() < animationEnd) requestAnimationFrame(frame);
                 }());
 
-            // 4. EID / MOON THEME (Starry glitter stream)
+            // 5. EID / OTHER FESTIVALS: Starry Glitter Stream
             } else if (festAnim === 'stars') {
                 let duration = 12 * 1000;
                 let animationEnd = Date.now() + duration;
                 (function frame() {
-                    confetti({ particleCount: (2 * multiplier), angle: 90, spread: 180, startVelocity: 15, ticks: 150, origin: { x: Math.random(), y: 0 }, colors: ['#FFD700', '#FFFFFF', '#00FF66'], shapes: ['star', 'circle'], zIndex: 100 });
+                    confetti({ 
+                        particleCount: (2 * multiplier), 
+                        angle: 90, 
+                        spread: 180, 
+                        startVelocity: 15, 
+                        ticks: 150, 
+                        origin: { x: Math.random(), y: 0 }, 
+                        colors: ['#FFD700', '#FFFFFF', '#00FF66'], 
+                        shapes: ['star', 'circle'], 
+                        zIndex: 100 
+                    });
                     if (Date.now() < animationEnd) requestAnimationFrame(frame);
                 }());
-
-            // 5. STANDARD FESTIVE CONFETTI (Ganpati, Rakshabandhan, Navratri, Dussehra, Pongal)
-            } else if (festAnim === 'confetti' || festAnim === 'flower') {
-                setInterval(() => {
-                    confetti({ particleCount: (40 * multiplier), angle: 60, spread: 60, origin: { x: 0, y: 0.7 }, zIndex: 100 });
-                    confetti({ particleCount: (40 * multiplier), angle: 120, spread: 60, origin: { x: 1, y: 0.7 }, zIndex: 100 });
-                }, 3000);
             }
         }
 
