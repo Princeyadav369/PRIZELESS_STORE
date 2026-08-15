@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
-from .models import Product, Category, Order, OrderItem, Notification, StoreSetting, Wishlist, Banner,VideoReview
+from .models import Product, Category, Order, OrderItem, Notification, StoreSetting, Wishlist, Banner, VideoReview
 from .forms import ProductForm, CategoryForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -18,8 +18,11 @@ import urllib.parse
 import os
 import traceback
 import datetime
-import datetime
-from django.db import connection # Make sure this is imported at the top
+from django.db import connection 
+
+# ==============================================================================
+# 1. MAIN CUSTOMER VIEWS (Homepage, Product Details)
+# ==============================================================================
 
 def store_home(request):
     query = request.GET.get('q')
@@ -33,78 +36,54 @@ def store_home(request):
     bestseller_products = base_products.filter(section='bestseller')
         
     categories = Category.objects.all()[:6] 
-        
     cart = request.session.get('cart', {})
     cart_count = sum(item['quantity'] for item in cart.values())
+    
     setting, created = StoreSetting.objects.get_or_create(id=1)
 
-    today = datetime.date.today()
-    auto_theme = 'normal'
+    # === DASHBOARD IS THE BOSS NOW ===
+    # Jo dashboard mein select hoga, wahi chalega. Dates ignore hongi.
+    auto_theme = getattr(setting, 'active_festival', 'normal')
+    
     decoration_level = 'normal' 
     festival_title = "🔥 Trending New Arrivals"
     is_festival_day = "false" 
     
-    if today.month == 8 and 10 <= today.day <= 14:
-        auto_theme = 'independence'
-        decoration_level = 'high'
-        festival_title = "🇮🇳 Independence Day Special Picks"
-    elif today.month == 8 and today.day == 15:
-        auto_theme = 'independence'
+    if auto_theme == 'independence':
         decoration_level = 'ultra'
         festival_title = "🇮🇳 Happy Independence Day! Mega Celebration Live"
         is_festival_day = "true"
-        
-    elif today.month == 8 and 14 <= today.day <= 18:
-        auto_theme = 'rakshabandhan'
-        decoration_level = 'high'
-        festival_title = "🎁 Raksha Bandhan Gifting Specials"
-    elif today.month == 8 and today.day == 19:
-        auto_theme = 'rakshabandhan'
+    elif auto_theme == 'rakshabandhan':
         decoration_level = 'ultra'
         festival_title = "🎁 Raksha Bandhan Maha Utsav Deals!"
         is_festival_day = "true"
-        
-    elif today.month == 10 and 27 <= today.day <= 31:
-        auto_theme = 'diwali'
-        decoration_level = 'high'
-        festival_title = "🪔 Diwali Pre-Sale Offers"
-    elif today.month == 11 and today.day == 1:
-        auto_theme = 'diwali'
+    elif auto_theme == 'diwali':
         decoration_level = 'ultra'
         festival_title = "🪔 Mega Diwali Dhamaka Live!"
         is_festival_day = "true"
-        
-    elif today.month == 12 and 27 <= today.day <= 31:
-        auto_theme = 'newyear'
-        decoration_level = 'high'
-        festival_title = "❄️ Year-End Blockbuster Deals"
-    elif today.month == 1 and today.day == 1:
-        auto_theme = 'newyear'
+    elif auto_theme == 'newyear':
         decoration_level = 'ultra'
         festival_title = "✨ Happy New Year Grand Sale!"
         is_festival_day = "true"
 
     banners = Banner.objects.filter(is_active=True)
 
-    # DIRECT DATABASE FIX: Create table if it doesn't exist
+    # Fetch Music URL Safely from Database bypassing ORM blocks
+    music_url_to_play = ""
     try:
+        from django.db import connection
         with connection.cursor() as cursor:
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS store_videoreview (
-                    id serial PRIMARY KEY,
-                    title varchar(255) NOT NULL,
-                    thumbnail_url varchar(200) NOT NULL,
-                    video_url varchar(200) NOT NULL,
-                    is_active boolean NOT NULL
-                );
-            """)
+            cursor.execute("SELECT festival_music_url FROM store_storesetting WHERE id = %s", [setting.id])
+            row = cursor.fetchone()
+            if row:
+                music_url_to_play = row[0]
     except Exception:
         pass
 
     try:
         videos = VideoReview.objects.filter(is_active=True)
     except Exception:
-        videos = [] # Fallback to prevent crash
+        videos = [] 
 
     user_wishlist = []
     if request.user.is_authenticated:
@@ -121,9 +100,74 @@ def store_home(request):
         'decoration_level': decoration_level,
         'is_festival_day': is_festival_day, 
         'festival_title': festival_title,
+        'festival_music_url': music_url_to_play, # Sent to frontend
         'user_wishlist': user_wishlist,
         'banners': banners,
         'videos': videos
+    })
+
+
+@user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
+def custom_dashboard(request):
+    from django.db import connection
+    # SAFE DB FIXES
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("ALTER TABLE store_product ADD COLUMN section VARCHAR(20) DEFAULT 'trending';")
+    except Exception: pass
+    
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("ALTER TABLE store_storesetting ADD COLUMN festival_music_url VARCHAR(500) DEFAULT '';")
+    except Exception: pass
+
+    products = Product.objects.all()
+    categories = Category.objects.all()
+    orders = Order.objects.all().order_by('-created_at')
+    customers = User.objects.filter(is_staff=False)
+    
+    total_orders = orders.count()
+    total_revenue = sum(o.total_amount for o in orders if o.status == 'Confirmed')
+    pending_orders = orders.filter(status='Pending').count()
+    completed_orders = orders.filter(status='Confirmed').count()
+    canceled_orders = orders.filter(status='Cancelled').count()
+    recent_notifications = orders[:5]
+    
+    setting, created = StoreSetting.objects.get_or_create(id=1)
+    
+    if request.method == 'POST':
+        theme_input = request.POST.get('festival_theme', 'normal')
+        music_input = request.POST.get('music_url', '')
+        
+        # Save theme normally
+        setting.active_festival = theme_input
+        setting.save()
+        
+        # Save Music using Raw SQL so it bypasses ORM blocks completely
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("UPDATE store_storesetting SET festival_music_url = %s WHERE id = %s", [music_input, setting.id])
+        except Exception:
+            pass
+            
+        return redirect('custom_dashboard')
+        
+    # Fetch current music url to display in dashboard form
+    current_music_url = ""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT festival_music_url FROM store_storesetting WHERE id = %s", [setting.id])
+            row = cursor.fetchone()
+            if row: current_music_url = row[0]
+    except Exception: pass
+        
+    return render(request, 'dashboard.html', {
+        'products': products, 'categories': categories, 'orders': orders, 
+        'customers': customers, 'total_orders': total_orders, 
+        'total_revenue': total_revenue, 'pending_orders': pending_orders,
+        'completed_orders': completed_orders, 'canceled_orders': canceled_orders, 
+        'recent_notifications': recent_notifications, 'setting': setting,
+        'current_music_url': current_music_url # So the input box stays filled
     })
 
 def product_detail(request, id):
@@ -142,6 +186,10 @@ def product_detail(request, id):
         'cart_count': cart_count,
         'in_wishlist': in_wishlist
     })
+
+# ==============================================================================
+# 2. CART & CHECKOUT SYSTEM
+# ==============================================================================
 
 def add_to_cart(request, id):
     product = get_object_or_404(Product, id=id)
@@ -203,11 +251,9 @@ def cart_page(request):
 def remove_from_cart(request, id):
     cart = request.session.get('cart', {})
     product_id = str(id)
-    
     if product_id in cart:
         del cart[product_id]
         request.session['cart'] = cart
-        
     return redirect('cart_page')
 
 def clear_cart(request):
@@ -215,47 +261,8 @@ def clear_cart(request):
     return redirect('cart_page')
 
 @login_required(login_url='/signin/')
-def wishlist_view(request):
-    wishlist_items = Wishlist.objects.filter(user=request.user)
-    cart = request.session.get('cart', {})
-    cart_count = sum(item['quantity'] for item in cart.values())
-    
-    return render(request, 'wishlist.html', {
-        'wishlist_items': wishlist_items, 
-        'cart_count': cart_count
-    })
-
-@login_required(login_url='/signin/')
-def add_to_wishlist(request, id):
-    product = get_object_or_404(Product, id=id)
-    wishlist_item = Wishlist.objects.filter(user=request.user, product=product)
-    
-    if wishlist_item.exists():
-        wishlist_item.delete()
-        status = 'removed'
-    else:
-        Wishlist.objects.create(user=request.user, product=product)
-        status = 'added'
-
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse({'status': 'success', 'action': status})
-        
-    return redirect(request.META.get('HTTP_REFERER', 'home'))
-
-@login_required(login_url='/signin/')
-def remove_from_wishlist(request, id):
-    product = get_object_or_404(Product, id=id)
-    Wishlist.objects.filter(user=request.user, product=product).delete()
-    
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse({'status': 'success', 'action': 'removed'})
-        
-    return redirect(request.META.get('HTTP_REFERER', 'home'))
-
-@login_required(login_url='/signin/')
 def checkout_view(request):
     cart = request.session.get('cart', {})
-    
     if not cart:
         return redirect('home')
         
@@ -267,7 +274,6 @@ def checkout_view(request):
         email = request.user.email if request.user.is_authenticated else request.POST.get('email', '')
         phone = request.POST.get('phone', 'N/A')
         
-        # Address step by step
         room_no = request.POST.get('room_no', '')
         street = request.POST.get('street', '')
         city = request.POST.get('city', '')
@@ -276,53 +282,31 @@ def checkout_view(request):
         full_address = f"{room_no}, {street}"
         
         order = Order.objects.create(
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            phone=phone,
-            address=full_address,
-            city=city,
-            pincode=pincode,
-            total_amount=total_price,
-            status='Pending'
+            first_name=first_name, last_name=last_name, email=email,
+            phone=phone, address=full_address, city=city, pincode=pincode,
+            total_amount=total_price, status='Pending'
         )
         
         for product_id, item_data in cart.items():
             product = Product.objects.get(id=product_id)
-            OrderItem.objects.create(
-                order=order,
-                product=product,
-                price=item_data['price'],
-                quantity=item_data['quantity']
-            )
+            OrderItem.objects.create(order=order, product=product, price=item_data['price'], quantity=item_data['quantity'])
             
         request.session['cart'] = {}
         request.session['pending_order_id'] = order.id
-        
         return redirect('payment_page')
         
     cart_count = sum(item['quantity'] for item in cart.values())
-    
-    return render(request, 'checkout.html', {
-        'cart': cart, 
-        'total_price': total_price, 
-        'cart_count': cart_count
-    })
+    return render(request, 'checkout.html', {'cart': cart, 'total_price': total_price, 'cart_count': cart_count})
 
 def payment_page_view(request):
     order_id = request.session.get('pending_order_id')
-    
-    if not order_id:
-        return redirect('home')
-        
+    if not order_id: return redirect('home')
     order = get_object_or_404(Order, id=order_id)
     
     if request.method == 'POST':
         action = request.POST.get('action')
-        
         if action == 'select_method':
             method = request.POST.get('payment_method')
-            
             if method == 'UPI':
                 upi_string = f"upi://pay?pa=prizeless@ybl&pn=Prizeless%20Store&am={order.total_amount}&cu=INR"
                 qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={urllib.parse.quote(upi_string)}"
@@ -360,6 +344,101 @@ def notification_list(request):
     notifications = Notification.objects.all().order_by('-created_at')
     return render(request, 'notifications.html', {'notifications': notifications})
 
+
+# ==============================================================================
+# 3. WISHLIST SYSTEM
+# ==============================================================================
+
+@login_required(login_url='/signin/')
+def wishlist_view(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user)
+    cart = request.session.get('cart', {})
+    cart_count = sum(item['quantity'] for item in cart.values())
+    return render(request, 'wishlist.html', {'wishlist_items': wishlist_items, 'cart_count': cart_count})
+
+@login_required(login_url='/signin/')
+def add_to_wishlist(request, id):
+    product = get_object_or_404(Product, id=id)
+    wishlist_item = Wishlist.objects.filter(user=request.user, product=product)
+    
+    if wishlist_item.exists():
+        wishlist_item.delete()
+        status = 'removed'
+    else:
+        Wishlist.objects.create(user=request.user, product=product)
+        status = 'added'
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'success', 'action': status})
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+@login_required(login_url='/signin/')
+def remove_from_wishlist(request, id):
+    product = get_object_or_404(Product, id=id)
+    Wishlist.objects.filter(user=request.user, product=product).delete()
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'success', 'action': 'removed'})
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+
+# ==============================================================================
+# 4. CUSTOMER AUTHENTICATION (Login, Register, Forgot Password)
+# ==============================================================================
+
+def register_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match!")
+            return redirect('register')
+            
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "This email is already registered!")
+            return redirect('register')
+            
+        user = User.objects.create_user(username=email, email=email, password=password)
+        user.save()
+        messages.success(request, "Account created successfully! Please login.")
+        return redirect('login')
+    return render(request, 'register.html')
+
+def login_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            login(request, user)
+            next_url = request.GET.get('next', 'home')
+            return redirect(next_url)
+        else:
+            messages.error(request, "Invalid email or password!")
+            return redirect('login')
+    return render(request, 'login.html')
+
+def custom_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid credentials.')
+    return render(request, 'login.html')
+
+def custom_logout(request):
+    logout(request)
+    return redirect('home')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
 @login_required(login_url='/signin/')
 def account_profile_view(request):
     user = request.user
@@ -380,10 +459,100 @@ def my_orders_view(request):
 def account_settings_view(request):
     return render(request, 'account_settings.html')
 
-# 🚀 CUSTOM DASHBOARD REAL ENGINE LINKING
+def forgot_password_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email)
+            otp = str(random.randint(100000, 999999))
+            request.session['reset_otp'] = otp
+            request.session['reset_email'] = email
+            
+            api_url = "https://api.brevo.com/v3/smtp/email"
+            data = {
+                "sender": {"name": "Prizeless Store", "email": "prizelessstore@gmail.com"},
+                "to": [{"email": email, "name": user.username}],
+                "subject": "Password Reset OTP - Prizeless Store",
+                "htmlContent": f"<div style='font-family: Arial; padding: 20px;'><h2>Password Reset</h2><p>Hello {user.username},</p><p>Your 6-digit OTP for Prizeless Store is: <strong style='font-size: 24px; color: #ffca28;'>{otp}</strong></p><p>Do not share this OTP with anyone.</p></div>"
+            }
+            json_data = json.dumps(data).encode('utf-8')
+            req = urllib.request.Request(api_url, data=json_data)
+            req.add_header('accept', 'application/json')
+            req.add_header('content-type', 'application/json')
+            req.add_header('api-key', os.environ.get('BREVO_API_KEY'))
+            
+            try:
+                response = urllib.request.urlopen(req)
+                messages.success(request, "OTP has been sent to your email!")
+                return redirect('verify_reset_otp')
+            except Exception as api_error:
+                messages.error(request, f"Brevo API Error: {str(api_error)}")
+                return redirect('forgot_password')
+                
+        except User.DoesNotExist:
+            messages.error(request, "This email is not registered with us!")
+            return redirect('forgot_password')
+    return render(request, 'forgot_password.html')
+
+def verify_reset_otp_view(request):
+    if request.method == 'POST':
+        user_otp = request.POST.get('otp')
+        real_otp = request.session.get('reset_otp')
+        if user_otp == real_otp:
+            messages.success(request, "OTP Verified! Enter your new password.")
+            return redirect('reset_new_password')
+        else:
+            messages.error(request, "Invalid OTP! Please try again.")
+            return redirect('verify_reset_otp')
+    return render(request, 'verify_otp.html')
+
+def reset_new_password_view(request):
+    reset_email = request.session.get('reset_email')
+    if not reset_email:
+        return redirect('forgot_password')
+        
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match!")
+            return redirect('reset_new_password')
+            
+        user = User.objects.get(email=reset_email)
+        user.set_password(new_password)
+        user.save()
+        if 'reset_otp' in request.session: del request.session['reset_otp']
+        if 'reset_email' in request.session: del request.session['reset_email']
+        messages.success(request, "Password reset successful! Please login.")
+        return redirect('login')
+    return render(request, 'reset_password.html')
+
+
+# ==============================================================================
+# 5. SELLER ADMIN DASHBOARD (Manage Products, Music, Themes)
+# ==============================================================================
+
+def seller_login_view(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('custom_dashboard')
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            if user.is_staff: 
+                login(request, user)
+                return redirect('custom_dashboard')
+            else:
+                messages.error(request, "Access Denied! Aap Customer hain, Shop Owner nahi.")
+                return redirect('seller_login')
+        else:
+            messages.error(request, "Galat ID ya Password! Sirf authorized sellers hi login karein.")
+    return render(request, 'seller_login.html')
+
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def custom_dashboard(request):
-    # DIRECT DATABASE FIX: Dashboard load hote hi missing column add ho jayega
     from django.db import connection
     try:
         with connection.cursor() as cursor:
@@ -401,43 +570,39 @@ def custom_dashboard(request):
     pending_orders = orders.filter(status='Pending').count()
     completed_orders = orders.filter(status='Confirmed').count()
     canceled_orders = orders.filter(status='Cancelled').count()
-
     recent_notifications = orders[:5]
-
+    
     setting, created = StoreSetting.objects.get_or_create(id=1)
     
     if request.method == 'POST':
         setting.active_festival = request.POST.get('festival_theme', 'normal')
+        
+        # 🎵 FIXED MUSIC SAVING BUG HERE
+        music_input = request.POST.get('music_url')
+        if music_input:
+            setting.festival_music_url = music_input
+            
         setting.save()
         return redirect('custom_dashboard')
         
     return render(request, 'dashboard.html', {
-        'products': products, 
-        'categories': categories, 
-        'orders': orders, 
-        'customers': customers,
-        'total_orders': total_orders, 
-        'total_revenue': total_revenue, 
-        'pending_orders': pending_orders,
-        'completed_orders': completed_orders, 
-        'canceled_orders': canceled_orders, 
-        'recent_notifications': recent_notifications, 
-        'setting': setting
+        'products': products, 'categories': categories, 'orders': orders, 
+        'customers': customers, 'total_orders': total_orders, 
+        'total_revenue': total_revenue, 'pending_orders': pending_orders,
+        'completed_orders': completed_orders, 'canceled_orders': canceled_orders, 
+        'recent_notifications': recent_notifications, 'setting': setting
     })
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def dashboard_banners(request):
     banners = Banner.objects.all().order_by('-id')
-    
     if request.method == 'POST':
         title = request.POST.get('title')
         image = request.FILES.get('image')
         link = request.POST.get('link', '')
-        
         if title and image:
             Banner.objects.create(title=title, image=image, link=link)
             return redirect('dashboard_banners')
-            
     return render(request, 'dashboard_banners.html', {'banners': banners})
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
@@ -456,7 +621,6 @@ def add_product_view(request):
             return redirect('custom_dashboard')
     else:
         form = ProductForm()
-        
     return render(request, 'add_product.html', {'form': form})
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
@@ -468,13 +632,11 @@ def add_category_view(request):
             return redirect('custom_dashboard')
     else:
         form = CategoryForm()
-        
     return render(request, 'add_category.html', {'form': form})
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def edit_product_view(request, id):
     product = get_object_or_404(Product, id=id)
-    
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
@@ -482,7 +644,6 @@ def edit_product_view(request, id):
             return redirect('custom_dashboard')
     else:
         form = ProductForm(instance=product)
-        
     return render(request, 'edit_product.html', {'form': form, 'product': product})
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
@@ -491,168 +652,3 @@ def delete_product_view(request, id):
         product = get_object_or_404(Product, id=id)
         product.delete()
     return redirect('custom_dashboard')
-
-def seller_login_view(request):
-    if request.user.is_authenticated and request.user.is_staff:
-        return redirect('custom_dashboard')
-
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            if user.is_staff: 
-                login(request, user)
-                return redirect('custom_dashboard')
-            else:
-                messages.error(request, "Access Denied! Aap Customer hain, Shop Owner nahi.")
-                return redirect('seller_login')
-        else:
-            messages.error(request, "Galat ID ya Password! Sirf authorized sellers hi login karein.")
-            
-    return render(request, 'seller_login.html')
-
-def custom_login(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            return redirect('home')
-        else:
-            messages.error(request, 'Invalid credentials.')
-            
-    return render(request, 'login.html')
-
-def custom_logout(request):
-    logout(request)
-    return redirect('home')
-
-def register_view(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        confirm_password = request.POST.get('confirm_password')
-        
-        if password != confirm_password:
-            messages.error(request, "Passwords do not match!")
-            return redirect('register')
-            
-        if User.objects.filter(username=email).exists():
-            messages.error(request, "This email is already registered!")
-            return redirect('register')
-            
-        user = User.objects.create_user(username=email, email=email, password=password)
-        user.save()
-        messages.success(request, "Account created successfully! Please login.")
-        return redirect('login')
-        
-    return render(request, 'register.html')
-
-def login_view(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        
-        user = authenticate(request, username=email, password=password)
-        
-        if user is not None:
-            login(request, user)
-            next_url = request.GET.get('next', 'home')
-            return redirect(next_url)
-        else:
-            messages.error(request, "Invalid email or password!")
-            return redirect('login')
-            
-    return render(request, 'login.html')
-
-def logout_view(request):
-    logout(request)
-    return redirect('login')
-
-def forgot_password_view(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        try:
-            user = User.objects.get(email=email)
-            otp = str(random.randint(100000, 999999))
-            
-            request.session['reset_otp'] = otp
-            request.session['reset_email'] = email
-            
-            api_url = "https://api.brevo.com/v3/smtp/email"
-            
-            data = {
-                "sender": {"name": "Prizeless Store", "email": "prizelessstore@gmail.com"},
-                "to": [{"email": email, "name": user.username}],
-                "subject": "Password Reset OTP - Prizeless Store",
-                "htmlContent": f"<div style='font-family: Arial; padding: 20px;'><h2>Password Reset</h2><p>Hello {user.username},</p><p>Your 6-digit OTP for Prizeless Store is: <strong style='font-size: 24px; color: #ffca28;'>{otp}</strong></p><p>Do not share this OTP with anyone.</p></div>"
-            }
-            
-            json_data = json.dumps(data).encode('utf-8')
-            
-            req = urllib.request.Request(api_url, data=json_data)
-            req.add_header('accept', 'application/json')
-            req.add_header('content-type', 'application/json')
-            req.add_header('api-key', os.environ.get('BREVO_API_KEY'))
-            
-            try:
-                response = urllib.request.urlopen(req)
-                messages.success(request, "OTP has been sent to your email!")
-                return redirect('verify_reset_otp')
-                
-            except Exception as api_error:
-                messages.error(request, f"Brevo API Error: {str(api_error)}")
-                return redirect('forgot_password')
-                
-        except User.DoesNotExist:
-            messages.error(request, "This email is not registered with us!")
-            return redirect('forgot_password')
-            
-    return render(request, 'forgot_password.html')
-
-def verify_reset_otp_view(request):
-    if request.method == 'POST':
-        user_otp = request.POST.get('otp')
-        real_otp = request.session.get('reset_otp')
-        
-        if user_otp == real_otp:
-            messages.success(request, "OTP Verified! Enter your new password.")
-            return redirect('reset_new_password')
-        else:
-            messages.error(request, "Invalid OTP! Please try again.")
-            return redirect('verify_reset_otp')
-            
-    return render(request, 'verify_otp.html')
-
-def reset_new_password_view(request):
-    reset_email = request.session.get('reset_email')
-    
-    if not reset_email:
-        return redirect('forgot_password')
-        
-    if request.method == 'POST':
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-        
-        if new_password != confirm_password:
-            messages.error(request, "Passwords do not match!")
-            return redirect('reset_new_password')
-            
-        user = User.objects.get(email=reset_email)
-        user.set_password(new_password)
-        user.save()
-        
-        if 'reset_otp' in request.session:
-            del request.session['reset_otp']
-        if 'reset_email' in request.session:
-            del request.session['reset_email']
-        
-        messages.success(request, "Password reset successful! Please login.")
-        return redirect('login')
-        
-    return render(request, 'reset_password.html')
