@@ -19,61 +19,98 @@ import os
 import traceback
 import datetime
 
+import datetime
+
 def store_home(request):
     query = request.GET.get('q')
     if query:
-        products = Product.objects.filter(name__icontains=query)
+        base_products = Product.objects.filter(name__icontains=query, is_available=True)
     else:
-        products = Product.objects.all()
+        base_products = Product.objects.filter(is_available=True)
         
-    categories = Category.objects.all()[:6] # Top 6 categories dikhane ke liye
+    # DIRECT FIX: Filtering products exactly as home.html expects
+    trending_products = base_products.filter(section='trending')
+    combo_products = base_products.filter(section='combo')
+    bestseller_products = base_products.filter(section='bestseller')
+        
+    categories = Category.objects.all()[:6] 
         
     cart = request.session.get('cart', {})
     cart_count = sum(item['quantity'] for item in cart.values())
     setting, created = StoreSetting.objects.get_or_create(id=1)
 
-    # === AUTOMATIC FESTIVAL LOGIC ===
+    # === FESTIVAL DECORATION LOGIC ===
     today = datetime.date.today()
     auto_theme = 'normal'
+    decoration_level = 'normal' 
     festival_title = "🔥 Trending New Arrivals"
+    is_festival_day = "false" # Triggers HTML Ultra Confetti Animation
     
-    # Independence Day (9 Aug to 16 Aug)
-    if today.month == 8 and 9 <= today.day <= 16:
+    # 1. Independence Day (Festival Date: August 15)
+    if today.month == 8 and 10 <= today.day <= 14:
         auto_theme = 'independence'
+        decoration_level = 'high'
         festival_title = "🇮🇳 Independence Day Special Picks"
+    elif today.month == 8 and today.day == 15:
+        auto_theme = 'independence'
+        decoration_level = 'ultra'
+        festival_title = "🇮🇳 Happy Independence Day! Mega Celebration Live"
+        is_festival_day = "true"
         
-    # Raksha Bandhan (Eg: 17 Aug to 21 Aug)
-    elif today.month == 8 and 17 <= today.day <= 21:
+    # 2. Raksha Bandhan (Festival Date Example: August 19)
+    elif today.month == 8 and 14 <= today.day <= 18:
         auto_theme = 'rakshabandhan'
+        decoration_level = 'high'
         festival_title = "🎁 Raksha Bandhan Gifting Specials"
+    elif today.month == 8 and today.day == 19:
+        auto_theme = 'rakshabandhan'
+        decoration_level = 'ultra'
+        festival_title = "🎁 Raksha Bandhan Maha Utsav Deals!"
+        is_festival_day = "true"
         
-    # Diwali (20 Oct to 5 Nov)
-    elif (today.month == 10 and today.day >= 20) or (today.month == 11 and today.day <= 5):
+    # 3. Diwali (Festival Date Example: November 1)
+    elif today.month == 10 and 27 <= today.day <= 31:
         auto_theme = 'diwali'
-        festival_title = "🪔 Diwali Dhamaka Offers"
+        decoration_level = 'high'
+        festival_title = "🪔 Diwali Pre-Sale Offers"
+    elif today.month == 11 and today.day == 1:
+        auto_theme = 'diwali'
+        decoration_level = 'ultra'
+        festival_title = "🪔 Mega Diwali Dhamaka Live!"
+        is_festival_day = "true"
         
-    # New Year (20 Dec to 5 Jan)
-    elif (today.month == 12 and today.day >= 20) or (today.month == 1 and today.day <= 5):
+    # 4. New Year (Festival Date: Jan 1)
+    elif today.month == 12 and 27 <= today.day <= 31:
         auto_theme = 'newyear'
+        decoration_level = 'high'
         festival_title = "❄️ Year-End Blockbuster Deals"
-    else:
-        auto_theme = 'normal'
+    elif today.month == 1 and today.day == 1:
+        auto_theme = 'newyear'
+        decoration_level = 'ultra'
+        festival_title = "✨ Happy New Year Grand Sale!"
+        is_festival_day = "true"
 
     banners = Banner.objects.filter(is_active=True)
+    videos = VideoReview.objects.filter(is_active=True) # Direct fix for video section
 
     user_wishlist = []
     if request.user.is_authenticated:
         user_wishlist = list(Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True))
         
     return render(request, 'home.html', {
-        'products': products, 
+        'trending_products': trending_products,
+        'combo_products': combo_products,
+        'bestseller_products': bestseller_products,
         'categories': categories,
         'query': query, 
         'cart_count': cart_count, 
         'active_festival': auto_theme, 
+        'decoration_level': decoration_level,
+        'is_festival_day': is_festival_day, 
         'festival_title': festival_title,
         'user_wishlist': user_wishlist,
-        'banners': banners
+        'banners': banners,
+        'videos': videos
     })
 
 def product_detail(request, id):
