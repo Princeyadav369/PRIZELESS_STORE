@@ -155,14 +155,3 @@ EMAIL_HOST_PASSWORD = 'prrhfktfttkpvddv'
 # ==========================================
 # CLOUDINARY PERMANENT IMAGE STORAGE CONFIG
 # ==========================================
-import cloudinary
-import cloudinary.uploader
-import cloudinary.storage
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'aqf3ifqp',
-    'API_KEY': '693212298569993',
-    'API_SECRET': 'hiGEZ88ihBgo9nz5GKBANA1tm8Y',
-}
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
