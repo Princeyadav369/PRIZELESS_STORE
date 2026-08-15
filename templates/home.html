@@ -384,7 +384,7 @@
         function startQuickView(id, name, price, imgUrl, colorsList) {
             qvTimer = setTimeout(() => {
                 openQuickView(id, name, price, imgUrl, colorsList);
-            }, 300); // Only 300ms so it opens fast but doesn't flicker when moving mouse across screen
+            }, 8000); // Only 8000ms so it opens fast but doesn't flicker when moving mouse across screen
         }
         function cancelQuickView() { clearTimeout(qvTimer); }
 
