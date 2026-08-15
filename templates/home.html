@@ -614,5 +614,33 @@
             document.documentElement.classList.add('dark');
         }
     </script>
+    <script>
+        // Yahan tera purana script hai...
+
+        // 🎠 AB YAHAN WALA CODE BHI ISKE ANDAR DAL DE:
+        let currentSlide = 0;
+        function showSlide(index) {
+            let slides = document.querySelectorAll('.slide-item');
+            if (slides.length === 0) return;
+            if (index >= slides.length) currentSlide = 0;
+            if (index < 0) currentSlide = slides.length - 1;
+            
+            let slider = document.getElementById('slider');
+            if (slider) {
+                slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+            }
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+
+        if (document.querySelectorAll('.slide-item').length > 1) {
+            setInterval(nextSlide, 4000);
+        }
+    </script>
+</body>
+</html>
 </body>
 </html>
