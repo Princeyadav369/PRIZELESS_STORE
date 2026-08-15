@@ -422,29 +422,77 @@
             });
         });
 
-        // 💥 ULTRA DECORATION TRIGGERS ON MAIN FESTIVAL DAY
+// 💥 DYNAMIC ADVANCED DECORATIONS (No Database Changes Needed)
         let isFestDay = "{{ is_festival_day }}";
-        if(isFestDay === "true") {
+        let activeFest = "{{ active_festival }}";
+        
+        if (isFestDay === "true") {
             let festTitle = document.getElementById('fest-main-title');
-            if(festTitle) {
+            if (festTitle) {
                 festTitle.style.fontSize = "2.5rem";
                 festTitle.style.color = "#d32f2f";
             }
-            setInterval(() => {
-                confetti({ particleCount: 30, angle: 60, spread: 55, origin: { x: 0 } });
-                confetti({ particleCount: 30, angle: 120, spread: 55, origin: { x: 1 } });
-            }, 3000);
+            
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            // Auto-Select Animation based on Festival Name
+            if (activeFest === 'diwali' || activeFest === 'independence') {
+                // 🎆 FIREWORKS EFFECT
+                let duration = 15 * 1000;
+                let animationEnd = Date.now() + duration;
+                let defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+                let interval = setInterval(function() {
+                    let timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) return clearInterval(interval);
+                    let particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+
+            } else if (activeFest === 'newyear') {
+                // ❄️ SNOW EFFECT
+                let duration = 15 * 1000;
+                let animationEnd = Date.now() + duration;
+                let skew = 1;
+                (function frame() {
+                    confetti({ particleCount: 1, startVelocity: 0, ticks: 200, origin: { x: Math.random(), y: (Math.random() * skew) - 0.2 }, colors: ['#ffffff'], shapes: ['circle'], gravity: randomInRange(0.4, 0.6), scalar: randomInRange(0.4, 1), drift: randomInRange(-0.4, 0.4) });
+                    if (Date.now() < animationEnd) requestAnimationFrame(frame);
+                }());
+
+            } else {
+                // 🎉 STANDARD HEAVY CONFETTI
+                setInterval(() => {
+                    confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
+                    confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
+                }, 3000);
+            }
         }
 
-        // Music Trigger Frame
+        // 🎵 ROBUST MUSIC AUTOPLAY (Triggers on any user action)
         let musicStarted = false;
-        document.body.addEventListener('click', function() {
-            if (!musicStarted) {
-                let m = document.getElementById('relaxing-bg-music');
-                if(m) { m.volume = 0.25; m.play().catch(e => console.log('Music stream queued')); }
-                musicStarted = true;
+        let bgMusic = document.getElementById('relaxing-bg-music');
+        
+        function startMusic() {
+            if (!musicStarted && bgMusic) {
+                bgMusic.volume = 0.5; // Set volume to 50%
+                let playPromise = bgMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => { 
+                        musicStarted = true; 
+                    }).catch(error => { 
+                        console.log("Waiting for stronger interaction to play music."); 
+                    });
+                }
             }
-        });
+        }
+
+        // Listen for Scroll, Click, or Touch. The moment the user does ANY of these, music starts!
+        ['click', 'scroll', 'keypress', 'touchstart'].forEach(evt => 
+            window.addEventListener(evt, startMusic, { once: true })
+        );
+
+        // ... (Keep your addToCartAjax and toggleWishlistAjax functions here below) ...
 
         function addToCartAjax(productId, btn) {
             fetch(`/add-to-cart/${productId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
