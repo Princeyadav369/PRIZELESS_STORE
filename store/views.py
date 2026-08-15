@@ -18,8 +18,8 @@ import urllib.parse
 import os
 import traceback
 import datetime
-
 import datetime
+from django.db import connection # Make sure this is imported at the top
 
 def store_home(request):
     query = request.GET.get('q')
@@ -28,7 +28,6 @@ def store_home(request):
     else:
         base_products = Product.objects.filter(is_available=True)
         
-    # DIRECT FIX: Filtering products exactly as home.html expects
     trending_products = base_products.filter(section='trending')
     combo_products = base_products.filter(section='combo')
     bestseller_products = base_products.filter(section='bestseller')
@@ -39,14 +38,12 @@ def store_home(request):
     cart_count = sum(item['quantity'] for item in cart.values())
     setting, created = StoreSetting.objects.get_or_create(id=1)
 
-    # === FESTIVAL DECORATION LOGIC ===
     today = datetime.date.today()
     auto_theme = 'normal'
     decoration_level = 'normal' 
     festival_title = "🔥 Trending New Arrivals"
-    is_festival_day = "false" # Triggers HTML Ultra Confetti Animation
+    is_festival_day = "false" 
     
-    # 1. Independence Day (Festival Date: August 15)
     if today.month == 8 and 10 <= today.day <= 14:
         auto_theme = 'independence'
         decoration_level = 'high'
@@ -57,7 +54,6 @@ def store_home(request):
         festival_title = "🇮🇳 Happy Independence Day! Mega Celebration Live"
         is_festival_day = "true"
         
-    # 2. Raksha Bandhan (Festival Date Example: August 19)
     elif today.month == 8 and 14 <= today.day <= 18:
         auto_theme = 'rakshabandhan'
         decoration_level = 'high'
@@ -68,7 +64,6 @@ def store_home(request):
         festival_title = "🎁 Raksha Bandhan Maha Utsav Deals!"
         is_festival_day = "true"
         
-    # 3. Diwali (Festival Date Example: November 1)
     elif today.month == 10 and 27 <= today.day <= 31:
         auto_theme = 'diwali'
         decoration_level = 'high'
@@ -79,7 +74,6 @@ def store_home(request):
         festival_title = "🪔 Mega Diwali Dhamaka Live!"
         is_festival_day = "true"
         
-    # 4. New Year (Festival Date: Jan 1)
     elif today.month == 12 and 27 <= today.day <= 31:
         auto_theme = 'newyear'
         decoration_level = 'high'
@@ -91,7 +85,26 @@ def store_home(request):
         is_festival_day = "true"
 
     banners = Banner.objects.filter(is_active=True)
-    videos = VideoReview.objects.filter(is_active=True) # Direct fix for video section
+
+    # DIRECT DATABASE FIX: Create table if it doesn't exist
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS store_videoreview (
+                    id serial PRIMARY KEY,
+                    title varchar(255) NOT NULL,
+                    thumbnail_url varchar(200) NOT NULL,
+                    video_url varchar(200) NOT NULL,
+                    is_active boolean NOT NULL
+                );
+            """)
+    except Exception:
+        pass
+
+    try:
+        videos = VideoReview.objects.filter(is_active=True)
+    except Exception:
+        videos = [] # Fallback to prevent crash
 
     user_wishlist = []
     if request.user.is_authenticated:
