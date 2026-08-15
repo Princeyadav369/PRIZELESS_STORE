@@ -21,39 +21,31 @@
 
         .trust-badge { display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 10px; color: #555; }
         
-        /* 🌟 DYNAMIC FESTIVAL COLORS 🌟 */
-        .theme-bg { background-color: #ff8c00; color: white; }
-        .hover-theme-text:hover { color: #ff8c00 !important; transition: 0.2s; }
-        
-        body[data-theme="independence"] .theme-bg { background: linear-gradient(90deg, #FF9933, #FFFFFF, #138808); color: #000; }
-        body[data-theme="independence"] .hover-theme-text:hover { color: #138808 !important; }
-        body[data-theme="independence"] .bg-orange-500 { background: linear-gradient(90deg, #FF9933, #138808) !important; color: white !important; border:none;}
-        body[data-theme="independence"] .text-orange-500 { color: #138808 !important; }
-        
-        body[data-theme="rakshabandhan"] .theme-bg { background-color: #e91e63; color: white; }
-        body[data-theme="rakshabandhan"] .hover-theme-text:hover { color: #e91e63 !important; }
-        body[data-theme="rakshabandhan"] .bg-orange-500 { background: linear-gradient(90deg, #e91e63, #ff4081) !important; color: white !important; border:none;}
-        body[data-theme="rakshabandhan"] .text-orange-500 { color: #e91e63 !important; }
-
-        body[data-theme="diwali"] .theme-bg { background-color: #800000; color: #FFD700; }
-        body[data-theme="diwali"] .hover-theme-text:hover { color: #800000 !important; }
-        body[data-theme="diwali"] .bg-orange-500 { background-color: #800000 !important; color: #FFD700 !important; border:none;}
-        body[data-theme="diwali"] .text-orange-500 { color: #800000 !important; }
-
-        body[data-theme="newyear"] .theme-bg { background-color: #007bff; color: white; }
-        body[data-theme="newyear"] .hover-theme-text:hover { color: #007bff !important; }
-        body[data-theme="newyear"] .bg-orange-500 { background-color: #007bff !important; color: white !important; border:none;}
-        body[data-theme="newyear"] .text-orange-500 { color: #007bff !important; }
-
-        body[data-theme="ganpati"] .theme-bg { background: linear-gradient(90deg, #ff5722, #ff9800); color: white; }
-        body[data-theme="holi"] .theme-bg { background: linear-gradient(90deg, #ff007f, #00f0ff, #ffef00); color: black; }
-
         @keyframes subtlePulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .pulse-text { animation: subtlePulse 2s infinite; display: inline-block; }
 
         .zoom-effect { overflow: hidden; position: relative; }
         .zoom-effect img { transition: transform 0.3s ease; }
         .zoom-effect:hover img { transform: scale(1.15); }
+    </style>
+
+    <!-- 🚀 UNIVERSAL COLOR ENGINE (From Backend Master Config) -->
+    <style>
+        :root {
+            --fest-c1: {{ fest_config.c1|default:'#f97316' }};
+            --fest-c2: {{ fest_config.c2|default:'#ea580c' }};
+        }
+        
+        {% if active_festival != 'normal' %}
+        .bg-orange-500, .add-cart-btn { background: linear-gradient(90deg, var(--fest-c1), var(--fest-c2)) !important; color: white !important; border:none !important; }
+        .text-orange-500, .hover\:text-orange-500:hover, #festival-icon, .product-name:hover { color: var(--fest-c1) !important; }
+        .border-orange-500 { border-color: var(--fest-c1) !important; }
+        .bg-orange-100, .bg-orange-50 { background-color: #f8f9fa !important; color: var(--fest-c1) !important; border-color: var(--fest-c1) !important; }
+        .theme-bg { background: linear-gradient(90deg, var(--fest-c1), var(--fest-c2)) !important; color: white !important; }
+        {% else %}
+        .theme-bg { background-color: #ff8c00; color: white; }
+        .hover-theme-text:hover { color: #ff8c00 !important; transition: 0.2s; }
+        {% endif %}
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans transition-colors duration-300" id="main-body" data-theme="{{ active_festival }}">
@@ -77,7 +69,7 @@
 
                     <a href="{% url 'home' %}" class="flex-shrink-0 flex items-center">
                         <span class="text-orange-500 text-2xl md:text-3xl font-bold mr-1" id="festival-icon">
-                            {% if active_festival == 'independence' %}🇮🇳{% elif active_festival == 'rakshabandhan' %}🎁{% elif active_festival == 'diwali' %}🪔{% elif active_festival == 'newyear' %}❄️{% else %}✴{% endif %}
+                            {{ fest_config.emoji|default:"✴" }}
                         </span>
                         <h1 class="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Prizeless<span class="text-orange-500">.</span></h1>
                     </a>
@@ -215,7 +207,7 @@
 
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-10 pb-4">
         <div class="text-center mb-8">
-            <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="fest-main-title">{{ festival_title }}</h2>
+            <h2 class="text-xl md:text-3xl font-bold uppercase tracking-wide" id="fest-main-title">{{ fest_config.emoji }} {{ fest_config.title }}</h2>
             <div class="h-1 w-16 md:w-20 bg-orange-500 mx-auto mt-2 md:mt-4 rounded"></div>
         </div>
 
@@ -371,7 +363,7 @@
                 </div>
                 <div class="flex gap-4 mt-4">
                     <button id="modal-cart-btn" class="flex-1 border-2 border-gray-900 py-3 rounded font-bold hover:bg-gray-900 hover:text-white transition">Add to Cart</button>
-                    <button id="modal-buy-btn" class="flex-1 bg-orange-500 text-white py-3 rounded font-bold hover:bg-orange-600 transition">Buy Now</button>
+                    <button id="modal-buy-btn" class="flex-1 bg-orange-500 text-white py-3 rounded font-bold hover:bg-orange-600 transition add-cart-btn">Buy Now</button>
                 </div>
             </div>
         </div>
@@ -380,11 +372,11 @@
     <script>
         let qvTimer;
         
-        // 🚀 0.3 SECOND DELAY (Perfect hover experience)
+        // 🚀 8.0 SECOND DELAY (Amazon-style hover experience)
         function startQuickView(id, name, price, imgUrl, colorsList) {
             qvTimer = setTimeout(() => {
                 openQuickView(id, name, price, imgUrl, colorsList);
-            }, 8000); // Only 8000ms so it opens fast but doesn't flicker when moving mouse across screen
+            }, 8000); 
         }
         function cancelQuickView() { clearTimeout(qvTimer); }
 
@@ -422,25 +414,47 @@
             });
         });
 
-// 💥 DYNAMIC ADVANCED DECORATIONS (No Database Changes Needed)
-// 💥 PREMIUM FESTIVAL DECORATION (Clean & Subtle)
-        let isFestDay = "{{ is_festival_day }}";
+        // 💥 DYNAMIC FESTIVAL ANIMATIONS (From Master Config)
+        let activeFest = "{{ active_festival }}";
+        let festAnim = "{{ fest_config.anim }}";
         
-        if (isFestDay === "true") {
+        if (activeFest !== "normal") {
             let festTitle = document.getElementById('fest-main-title');
             if (festTitle) {
-                festTitle.style.fontSize = "2.5rem";
-                festTitle.style.color = "#d32f2f";
+                festTitle.innerText = "{{ fest_config.emoji }} {{ fest_config.title }}";
+                festTitle.style.fontSize = "2.2rem";
+                festTitle.style.color = "var(--fest-c1)";
             }
             
-            // Classic Side-Drop Confetti (Not overwhelming)
-            setInterval(() => {
-                confetti({ particleCount: 35, angle: 60, spread: 55, origin: { x: 0 }, zIndex: 100 });
-                confetti({ particleCount: 35, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 100 });
-            }, 3500);
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            if (festAnim === 'fireworks') {
+                let duration = 10 * 1000;
+                let animationEnd = Date.now() + duration;
+                let defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+                let interval = setInterval(function() {
+                    let timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) return clearInterval(interval);
+                    let particleCount = 40 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+            } else if (festAnim === 'snow') {
+                let duration = 15 * 1000;
+                let animationEnd = Date.now() + duration;
+                (function frame() {
+                    confetti({ particleCount: 1, startVelocity: 0, ticks: 200, origin: { x: Math.random(), y: Math.random() - 0.2 }, colors: ['#ffffff'], shapes: ['circle'], gravity: randomInRange(0.4, 0.6), scalar: randomInRange(0.4, 1), drift: randomInRange(-0.4, 0.4), zIndex: 100 });
+                    if (Date.now() < animationEnd) requestAnimationFrame(frame);
+                }());
+            } else if (festAnim === 'confetti') {
+                setInterval(() => {
+                    confetti({ particleCount: 35, angle: 60, spread: 55, origin: { x: 0 }, zIndex: 100 });
+                    confetti({ particleCount: 35, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 100 });
+                }, 3500);
+            }
         }
 
-        // 🎵 MUSIC AUTOPLAY
+        // 🎵 ROBUST MUSIC AUTOPLAY
         let musicStarted = false;
         let bgMusic = document.getElementById('relaxing-bg-music');
         
@@ -454,8 +468,6 @@
             }
         }
         ['click', 'scroll', 'keypress', 'touchstart'].forEach(evt => window.addEventListener(evt, startMusic, { once: true }));
-
-        // ... (Keep your addToCartAjax and toggleWishlistAjax functions here below) ...
 
         function addToCartAjax(productId, btn) {
             fetch(`/add-to-cart/${productId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })

@@ -95,19 +95,19 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Select Live Theme</label>
+                                <!-- FIXED DROPDOWN LOOP -->
                                 <select name="festival_theme" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-2.5 outline-none">
-                                    <option value="normal" {% if setting.active_festival == 'normal' %}selected{% endif %}>Default Normal View</option>
-                                    <option value="independence" {% if setting.active_festival == 'independence' %}selected{% endif %}>🇮🇳 Independence Day Theme</option>
-                                    <option value="rakshabandhan" {% if setting.active_festival == 'rakshabandhan' %}selected{% endif %}>🎁 Raksha Bandhan Theme</option>
-                                    <option value="diwali" {% if setting.active_festival == 'diwali' %}selected{% endif %}>🪔 Diwali Mahotsav Theme</option>
-                                    <option value="ganpati" {% if setting.active_festival == 'ganpati' %}selected{% endif %}>🔱 Ganpati Puja Mahotsav</option>
-                                    <option value="holi" {% if setting.active_festival == 'holi' %}selected{% endif %}>🎨 Holi Rangotsav Theme</option>
-                                    <option value="newyear" {% if setting.active_festival == 'newyear' %}selected{% endif %}>❄️ New Year Deals Theme</option>
+                                    {% for key, fest in festivals.items %}
+                                        <option value="{{ key }}" {% if setting.active_festival == key %}selected{% endif %}>
+                                            {{ fest.emoji }} {{ fest.title }}
+                                        </option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Background Music Stream URL</label>
-                                <input type="url" name="music_url" value="{{ setting.bg_music_link }}" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-2.5 outline-none">
+                                <!-- FIXED MUSIC URL BINDING -->
+                                <input type="url" name="music_url" value="{{ current_music_url }}" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-2.5 outline-none">
                             </div>
                         </div>
                         <button type="submit" class="bg-orange-500 text-white font-bold px-8 py-3 rounded hover:bg-orange-600 transition shadow-md">Apply Theme & Music</button>
