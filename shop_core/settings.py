@@ -151,7 +151,3 @@ EMAIL_USE_SSL = True
 EMAIL_USE_TLS = False            
 EMAIL_HOST_USER = 'prizelessstore@gmail.com'
 EMAIL_HOST_PASSWORD = 'prrhfktfttkpvddv'
-
-# ==========================================
-# CLOUDINARY PERMANENT IMAGE STORAGE CONFIG
-# ==========================================
