@@ -227,7 +227,7 @@
                 <span class="absolute top-2 left-2 bg-orange-500 text-white text-[9px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded z-10">NEW</span>
 
                 <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center cursor-pointer zoom-effect"
-                     onmouseenter="startQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onmouseenter="startQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}', '{{ p.description|escapejs }}')"
                      onmouseleave="cancelQuickView()"
                      onclick="window.location.href='{% url 'product_detail' p.id %}'">
                     
@@ -276,7 +276,7 @@
                 <span class="absolute top-2 left-2 bg-purple-600 text-white text-[9px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded z-10">COMBO DEAL</span>
                 
                 <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center cursor-pointer zoom-effect"
-                     onmouseenter="startQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onmouseenter="startQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}', '{{ p.description|escapejs }}')"
                      onmouseleave="cancelQuickView()"
                      onclick="window.location.href='{% url 'product_detail' p.id %}'">
                     {% if p.image %}<img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110">{% else %}<div class="text-4xl text-gray-300">📷</div>{% endif %}
@@ -314,7 +314,7 @@
                 <span class="absolute top-2 left-2 bg-yellow-400 text-gray-900 text-[9px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded z-10">TOP RATED</span>
                 
                 <div class="h-36 sm:h-48 md:h-64 bg-gray-100 overflow-hidden relative flex items-center justify-center cursor-pointer zoom-effect"
-                     onmouseenter="startQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}')"
+                     onmouseenter="startQuickView('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.price }}', '{% if p.image %}{{ p.image.url }}{% else %}''{% endif %}', '{{ p.colors|default:'' }}', '{{ p.description|escapejs }}')"
                      onmouseleave="cancelQuickView()"
                      onclick="window.location.href='{% url 'product_detail' p.id %}'">
                     {% if p.image %}<img src="{{ p.image.url }}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110">{% else %}<div class="text-4xl text-gray-300">📷</div>{% endif %}
@@ -357,23 +357,41 @@
         </div>
     </div>
 
+    <!-- 🚀 UPGRADED DETAILED QUICK VIEW MODAL -->
     <div id="quickViewModal" class="fixed inset-0 z-[100] hidden bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-xl max-w-4xl w-full flex flex-col md:flex-row relative shadow-2xl modal-enter overflow-hidden">
-            <button onclick="closeQuickView()" class="absolute top-3 right-4 bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            <a id="modal-img-link" href="#" class="w-full md:w-1/2 bg-gray-50 p-8 flex items-center justify-center border-r"><img id="modal-img" src="" class="max-h-[350px] object-contain hover:scale-105 transition"></a>
+            <button onclick="closeQuickView()" class="absolute top-3 right-4 bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-700 font-bold z-10 hover:bg-gray-200"><i class="fa-solid fa-xmark"></i></button>
+            
+            <a id="modal-img-link" href="#" class="w-full md:w-1/2 bg-gray-50 p-8 flex items-center justify-center border-r relative">
+                <img id="modal-img" src="" class="max-h-[350px] object-contain hover:scale-105 transition">
+            </a>
+
             <div class="w-full md:w-1/2 p-6 flex flex-col justify-between">
                 <div>
-                    <h2 id="modal-title" class="text-2xl font-bold mb-2 hover:text-orange-500 cursor-pointer">Product Name</h2>
-                    <span id="modal-price" class="text-3xl font-black text-gray-900 block mb-4">₹0</span>
+                    <h2 id="modal-title" class="text-2xl font-bold mb-1 text-gray-900 hover:text-orange-500 cursor-pointer">Product Name</h2>
+                    <span id="modal-price" class="text-3xl font-black text-gray-900 block mb-3">₹0</span>
                     
+                    <!-- 📦 Delivery, Stock & Description Details -->
+                    <div class="mb-4 text-xs text-gray-600 space-y-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <p>🚚 <strong class="text-gray-800">Delivery:</strong> Usually delivered in 3-5 business days.</p>
+                        <p>📦 <strong class="text-gray-800">Stock Status:</strong> <span class="text-green-600 font-bold">In Stock & Ready to Ship</span></p>
+                        <p id="modal-desc" class="text-gray-500 line-clamp-2 mt-1"></p>
+                    </div>
+
                     <div class="mb-4">
-                        <p class="text-xs font-bold text-gray-500 uppercase mb-2">Available Colors (Click to Select):</p>
+                        <p class="text-xs font-bold text-gray-500 uppercase mb-2">Available Colors:</p>
                         <div id="modal-colors" class="flex gap-2"></div>
                     </div>
                 </div>
-                <div class="flex gap-4 mt-4">
-                    <button id="modal-cart-btn" class="flex-1 border-2 border-gray-900 py-3 rounded font-bold hover:bg-gray-900 hover:text-white transition">Add to Cart</button>
-                    <button id="modal-buy-btn" class="flex-1 bg-orange-500 text-white py-3 rounded font-bold hover:bg-orange-600 transition add-cart-btn">Buy Now</button>
+
+                <div class="space-y-2 mt-4 pt-3 border-t border-gray-100">
+                    <div class="flex gap-3">
+                        <button id="modal-cart-btn" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded font-bold transition shadow-sm text-sm add-cart-btn">Add to Cart 🛒</button>
+                        <button id="modal-buy-btn" class="flex-1 bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded font-bold transition text-sm">Buy Now</button>
+                    </div>
+                    <button id="modal-wishlist-btn" class="w-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 py-2 rounded font-bold transition text-xs flex items-center justify-center gap-1.5">
+                        🤍 Save to Wishlist
+                    </button>
                 </div>
             </div>
         </div>
@@ -383,22 +401,25 @@
         let qvTimer;
         
         // 🚀 8.0 SECOND DELAY (Amazon-style hover experience)
-        function startQuickView(id, name, price, imgUrl, colorsList) {
+        function startQuickView(id, name, price, imgUrl, colorsList, description) {
             qvTimer = setTimeout(() => {
-                openQuickView(id, name, price, imgUrl, colorsList);
+                openQuickView(id, name, price, imgUrl, colorsList, description);
             }, 8000); 
         }
         function cancelQuickView() { clearTimeout(qvTimer); }
 
-        function openQuickView(id, name, price, imgUrl, colorsList) {
+        function openQuickView(id, name, price, imgUrl, colorsList, description) {
             document.getElementById('modal-title').innerText = name;
             document.getElementById('modal-price').innerText = '₹' + price;
             document.getElementById('modal-img').src = imgUrl ? imgUrl : 'https://via.placeholder.com/400?text=No+Image';
+            document.getElementById('modal-desc').innerText = description ? description : 'High quality premium product from Prizeless Store with assured warranty.';
             
             let fullUrl = `/product/${id}/`;
             document.getElementById('modal-img-link').href = fullUrl;
             document.getElementById('modal-title').onclick = function() { window.location.href = fullUrl; };
             document.getElementById('modal-cart-btn').setAttribute('onclick', `addToCartAjax('${id}', this)`);
+            document.getElementById('modal-wishlist-btn').setAttribute('onclick', `toggleWishlistAjax('${id}', this)`);
+            
             document.getElementById('modal-buy-btn').onclick = function() {
                 fetch(`/add-to-cart/${id}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' }}).then(() => window.location.href = "/checkout/");
             };
@@ -411,7 +432,7 @@
                     if(c) mc.innerHTML += `<div class="w-6 h-6 rounded-full border-2 border-gray-300 shadow cursor-pointer hover:scale-125 transition" style="background-color: ${c};" onclick="window.location.href='${fullUrl}'"></div>`;
                 });
             } else {
-                mc.innerHTML = '<span class="text-xs text-gray-400">Standard Package</span>';
+                mc.innerHTML = '<span class="text-xs text-gray-400">Standard Package Available</span>';
             }
             document.getElementById('quickViewModal').classList.remove('hidden');
         }
@@ -424,11 +445,11 @@
             });
         });
 
-// 💥 ULTIMATE FESTIVAL ANIMATIONS & CULTURAL EFFECTS ENGINE
+        // 💥 ULTIMATE FESTIVAL ANIMATIONS & CULTURAL EFFECTS ENGINE
         let activeFest = "{{ active_festival }}";
         let festAnim = "{{ fest_config.anim }}";
         let decorationLevel = "{{ decoration_level }}"; 
-        let multiplier = (decorationLevel === 'ultra') ? 1 : 0.4; // 5 din pehle halka, main din pe tagda animation!
+        let multiplier = (decorationLevel === 'ultra') ? 1 : 0.4; 
         
         if (activeFest !== "normal" && activeFest !== "auto" && decorationLevel !== "normal") {
             let festTitle = document.getElementById('fest-main-title');
