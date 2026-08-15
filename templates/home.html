@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
+        <script>tailwind.config = { darkMode: 'class' }</script>
         .slider-container { display: flex; transition: transform 0.5s ease-in-out; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
@@ -414,11 +415,15 @@
             });
         });
 
-        // 💥 DYNAMIC FESTIVAL ANIMATIONS (From Master Config)
+// 💥 DYNAMIC FESTIVAL ANIMATIONS (High/Ultra Logic & Holi Splash)
         let activeFest = "{{ active_festival }}";
         let festAnim = "{{ fest_config.anim }}";
+        let decorationLevel = "{{ decoration_level }}"; // 'high' (5 days before) or 'ultra' (exact day)
         
-        if (activeFest !== "normal") {
+        // Intensity Multiplier: High = 40% animation, Ultra = 100% animation
+        let multiplier = (decorationLevel === 'ultra') ? 1 : 0.4; 
+        
+        if (activeFest !== "normal" && activeFest !== "auto") {
             let festTitle = document.getElementById('fest-main-title');
             if (festTitle) {
                 festTitle.innerText = "{{ fest_config.emoji }} {{ fest_config.title }}";
@@ -429,30 +434,57 @@
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
             if (festAnim === 'fireworks') {
+                // 🎆 DIWALI ROCKETS
                 let duration = 10 * 1000;
                 let animationEnd = Date.now() + duration;
                 let defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
                 let interval = setInterval(function() {
                     let timeLeft = animationEnd - Date.now();
                     if (timeLeft <= 0) return clearInterval(interval);
-                    let particleCount = 40 * (timeLeft / duration);
+                    let particleCount = (40 * multiplier) * (timeLeft / duration);
                     confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
                     confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-                }, 250);
+                }, 400); // Thoda slow kiya taki screen na bhare
+
+            } else if (festAnim === 'splash') {
+                // 🎨 HOLI COLOR SPLASH (Rang ka chheenta)
+                let duration = 15 * 1000;
+                let animationEnd = Date.now() + duration;
+                let defaults = { startVelocity: 45, spread: 360, ticks: 80, zIndex: 100 };
+                function randomVibrantColor() { 
+                    return ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'][Math.floor(Math.random() * 6)]; 
+                }
+                let interval = setInterval(function() {
+                    let timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) return clearInterval(interval);
+                    // Pura screen par random jagah se rang footega
+                    confetti(Object.assign({}, defaults, { 
+                        particleCount: (60 * multiplier), 
+                        colors: [randomVibrantColor(), randomVibrantColor()],
+                        origin: { x: randomInRange(0.1, 0.9), y: randomInRange(0.1, 0.9) } 
+                    }));
+                }, 800);
+
             } else if (festAnim === 'snow') {
+                // ❄️ NEW YEAR / CHRISTMAS SNOW
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
                 (function frame() {
-                    confetti({ particleCount: 1, startVelocity: 0, ticks: 200, origin: { x: Math.random(), y: Math.random() - 0.2 }, colors: ['#ffffff'], shapes: ['circle'], gravity: randomInRange(0.4, 0.6), scalar: randomInRange(0.4, 1), drift: randomInRange(-0.4, 0.4), zIndex: 100 });
+                    confetti({ particleCount: (1 * multiplier), startVelocity: 0, ticks: 200, origin: { x: Math.random(), y: Math.random() - 0.2 }, colors: ['#ffffff'], shapes: ['circle'], gravity: randomInRange(0.4, 0.6), scalar: randomInRange(0.4, 1), drift: randomInRange(-0.4, 0.4), zIndex: 100 });
                     if (Date.now() < animationEnd) requestAnimationFrame(frame);
                 }());
+
             } else if (festAnim === 'confetti') {
+                // 🎉 NORMAL SIDE-DROP (Ganpati, Rakshabandhan, etc)
                 setInterval(() => {
-                    confetti({ particleCount: 35, angle: 60, spread: 55, origin: { x: 0 }, zIndex: 100 });
-                    confetti({ particleCount: 35, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 100 });
+                    confetti({ particleCount: (35 * multiplier), angle: 60, spread: 55, origin: { x: 0 }, zIndex: 100 });
+                    confetti({ particleCount: (35 * multiplier), angle: 120, spread: 55, origin: { x: 1 }, zIndex: 100 });
                 }, 3500);
             }
         }
+
+        // डार्क मोड फिक्स: अब यह HTML टैग पर 'dark' क्लास लगाएगा
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
 
         // 🎵 ROBUST MUSIC AUTOPLAY
         let musicStarted = false;

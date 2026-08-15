@@ -24,13 +24,17 @@ from django.db import connection # Make sure this is imported at the top
 # ==============================================================================
 # MASTER FESTIVAL ENGINE (Add new festivals here instantly!)
 # ==============================================================================
+# ==============================================================================
+# MASTER FESTIVAL ENGINE (Add new festivals here instantly!)
+# ==============================================================================
 FESTIVAL_CONFIG = {
+    'auto': {'title': '🤖 Auto-Pilot Mode (Date-based)', 'c1': '#4b5563', 'c2': '#1f2937', 'emoji': '⚙️', 'anim': 'none'},
     'normal': {'title': '🔥 Trending New Arrivals', 'c1': '#f97316', 'c2': '#ea580c', 'emoji': '✴', 'anim': 'none'},
     'independence': {'title': '🇮🇳 Independence Day Mega Sale', 'c1': '#FF9933', 'c2': '#138808', 'emoji': '🇮🇳', 'anim': 'confetti'},
     'rakshabandhan': {'title': '🎁 Raksha Bandhan Utsav', 'c1': '#e91e63', 'c2': '#ff4081', 'emoji': '🎁', 'anim': 'confetti'},
     'ganpati': {'title': '🌺 Ganesh Chaturthi Special', 'c1': '#ff5722', 'c2': '#ffc107', 'emoji': '🌺', 'anim': 'confetti'},
-    'holi': {'title': '🎨 Holi Splash Offers', 'c1': '#e040fb', 'c2': '#00e5ff', 'emoji': '🎨', 'anim': 'confetti'},
-    'diwali': {'title': '🪔 Mega Diwali Dhamaka', 'c1': '#800000', 'c2': '#FFD700', 'emoji': '🪔', 'anim': 'fireworks'},
+    'holi': {'title': '🎨 Holi Splash Offers', 'c1': '#e040fb', 'c2': '#00e5ff', 'emoji': '🎨', 'anim': 'splash'}, # ✨ HOLI KE LIYE NAYA SPLASH
+    'diwali': {'title': '🪔 Mega Diwali Dhamaka', 'c1': '#800000', 'c2': '#FFD700', 'emoji': '🪔', 'anim': 'fireworks'}, # 🎆 ROCKET FIREWORKS
     'newyear': {'title': '✨ Happy New Year Sale', 'c1': '#007bff', 'c2': '#00d2ff', 'emoji': '❄️', 'anim': 'snow'},
     'navratri': {'title': '💃 Navratri Special Deals', 'c1': '#d50000', 'c2': '#ffea00', 'emoji': '💃', 'anim': 'confetti'},
     'dussehra': {'title': '🏹 Dussehra Vijay Sale', 'c1': '#ff6d00', 'c2': '#ffd600', 'emoji': '🏹', 'anim': 'confetti'},
@@ -56,41 +60,81 @@ def store_home(request):
     
     setting, created = StoreSetting.objects.get_or_create(id=1)
 
-    # 🚀 DYNAMIC ENGINE: Dashboard decides the theme
-    auto_theme = getattr(setting, 'active_festival', 'normal')
-    fest_config = FESTIVAL_CONFIG.get(auto_theme, FESTIVAL_CONFIG['normal'])
+    # 🚀 HYBRID ENGINE: Auto-Pilot vs Manual
+    db_theme = getattr(setting, 'active_festival', 'auto')
+    today = datetime.date.today()
+    
+    computed_theme = 'normal'
+    decoration_level = 'normal' # Default none
+    festival_title = "🔥 Trending New Arrivals"
+    
+    # --- AUTO-PILOT DATE LOGIC ---
+    if today.month == 8 and 10 <= today.day <= 14:
+        computed_theme = 'independence'
+        decoration_level = 'high' # 5 Days before (Light animation)
+        festival_title = "🇮🇳 Independence Day Special Picks"
+    elif today.month == 8 and today.day == 15:
+        computed_theme = 'independence'
+        decoration_level = 'ultra' # Exact Day (Heavy animation)
+        festival_title = "🇮🇳 Happy Independence Day! Mega Celebration Live"
+        
+    elif today.month == 8 and 14 <= today.day <= 18:
+        computed_theme = 'rakshabandhan'
+        decoration_level = 'high'
+        festival_title = "🎁 Raksha Bandhan Gifting Specials"
+    elif today.month == 8 and today.day == 19:
+        computed_theme = 'rakshabandhan'
+        decoration_level = 'ultra'
+        festival_title = "🎁 Raksha Bandhan Maha Utsav Deals!"
+        
+    elif today.month == 10 and 27 <= today.day <= 31:
+        computed_theme = 'diwali'
+        decoration_level = 'high'
+        festival_title = "🪔 Diwali Pre-Sale Offers"
+    elif today.month == 11 and today.day == 1:
+        computed_theme = 'diwali'
+        decoration_level = 'ultra'
+        festival_title = "🪔 Mega Diwali Dhamaka Live!"
+        
+    elif today.month == 12 and 27 <= today.day <= 31:
+        computed_theme = 'newyear'
+        decoration_level = 'high'
+        festival_title = "❄️ Year-End Blockbuster Deals"
+    elif today.month == 1 and today.day == 1:
+        computed_theme = 'newyear'
+        decoration_level = 'ultra'
+        festival_title = "✨ Happy New Year Grand Sale!"
+
+    # Decide final theme
+    if db_theme == 'auto':
+        final_theme = computed_theme
+        is_festival_day = "true" if decoration_level != 'normal' else "false"
+    else:
+        final_theme = db_theme
+        festival_title = FESTIVAL_CONFIG[final_theme]['title']
+        decoration_level = 'ultra' # Manual is always Ultra for testing
+        is_festival_day = "true" if final_theme != 'normal' else "false"
+
+    fest_config = FESTIVAL_CONFIG.get(final_theme, FESTIVAL_CONFIG['normal'])
+    fest_config['title'] = festival_title # Apply dynamic title
 
     banners = Banner.objects.filter(is_active=True)
 
-    # DIRECT DATABASE FIX: Create table if it doesn't exist
     try:
         with connection.cursor() as cursor:
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS store_videoreview (
-                    id serial PRIMARY KEY,
-                    title varchar(255) NOT NULL,
-                    thumbnail_url varchar(200) NOT NULL,
-                    video_url varchar(200) NOT NULL,
-                    is_active boolean NOT NULL
-                );
-            """)
-    except Exception:
-        pass
+            cursor.execute("CREATE TABLE IF NOT EXISTS store_videoreview (id serial PRIMARY KEY, title varchar(255) NOT NULL, thumbnail_url varchar(200) NOT NULL, video_url varchar(200) NOT NULL, is_active boolean NOT NULL);")
+    except Exception: pass
 
-    try:
-        videos = VideoReview.objects.filter(is_active=True)
-    except Exception:
-        videos = [] # Fallback to prevent crash
+    try: videos = VideoReview.objects.filter(is_active=True)
+    except Exception: videos = [] 
 
-    # Fetch Music URL Safely from Database
     music_url_to_play = ""
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT festival_music_url FROM store_storesetting WHERE id = %s", [setting.id])
             row = cursor.fetchone()
             if row: music_url_to_play = row[0]
-    except Exception:
-        pass
+    except Exception: pass
 
     user_wishlist = []
     if request.user.is_authenticated:
@@ -103,8 +147,10 @@ def store_home(request):
         'categories': categories,
         'query': query, 
         'cart_count': cart_count, 
-        'active_festival': auto_theme, 
+        'active_festival': final_theme, 
         'fest_config': fest_config,
+        'decoration_level': decoration_level, # Bhej diya frontend ko intensity set karne ke liye
+        'is_festival_day': is_festival_day,
         'festival_music_url': music_url_to_play,
         'user_wishlist': user_wishlist,
         'banners': banners,
