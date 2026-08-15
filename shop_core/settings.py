@@ -21,6 +21,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    # Cloudinary app integration
+    'cloudinary_storage',
+    'cloudinary',
+
     # Tera custom e-commerce app
     'store',
 
@@ -66,7 +70,6 @@ WSGI_APPLICATION = 'shop_core.wsgi.application'
 
 # Database
 import dj_database_url
-import os
 
 DATABASES = {
     'default': dj_database_url.config(
@@ -137,39 +140,29 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
-# Permanent Google Login Fix
-SITE_ID = 1
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
-    }
-}
 # ==========================================================
 # REAL GMAIL SMTP SETTINGS (For Forgot Password & OTP)
 # ==========================================================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465                 # 587 hata kar 465 kar diya
-EMAIL_USE_SSL = True             # Naya SSL on kar diya
-EMAIL_USE_TLS = False            # Purana TLS band kar diya
+EMAIL_PORT = 465                 
+EMAIL_USE_SSL = True             
+EMAIL_USE_TLS = False            
 EMAIL_HOST_USER = 'prizelessstore@gmail.com'
-EMAIL_HOST_PASSWORD = 'prrhfktfttkpvddv' # Yahan apna password daal dena
-import os
+EMAIL_HOST_PASSWORD = 'prrhfktfttkpvddv'
+
+# ==========================================
+# CLOUDINARY PERMANENT IMAGE STORAGE CONFIG
+# ==========================================
 import cloudinary
 import cloudinary.uploader
 import cloudinary.storage
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('aqf3jfqp'),
-    'API_KEY': os.environ.get('693212298569993'),
-    'API_SECRET': os.environ.get('hiGEZ88ihBgo9nz5GKBANA1tm8Y'),
+    'CLOUD_NAME': 'aqf3ifqp',
+    'API_KEY': '693212298569993',
+    'API_SECRET': 'hiGEZ88ihBgo9nz5GKBANA1tm8Y',
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
