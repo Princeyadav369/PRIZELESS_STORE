@@ -161,3 +161,15 @@ EMAIL_USE_SSL = True             # Naya SSL on kar diya
 EMAIL_USE_TLS = False            # Purana TLS band kar diya
 EMAIL_HOST_USER = 'prizelessstore@gmail.com'
 EMAIL_HOST_PASSWORD = 'prrhfktfttkpvddv' # Yahan apna password daal dena
+import os
+import cloudinary
+import cloudinary.uploader
+import cloudinary.storage
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('aqf3jfqp'),
+    'API_KEY': os.environ.get('693212298569993'),
+    'API_SECRET': os.environ.get('hiGEZ88ihBgo9nz5GKBANA1tm8Y'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
