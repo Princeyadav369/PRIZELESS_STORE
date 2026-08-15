@@ -424,13 +424,13 @@
             });
         });
 
-     // 💥 ULTIMATE FESTIVAL ANIMATIONS & CULTURAL EFFECTS ENGINE
+// 💥 ULTIMATE FESTIVAL ANIMATIONS & CULTURAL EFFECTS ENGINE
         let activeFest = "{{ active_festival }}";
         let festAnim = "{{ fest_config.anim }}";
         let decorationLevel = "{{ decoration_level }}"; 
-        let multiplier = (decorationLevel === 'ultra') ? 1 : 0.4; 
+        let multiplier = (decorationLevel === 'ultra') ? 1 : 0.4; // 5 din pehle halka, main din pe tagda animation!
         
-        if (activeFest !== "normal" && activeFest !== "auto") {
+        if (activeFest !== "normal" && activeFest !== "auto" && decorationLevel !== "normal") {
             let festTitle = document.getElementById('fest-main-title');
             if (festTitle) {
                 festTitle.innerText = "{{ fest_config.emoji }} {{ fest_config.title }}";
@@ -440,15 +440,12 @@
             
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
-            // 1. DIWALI: Real Rocket Fireworks bursting in sky
             if (festAnim === 'fireworks') {
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
                 let interval = setInterval(function() {
                     let timeLeft = animationEnd - Date.now();
                     if (timeLeft <= 0) return clearInterval(interval);
-                    
-                    // Rocket launching from bottom and bursting at top
                     confetti({
                         particleCount: (50 * multiplier),
                         angle: randomInRange(55, 125),
@@ -460,38 +457,30 @@
                     });
                 }, 500);
 
-            // 2. HOLI: Multi-color Gulal Splash & Water Balloon Splatters across screen
             } else if (festAnim === 'splash') {
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
-                function randomHoliColors() { 
-                    return ['#ff0055', '#00ffcc', '#ffcc00', '#9400d3', '#ff4d4d', '#2ecc71', '#3498db', '#ff1493']; 
-                }
                 let interval = setInterval(function() {
                     let timeLeft = animationEnd - Date.now();
                     if (timeLeft <= 0) return clearInterval(interval);
-                    
-                    // Splattering random color drops everywhere like a water balloon burst
                     confetti({
                         particleCount: (70 * multiplier),
                         angle: 360,
                         spread: 360,
                         startVelocity: 35,
                         origin: { x: randomInRange(0.1, 0.9), y: randomInRange(0.15, 0.85) },
-                        colors: [randomHoliColors(), randomHoliColors(), randomHoliColors(), randomHoliColors()],
+                        colors: ['#ff0055', '#00ffcc', '#ffcc00', '#9400d3', '#ff4d4d', '#2ecc71'],
                         shapes: ['circle', 'square'],
-                        scalar: randomInRange(1.2, 2.0) // Bada chheenta effect
+                        scalar: randomInRange(1.2, 2.0)
                     });
                 }, 700);
 
-            // 3. GANPATI: Modak & Auspicious Flower Petals Shower
             } else if (festAnim === 'confetti' || festAnim === 'flower') {
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
                 let interval = setInterval(function() {
                     let timeLeft = animationEnd - Date.now();
                     if (timeLeft <= 0) return clearInterval(interval);
-                    
                     confetti({
                         particleCount: (40 * multiplier),
                         angle: 90,
@@ -504,7 +493,6 @@
                     });
                 }, 600);
 
-            // 4. NEW YEAR / CHRISTMAS: Gentle Snowfall
             } else if (festAnim === 'snow') {
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
@@ -524,7 +512,6 @@
                     if (Date.now() < animationEnd) requestAnimationFrame(frame);
                 }());
 
-            // 5. EID / OTHER FESTIVALS: Starry Glitter Stream
             } else if (festAnim === 'stars') {
                 let duration = 12 * 1000;
                 let animationEnd = Date.now() + duration;

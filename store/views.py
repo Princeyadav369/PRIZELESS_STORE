@@ -60,24 +60,46 @@ def store_home(request):
     
     setting, created = StoreSetting.objects.get_or_create(id=1)
 
-    # 🚀 HYBRID ENGINE: Auto-Pilot vs Manual
+    # 🚀 ACCURATE AUTO-PILOT VS MANUAL ENGINE
     db_theme = getattr(setting, 'active_festival', 'auto')
     today = datetime.date.today()
     
     computed_theme = 'normal'
-    decoration_level = 'normal' # Default none
+    decoration_level = 'normal' 
     festival_title = "🔥 Trending New Arrivals"
     
-    # --- AUTO-PILOT DATE LOGIC ---
-    if today.month == 8 and 10 <= today.day <= 14:
+    # --- STRICT DATE-BASED AUTO-PILOT LOGIC ---
+    # 1. Republic Day (Jan 26)
+    if today.month == 1 and 21 <= today.day <= 25:
+        computed_theme = 'republicday'
+        decoration_level = 'high'
+        festival_title = "🇮🇳 Republic Day Special Offers"
+    elif today.month == 1 and today.day == 26:
+        computed_theme = 'republicday'
+        decoration_level = 'ultra'
+        festival_title = "🇮🇳 Happy Republic Day Grand Sale Live!"
+
+    # 2. Holi (March window)
+    elif today.month == 3 and 1 <= today.day <= 9:
+        computed_theme = 'holi'
+        decoration_level = 'high'
+        festival_title = "🎨 Holi Splash Offers & Colors"
+    elif today.month == 3 and today.day == 10:
+        computed_theme = 'holi'
+        decoration_level = 'ultra'
+        festival_title = "🎨 Happy Holi! Mega Color Fest Live!"
+
+    # 3. Independence Day (August 15)
+    elif today.month == 8 and 10 <= today.day <= 14:
         computed_theme = 'independence'
-        decoration_level = 'high' # 5 Days before (Light animation)
+        decoration_level = 'high' 
         festival_title = "🇮🇳 Independence Day Special Picks"
     elif today.month == 8 and today.day == 15:
         computed_theme = 'independence'
-        decoration_level = 'ultra' # Exact Day (Heavy animation)
+        decoration_level = 'ultra' 
         festival_title = "🇮🇳 Happy Independence Day! Mega Celebration Live"
         
+    # 4. Raksha Bandhan (August 19 example window)
     elif today.month == 8 and 14 <= today.day <= 18:
         computed_theme = 'rakshabandhan'
         decoration_level = 'high'
@@ -87,6 +109,27 @@ def store_home(request):
         decoration_level = 'ultra'
         festival_title = "🎁 Raksha Bandhan Maha Utsav Deals!"
         
+    # 5. Ganesh Chaturthi
+    elif today.month == 9 and 1 <= today.day <= 6:
+        computed_theme = 'ganpati'
+        decoration_level = 'high'
+        festival_title = "🌺 Ganesh Chaturthi Specials"
+    elif today.month == 9 and today.day == 7:
+        computed_theme = 'ganpati'
+        decoration_level = 'ultra'
+        festival_title = "🌺 Ganesh Festival Maha Utsav Live!"
+
+    # 6. Durga Puja / Navratri
+    elif today.month == 10 and 1 <= today.day <= 9:
+        computed_theme = 'navratri'
+        decoration_level = 'high'
+        festival_title = "💃 Navratri Special Deals"
+    elif today.month == 10 and today.day == 10:
+        computed_theme = 'navratri'
+        decoration_level = 'ultra'
+        festival_title = "💃 Navratri Maha Dhamaka!"
+
+    # 7. Diwali
     elif today.month == 10 and 27 <= today.day <= 31:
         computed_theme = 'diwali'
         decoration_level = 'high'
@@ -95,7 +138,18 @@ def store_home(request):
         computed_theme = 'diwali'
         decoration_level = 'ultra'
         festival_title = "🪔 Mega Diwali Dhamaka Live!"
+
+    # 8. Christmas
+    elif today.month == 12 and 20 <= today.day <= 24:
+        computed_theme = 'christmas'
+        decoration_level = 'high'
+        festival_title = "🎄 Christmas Eve Special Offers"
+    elif today.month == 12 and today.day == 25:
+        computed_theme = 'christmas'
+        decoration_level = 'ultra'
+        festival_title = "🎄 Merry Christmas Grand Holiday Sale!"
         
+    # 9. New Year
     elif today.month == 12 and 27 <= today.day <= 31:
         computed_theme = 'newyear'
         decoration_level = 'high'
@@ -105,18 +159,18 @@ def store_home(request):
         decoration_level = 'ultra'
         festival_title = "✨ Happy New Year Grand Sale!"
 
-    # Decide final theme
+    # Decide final theme based on Auto vs Manual selection
     if db_theme == 'auto':
         final_theme = computed_theme
         is_festival_day = "true" if decoration_level != 'normal' else "false"
     else:
         final_theme = db_theme
         festival_title = FESTIVAL_CONFIG[final_theme]['title']
-        decoration_level = 'ultra' # Manual is always Ultra for testing
+        decoration_level = 'ultra' 
         is_festival_day = "true" if final_theme != 'normal' else "false"
 
     fest_config = FESTIVAL_CONFIG.get(final_theme, FESTIVAL_CONFIG['normal'])
-    fest_config['title'] = festival_title # Apply dynamic title
+    fest_config['title'] = festival_title 
 
     banners = Banner.objects.filter(is_active=True)
 
@@ -149,7 +203,7 @@ def store_home(request):
         'cart_count': cart_count, 
         'active_festival': final_theme, 
         'fest_config': fest_config,
-        'decoration_level': decoration_level, # Bhej diya frontend ko intensity set karne ke liye
+        'decoration_level': decoration_level, 
         'is_festival_day': is_festival_day,
         'festival_music_url': music_url_to_play,
         'user_wishlist': user_wishlist,
