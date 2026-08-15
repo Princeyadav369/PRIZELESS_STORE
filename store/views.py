@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
-from .models import Product, Category, Order, OrderItem, Notification, StoreSetting, Wishlist, Banner
+from .models import Product, Category, Order, OrderItem, Notification, StoreSetting, Wishlist, Banner,VideoReview
 from .forms import ProductForm, CategoryForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
