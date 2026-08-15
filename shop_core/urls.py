@@ -62,6 +62,8 @@ urlpatterns = [
     path('custom-dashboard/add-category/', views.add_category_view, name='add_category'),
     path('custom-dashboard/edit-product/<int:id>/', views.edit_product_view, name='edit_product'),
     path('custom-dashboard/delete-product/<int:id>/', views.delete_product_view, name='delete_product'),
+    path('dashboard/videos/', views.dashboard_videos, name='dashboard_videos'),
+path('dashboard/videos/delete/<int:id>/', views.delete_video, name='delete_video'),
     
     # Login/Logout
     path('custom-login/', views.custom_login, name='custom_login'),

@@ -398,6 +398,14 @@
     </div>
 
     <script>
+        // 📱 MOBILE MENU TOGGLE FIX
+        function toggleMobileMenu() {
+            let menu = document.getElementById('mobile-menu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+
         let qvTimer;
         
         // 🚀 8.0 SECOND DELAY (Amazon-style hover experience)

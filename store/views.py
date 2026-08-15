@@ -19,11 +19,8 @@ import os
 import traceback
 import datetime
 import datetime
-from django.db import connection # Make sure this is imported at the top
+from django.db import connection 
 
-# ==============================================================================
-# MASTER FESTIVAL ENGINE (Add new festivals here instantly!)
-# ==============================================================================
 # ==============================================================================
 # MASTER FESTIVAL ENGINE (Add new festivals here instantly!)
 # ==============================================================================
@@ -33,8 +30,8 @@ FESTIVAL_CONFIG = {
     'independence': {'title': '🇮🇳 Independence Day Mega Sale', 'c1': '#FF9933', 'c2': '#138808', 'emoji': '🇮🇳', 'anim': 'confetti'},
     'rakshabandhan': {'title': '🎁 Raksha Bandhan Utsav', 'c1': '#e91e63', 'c2': '#ff4081', 'emoji': '🎁', 'anim': 'confetti'},
     'ganpati': {'title': '🌺 Ganesh Chaturthi Special', 'c1': '#ff5722', 'c2': '#ffc107', 'emoji': '🌺', 'anim': 'confetti'},
-    'holi': {'title': '🎨 Holi Splash Offers', 'c1': '#e040fb', 'c2': '#00e5ff', 'emoji': '🎨', 'anim': 'splash'}, # ✨ HOLI KE LIYE NAYA SPLASH
-    'diwali': {'title': '🪔 Mega Diwali Dhamaka', 'c1': '#800000', 'c2': '#FFD700', 'emoji': '🪔', 'anim': 'fireworks'}, # 🎆 ROCKET FIREWORKS
+    'holi': {'title': '🎨 Holi Splash Offers', 'c1': '#e040fb', 'c2': '#00e5ff', 'emoji': '🎨', 'anim': 'splash'},
+    'diwali': {'title': '🪔 Mega Diwali Dhamaka', 'c1': '#800000', 'c2': '#FFD700', 'emoji': '🪔', 'anim': 'fireworks'},
     'newyear': {'title': '✨ Happy New Year Sale', 'c1': '#007bff', 'c2': '#00d2ff', 'emoji': '❄️', 'anim': 'snow'},
     'navratri': {'title': '💃 Navratri Special Deals', 'c1': '#d50000', 'c2': '#ffea00', 'emoji': '💃', 'anim': 'confetti'},
     'dussehra': {'title': '🏹 Dussehra Vijay Sale', 'c1': '#ff6d00', 'c2': '#ffd600', 'emoji': '🏹', 'anim': 'confetti'},
@@ -60,7 +57,6 @@ def store_home(request):
     
     setting, created = StoreSetting.objects.get_or_create(id=1)
 
-    # 🚀 100% ACCURATE DATE-BASED AUTO-PILOT ENGINE
     db_theme = getattr(setting, 'active_festival', 'auto')
     today = datetime.date.today()
     
@@ -68,9 +64,6 @@ def store_home(request):
     decoration_level = 'normal' 
     festival_title = "🔥 Trending New Arrivals"
     
-    # --- STRICT DATE RANGES FOR EACH FESTIVAL ---
-    
-    # 1. Republic Day (Jan 26) -> 21 to 25 Jan (High), 26 Jan (Ultra)
     if today.month == 1 and 21 <= today.day <= 25:
         computed_theme = 'republicday'
         decoration_level = 'high'
@@ -80,7 +73,6 @@ def store_home(request):
         decoration_level = 'ultra'
         festival_title = "🇮🇳 Happy Republic Day Grand Sale Live!"
 
-    # 2. Holi -> 5 to 9 March (High), 10 March / Holi Day (Ultra) - Note: Date changes yearly, keeping standard window
     elif today.month == 3 and 5 <= today.day <= 9:
         computed_theme = 'holi'
         decoration_level = 'high'
@@ -90,7 +82,6 @@ def store_home(request):
         decoration_level = 'ultra'
         festival_title = "🎨 Happy Holi! Mega Color Fest Live!"
 
-    # 3. Independence Day (August 15) -> 10 to 14 Aug (High), 15 Aug (Ultra)
     elif today.month == 8 and 10 <= today.day <= 14:
         computed_theme = 'independence'
         decoration_level = 'high' 
@@ -100,7 +91,6 @@ def store_home(request):
         decoration_level = 'ultra' 
         festival_title = "🇮🇳 Happy Independence Day! Mega Celebration Live"
         
-    # 4. Raksha Bandhan (August 28) -> 23 to 27 Aug (High), 28 Aug (Ultra)
     elif today.month == 8 and 23 <= today.day <= 27:
         computed_theme = 'rakshabandhan'
         decoration_level = 'high'
@@ -110,7 +100,6 @@ def store_home(request):
         decoration_level = 'ultra'
         festival_title = "🎁 Raksha Bandhan Maha Utsav Deals!"
         
-    # 5. Ganesh Chaturthi -> Sept 1 to 6 (High), Sept 7 (Ultra)
     elif today.month == 9 and 1 <= today.day <= 6:
         computed_theme = 'ganpati'
         decoration_level = 'high'
@@ -120,7 +109,6 @@ def store_home(request):
         decoration_level = 'ultra'
         festival_title = "🌺 Ganesh Festival Maha Utsav Live!"
 
-    # 6. Durga Puja / Navratri -> Oct 5 to 11 (High), Oct 12 (Ultra)
     elif today.month == 10 and 5 <= today.day <= 11:
         computed_theme = 'navratri'
         decoration_level = 'high'
@@ -130,7 +118,6 @@ def store_home(request):
         decoration_level = 'ultra'
         festival_title = "💃 Navratri Maha Dhamaka!"
 
-    # 7. Diwali -> Oct 27 to 31 (High), Nov 1 (Ultra)
     elif today.month == 10 and 27 <= today.day <= 31:
         computed_theme = 'diwali'
         decoration_level = 'high'
@@ -140,7 +127,6 @@ def store_home(request):
         decoration_level = 'ultra'
         festival_title = "🪔 Mega Diwali Dhamaka Live!"
 
-    # 8. Christmas -> Dec 20 to 24 (High), Dec 25 (Ultra)
     elif today.month == 12 and 20 <= today.day <= 24:
         computed_theme = 'christmas'
         decoration_level = 'high'
@@ -150,7 +136,6 @@ def store_home(request):
         decoration_level = 'ultra'
         festival_title = "🎄 Merry Christmas Grand Holiday Sale!"
         
-    # 9. New Year -> Dec 27 to 31 (High), Jan 1 (Ultra)
     elif today.month == 12 and 27 <= today.day <= 31:
         computed_theme = 'newyear'
         decoration_level = 'high'
@@ -160,7 +145,6 @@ def store_home(request):
         decoration_level = 'ultra'
         festival_title = "✨ Happy New Year Grand Sale!"
 
-    # Final Theme Selection Logic
     if db_theme == 'auto':
         final_theme = computed_theme
         is_festival_day = "true" if decoration_level != 'normal' else "false"
@@ -350,16 +334,15 @@ def checkout_view(request):
     if request.method == 'POST':
         first_name = request.POST.get('first_name') or request.user.first_name or 'Customer'
         last_name = request.POST.get('last_name', '')
-        email = request.user.email if request.user.is_authenticated else request.POST.get('email', '')
+        email = request.POST.get('email') or request.user.email
         phone = request.POST.get('phone', 'N/A')
         
-        # Address step by step
         room_no = request.POST.get('room_no', '')
         street = request.POST.get('street', '')
         city = request.POST.get('city', '')
         pincode = request.POST.get('pincode', '')
         
-        full_address = f"{room_no}, {street}"
+        full_address = request.POST.get('address', f"{room_no}, {street}".strip())
         
         order = Order.objects.create(
             first_name=first_name,
@@ -416,12 +399,32 @@ def payment_page_view(request):
             else:
                 order.status = 'Confirmed'
                 order.save()
+                
+                # 🔥 ORDER CONFIRMATION EMAIL SENDER
+                if order.email:
+                    try:
+                        subject = 'Order Confirmed - Prizeless Store'
+                        message = f"Hi {order.first_name},\n\nYour order has been successfully placed and confirmed! Thank you for shopping with Prizeless Store.\n\nOrder ID: #{order.id}\nTotal Amount: ₹{order.total_amount}\n\nWe will notify you once it ships."
+                        send_mail(subject, message, 'prizelessstore@gmail.com', [order.email], fail_silently=False)
+                    except Exception as e:
+                        print("Email sending failed:", e)
+
                 del request.session['pending_order_id']
                 return redirect('order_success', order_id=order.id)
                 
         elif action == 'confirm_upi':
             order.status = 'Confirmed'
             order.save()
+            
+            # 🔥 ORDER CONFIRMATION EMAIL SENDER (UPI)
+            if order.email:
+                try:
+                    subject = 'Order Confirmed - Prizeless Store'
+                    message = f"Hi {order.first_name},\n\nYour order has been successfully placed and confirmed! Thank you for shopping with Prizeless Store.\n\nOrder ID: #{order.id}\nTotal Amount: ₹{order.total_amount}\n\nWe will notify you once it ships."
+                    send_mail(subject, message, 'prizelessstore@gmail.com', [order.email], fail_silently=False)
+                except Exception as e:
+                    print("Email sending failed:", e)
+
             del request.session['pending_order_id']
             return redirect('order_success', order_id=order.id)
             
@@ -466,7 +469,6 @@ def my_orders_view(request):
 def account_settings_view(request):
     return render(request, 'account_settings.html')
 
-# 🚀 CUSTOM DASHBOARD REAL ENGINE LINKING
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def custom_dashboard(request):
     from django.db import connection
@@ -524,7 +526,7 @@ def custom_dashboard(request):
         'completed_orders': completed_orders, 'canceled_orders': canceled_orders, 
         'recent_notifications': recent_notifications, 'setting': setting,
         'current_music_url': current_music_url,
-        'festivals': FESTIVAL_CONFIG # Send to dropdown
+        'festivals': FESTIVAL_CONFIG 
     })
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
@@ -758,3 +760,29 @@ def reset_new_password_view(request):
         return redirect('login')
         
     return render(request, 'reset_password.html')
+@user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
+def dashboard_videos(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("CREATE TABLE IF NOT EXISTS store_videoreview (id serial PRIMARY KEY, title varchar(255) NOT NULL, thumbnail_url varchar(200) NOT NULL, video_url varchar(200) NOT NULL, is_active boolean NOT NULL);")
+    except Exception: pass
+
+    videos = VideoReview.objects.all().order_by('-id')
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        thumbnail_url = request.POST.get('thumbnail_url')
+        video_url = request.POST.get('video_url')
+        
+        if title and video_url:
+            VideoReview.objects.create(title=title, thumbnail_url=thumbnail_url, video_url=video_url, is_active=True)
+            return redirect('dashboard_videos')
+            
+    return render(request, 'dashboard_videos.html', {'videos': videos})
+
+@user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
+def delete_video(request, id):
+    if request.method == 'POST':
+        video = get_object_or_404(VideoReview, id=id)
+        video.delete()
+    return redirect('dashboard_videos')

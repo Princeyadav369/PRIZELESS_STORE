@@ -104,6 +104,11 @@
             </div>
 
             <div class="form-group">
+                <label for="email">Email Address (For Order Confirmation)</label>
+                <input type="email" id="email" name="email" value="{{ request.user.email }}" required placeholder="Enter your email">
+            </div>
+
+            <div class="form-group">
                 <label for="phone">Phone Number</label>
                 <input type="text" id="phone" name="phone" required placeholder="Enter 10-digit mobile number">
             </div>
