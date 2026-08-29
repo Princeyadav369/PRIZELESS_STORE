@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
-from .models import Product, Category, Order, OrderItem, Notification, StoreSetting, Wishlist, Banner,VideoReview
+from .models import Product, Category, Order, OrderItem, Notification, StoreSetting, Wishlist, Banner, VideoReview, ProductGallery
 from .forms import ProductForm, CategoryForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -18,11 +18,10 @@ import urllib.parse
 import os
 import traceback
 import datetime
-import datetime
 from django.db import connection 
 
 # ==============================================================================
-# MASTER FESTIVAL ENGINE (Add new festivals here instantly!)
+# MASTER FESTIVAL ENGINE 
 # ==============================================================================
 FESTIVAL_CONFIG = {
     'auto': {'title': '🤖 Auto-Pilot Mode (Date-based)', 'c1': '#4b5563', 'c2': '#1f2937', 'emoji': '⚙️', 'anim': 'none'},
@@ -400,7 +399,6 @@ def payment_page_view(request):
                 order.status = 'Confirmed'
                 order.save()
                 
-                # 🔥 ORDER CONFIRMATION EMAIL SENDER
                 if order.email:
                     try:
                         subject = 'Order Confirmed - Prizeless Store'
@@ -416,7 +414,6 @@ def payment_page_view(request):
             order.status = 'Confirmed'
             order.save()
             
-            # 🔥 ORDER CONFIRMATION EMAIL SENDER (UPI)
             if order.email:
                 try:
                     subject = 'Order Confirmed - Prizeless Store'
@@ -551,17 +548,45 @@ def delete_banner(request, id):
         banner.delete()
     return redirect('dashboard_banners')
 
+# 🚀 MULTIPLE IMAGE UPLOAD ADDED HERE
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def add_product_view(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            product = form.save()
+            
+            # Save multiple gallery images
+            if request.FILES.getlist('gallery_images'):
+                for img in request.FILES.getlist('gallery_images'):
+                    ProductGallery.objects.create(product=product, image=img)
+                    
             return redirect('custom_dashboard')
     else:
         form = ProductForm()
         
     return render(request, 'add_product.html', {'form': form})
+
+# 🚀 MULTIPLE IMAGE UPLOAD ADDED HERE TOO
+@user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
+def edit_product_view(request, id):
+    product = get_object_or_404(Product, id=id)
+    
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            product = form.save()
+            
+            # Save multiple gallery images
+            if request.FILES.getlist('gallery_images'):
+                for img in request.FILES.getlist('gallery_images'):
+                    ProductGallery.objects.create(product=product, image=img)
+                    
+            return redirect('custom_dashboard')
+    else:
+        form = ProductForm(instance=product)
+        
+    return render(request, 'edit_product.html', {'form': form, 'product': product})
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def add_category_view(request):
@@ -572,22 +597,7 @@ def add_category_view(request):
             return redirect('custom_dashboard')
     else:
         form = CategoryForm()
-        
     return render(request, 'add_category.html', {'form': form})
-
-@user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
-def edit_product_view(request, id):
-    product = get_object_or_404(Product, id=id)
-    
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            form.save()
-            return redirect('custom_dashboard')
-    else:
-        form = ProductForm(instance=product)
-        
-    return render(request, 'edit_product.html', {'form': form, 'product': product})
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def delete_product_view(request, id):
@@ -760,6 +770,7 @@ def reset_new_password_view(request):
         return redirect('login')
         
     return render(request, 'reset_password.html')
+
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def dashboard_videos(request):
     try:

@@ -9,7 +9,7 @@
     <style>
         body { background-color: #f1f3f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        /* 🔍 AMAZON STYLE ZOOM CSS */
+        /* 🛒 AMAZON STYLE ZOOM CSS */
         .zoom-container {
             position: relative;
             overflow: hidden;
@@ -39,6 +39,10 @@
         /* Trust Badges */
         .trust-badge { display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 11px; color: #333; font-weight: 600; }
         .trust-badge i { margin-bottom: 5px; }
+
+        /* Hide Scrollbar for thumbnails */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body>
@@ -60,6 +64,8 @@
         <div class="bg-white rounded-lg shadow-sm flex flex-col md:flex-row p-4 md:p-8 gap-8">
             
             <div class="w-full md:w-5/12 flex flex-col gap-4">
+                
+                <!-- MAIN IMAGE -->
                 <div class="zoom-container" id="zoom-container">
                     {% if product.image %}
                         <img src="{{ product.image.url }}" alt="{{ product.name }}" class="zoom-image" id="zoom-image">
@@ -68,6 +74,21 @@
                     {% endif %}
                 </div>
                 
+                <!-- MULTIPLE IMAGES THUMBNAIL GALLERY -->
+                <div class="flex gap-3 mt-1 overflow-x-auto hide-scroll pb-2">
+                    {% if product.image %}
+                    <div class="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 border-orange-500 cursor-pointer thumbnail-img transition" onclick="changeMainImage('{{ product.image.url }}', this)">
+                        <img src="{{ product.image.url }}" class="w-full h-full object-cover">
+                    </div>
+                    {% endif %}
+                    
+                    {% for gal in product.gallery_images.all %}
+                    <div class="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 border-transparent hover:border-orange-500 cursor-pointer thumbnail-img transition" onclick="changeMainImage('{{ gal.image.url }}', this)">
+                        <img src="{{ gal.image.url }}" class="w-full h-full object-cover">
+                    </div>
+                    {% endfor %}
+                </div>
+
                 <div class="flex gap-4 mt-2">
                     <button onclick="addToCartAjax('{{ product.id }}')" id="cart-btn" class="w-1/2 btn-cart py-3 rounded-sm font-bold text-sm md:text-lg shadow-md flex items-center justify-center gap-2">
                         <i class="fa-solid fa-cart-shopping"></i> ADD TO CART
@@ -93,7 +114,7 @@
                 <div class="mb-6 bg-gray-50 border border-gray-200 p-4 rounded-lg">
                     <h3 class="font-bold text-gray-500 mb-3 text-xs uppercase tracking-wider">Select Available Color:</h3>
                     <div class="flex gap-3" id="detail-colors" data-raw-colors="{{ product.colors }}">
-                        </div>
+                    </div>
                 </div>
                 {% endif %}
 
@@ -164,7 +185,21 @@
     </div>
 
     <script>
-        // 🔍 IMAGE ZOOM LOGIC
+        // 🚀 CHANGE MAIN IMAGE ON THUMBNAIL CLICK
+        function changeMainImage(url, element) {
+            const zoomImage = document.getElementById('zoom-image');
+            if (zoomImage) zoomImage.src = url;
+            
+            // Update active border color
+            document.querySelectorAll('.thumbnail-img').forEach(el => {
+                el.classList.remove('border-orange-500');
+                el.classList.add('border-transparent');
+            });
+            element.classList.remove('border-transparent');
+            element.classList.add('border-orange-500');
+        }
+
+        // 🛒 IMAGE ZOOM LOGIC
         const zoomContainer = document.getElementById('zoom-container');
         const zoomImage = document.getElementById('zoom-image');
 
@@ -225,13 +260,12 @@
             .catch(error => console.error('Error:', error));
         }
 
-        // BUY NOW FUNCTION (Adds to cart silently, then sends to checkout)
+        // BUY NOW FUNCTION
         function buyNow(productId) {
             fetch(`/add-to-cart/${productId}/`, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(() => {
-                // Direct user to checkout immediately after adding to cart
                 window.location.href = "{% url 'checkout' %}";
             })
             .catch(error => console.error('Error:', error));
