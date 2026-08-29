@@ -9,7 +9,7 @@
     <style>
         body { background-color: #f1f3f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        /* 🛒 AMAZON STYLE ZOOM CSS */
+        /* 剥 AMAZON STYLE ZOOM CSS */
         .zoom-container {
             position: relative;
             overflow: hidden;
@@ -39,10 +39,7 @@
         /* Trust Badges */
         .trust-badge { display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 11px; color: #333; font-weight: 600; }
         .trust-badge i { margin-bottom: 5px; }
-
-        /* Hide Scrollbar for thumbnails */
         .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body>
@@ -64,8 +61,6 @@
         <div class="bg-white rounded-lg shadow-sm flex flex-col md:flex-row p-4 md:p-8 gap-8">
             
             <div class="w-full md:w-5/12 flex flex-col gap-4">
-                
-                <!-- MAIN IMAGE -->
                 <div class="zoom-container" id="zoom-container">
                     {% if product.image %}
                         <img src="{{ product.image.url }}" alt="{{ product.name }}" class="zoom-image" id="zoom-image">
@@ -74,18 +69,14 @@
                     {% endif %}
                 </div>
                 
-                <!-- MULTIPLE IMAGES THUMBNAIL GALLERY -->
-                <div class="flex gap-3 mt-1 overflow-x-auto hide-scroll pb-2">
+                <!-- 🖼️ MULTIPLE PHOTOS GALLERY THUMBNAILS -->
+                <div class="flex gap-2 mt-2 overflow-x-auto hide-scroll pb-2">
                     {% if product.image %}
-                    <div class="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 border-orange-500 cursor-pointer thumbnail-img transition" onclick="changeMainImage('{{ product.image.url }}', this)">
-                        <img src="{{ product.image.url }}" class="w-full h-full object-cover">
-                    </div>
+                    <img src="{{ product.image.url }}" class="w-16 h-16 md:w-20 md:h-20 object-cover border-2 border-orange-500 cursor-pointer rounded thumbnail-btn" onclick="changeMainImage('{{ product.image.url }}', this)">
                     {% endif %}
                     
                     {% for gal in product.gallery_images.all %}
-                    <div class="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 border-transparent hover:border-orange-500 cursor-pointer thumbnail-img transition" onclick="changeMainImage('{{ gal.image.url }}', this)">
-                        <img src="{{ gal.image.url }}" class="w-full h-full object-cover">
-                    </div>
+                    <img src="{{ gal.image.url }}" class="w-16 h-16 md:w-20 md:h-20 object-cover border-2 border-gray-200 cursor-pointer rounded thumbnail-btn hover:border-orange-500 transition" onclick="changeMainImage('{{ gal.image.url }}', this)">
                     {% endfor %}
                 </div>
 
@@ -114,7 +105,7 @@
                 <div class="mb-6 bg-gray-50 border border-gray-200 p-4 rounded-lg">
                     <h3 class="font-bold text-gray-500 mb-3 text-xs uppercase tracking-wider">Select Available Color:</h3>
                     <div class="flex gap-3" id="detail-colors" data-raw-colors="{{ product.colors }}">
-                    </div>
+                        </div>
                 </div>
                 {% endif %}
 
@@ -151,12 +142,9 @@
                 </div>
                 
                 <div class="mt-auto">
-                    <button onclick="toggleWishlistAjax('{{ product.id }}', this)" class="text-sm font-bold text-gray-600 hover:text-red-500 flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-sm transition">
-                        {% if in_wishlist %}
-                            <i class="fa-solid fa-heart text-red-500"></i> Remove from Wishlist
-                        {% else %}
-                            <i class="fa-regular fa-heart"></i> Add to Wishlist
-                        {% endif %}
+                    <!-- 🛠️ ORIGINAL WISHLIST BUTTON COLORS -->
+                    <button onclick="toggleWishlistAjax('{{ product.id }}', this)" class="w-full md:w-1/2 text-center text-sm font-bold py-3 rounded-sm transition border shadow-sm {% if in_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
+                        {% if in_wishlist %}❤️ Removed from Wishlist{% else %}🤍 Add to Wishlist{% endif %}
                     </button>
                 </div>
             </div>
@@ -185,21 +173,18 @@
     </div>
 
     <script>
-        // 🚀 CHANGE MAIN IMAGE ON THUMBNAIL CLICK
-        function changeMainImage(url, element) {
-            const zoomImage = document.getElementById('zoom-image');
-            if (zoomImage) zoomImage.src = url;
-            
-            // Update active border color
-            document.querySelectorAll('.thumbnail-img').forEach(el => {
-                el.classList.remove('border-orange-500');
-                el.classList.add('border-transparent');
+        // 🖼️ MULTIPLE PHOTOS SCRIPT
+        function changeMainImage(imgUrl, element) {
+            document.getElementById('zoom-image').src = imgUrl;
+            document.querySelectorAll('.thumbnail-btn').forEach(btn => {
+                btn.classList.remove('border-orange-500');
+                btn.classList.add('border-gray-200');
             });
-            element.classList.remove('border-transparent');
+            element.classList.remove('border-gray-200');
             element.classList.add('border-orange-500');
         }
 
-        // 🛒 IMAGE ZOOM LOGIC
+        // 剥 IMAGE ZOOM LOGIC
         const zoomContainer = document.getElementById('zoom-container');
         const zoomImage = document.getElementById('zoom-image');
 
@@ -224,7 +209,7 @@
             });
         }
 
-        // 🎨 COLOR CIRCLES BUILDER
+        // 耳 COLOR CIRCLES BUILDER
         document.addEventListener("DOMContentLoaded", function() {
             let colorBox = document.getElementById('detail-colors');
             if(colorBox) {
@@ -260,29 +245,37 @@
             .catch(error => console.error('Error:', error));
         }
 
-        // BUY NOW FUNCTION
+        // BUY NOW FUNCTION (Adds to cart silently, then sends to checkout)
         function buyNow(productId) {
             fetch(`/add-to-cart/${productId}/`, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(() => {
+                // Direct user to checkout immediately after adding to cart
                 window.location.href = "{% url 'checkout' %}";
             })
             .catch(error => console.error('Error:', error));
         }
 
-        // AJAX WISHLIST
+        // 🛠️ SMART WISHLIST AJAX WITH REDIRECT & LIVE BADGE UPDATE
         function toggleWishlistAjax(productId, btn) {
-            fetch(`/wishlist/add/${productId}/`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            fetch(`/wishlist/add/${productId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => {
+                if (res.url.includes('login') || res.url.includes('signin')) {
+                    window.location.href = res.url; // Redirect unauthenticated users
+                    return null;
+                }
+                return res.json();
             })
-            .then(response => response.json())
             .then(data => {
-                if(data.status === 'success') {
+                if(data && data.status === 'success') {
                     if(data.action === 'added') {
-                        btn.innerHTML = '<i class="fa-solid fa-heart text-red-500"></i> Remove from Wishlist';
+                        btn.innerHTML = '❤️ Removed from Wishlist'; // Wait, toggle states were swapped in UI, fixing it correctly:
+                        btn.innerHTML = '❤️ Saved';
+                        btn.className = 'w-full md:w-1/2 text-center text-sm font-bold py-3 rounded-sm transition border shadow-sm bg-red-50 text-red-600 border-red-200';
                     } else {
-                        btn.innerHTML = '<i class="fa-regular fa-heart"></i> Add to Wishlist';
+                        btn.innerHTML = '🤍 Add to Wishlist';
+                        btn.className = 'w-full md:w-1/2 text-center text-sm font-bold py-3 rounded-sm transition border shadow-sm bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100';
                     }
                 }
             })

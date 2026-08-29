@@ -20,9 +20,6 @@ import traceback
 import datetime
 from django.db import connection 
 
-# ==============================================================================
-# MASTER FESTIVAL ENGINE 
-# ==============================================================================
 FESTIVAL_CONFIG = {
     'auto': {'title': '🤖 Auto-Pilot Mode (Date-based)', 'c1': '#4b5563', 'c2': '#1f2937', 'emoji': '⚙️', 'anim': 'none'},
     'normal': {'title': '🔥 Trending New Arrivals', 'c1': '#f97316', 'c2': '#ea580c', 'emoji': '✴', 'anim': 'none'},
@@ -71,7 +68,6 @@ def store_home(request):
         computed_theme = 'republicday'
         decoration_level = 'ultra'
         festival_title = "🇮🇳 Happy Republic Day Grand Sale Live!"
-
     elif today.month == 3 and 5 <= today.day <= 9:
         computed_theme = 'holi'
         decoration_level = 'high'
@@ -80,7 +76,6 @@ def store_home(request):
         computed_theme = 'holi'
         decoration_level = 'ultra'
         festival_title = "🎨 Happy Holi! Mega Color Fest Live!"
-
     elif today.month == 8 and 10 <= today.day <= 14:
         computed_theme = 'independence'
         decoration_level = 'high' 
@@ -89,7 +84,6 @@ def store_home(request):
         computed_theme = 'independence'
         decoration_level = 'ultra' 
         festival_title = "🇮🇳 Happy Independence Day! Mega Celebration Live"
-        
     elif today.month == 8 and 23 <= today.day <= 27:
         computed_theme = 'rakshabandhan'
         decoration_level = 'high'
@@ -98,7 +92,6 @@ def store_home(request):
         computed_theme = 'rakshabandhan'
         decoration_level = 'ultra'
         festival_title = "🎁 Raksha Bandhan Maha Utsav Deals!"
-        
     elif today.month == 9 and 1 <= today.day <= 6:
         computed_theme = 'ganpati'
         decoration_level = 'high'
@@ -107,7 +100,6 @@ def store_home(request):
         computed_theme = 'ganpati'
         decoration_level = 'ultra'
         festival_title = "🌺 Ganesh Festival Maha Utsav Live!"
-
     elif today.month == 10 and 5 <= today.day <= 11:
         computed_theme = 'navratri'
         decoration_level = 'high'
@@ -116,7 +108,6 @@ def store_home(request):
         computed_theme = 'navratri'
         decoration_level = 'ultra'
         festival_title = "💃 Navratri Maha Dhamaka!"
-
     elif today.month == 10 and 27 <= today.day <= 31:
         computed_theme = 'diwali'
         decoration_level = 'high'
@@ -125,7 +116,6 @@ def store_home(request):
         computed_theme = 'diwali'
         decoration_level = 'ultra'
         festival_title = "🪔 Mega Diwali Dhamaka Live!"
-
     elif today.month == 12 and 20 <= today.day <= 24:
         computed_theme = 'christmas'
         decoration_level = 'high'
@@ -134,7 +124,6 @@ def store_home(request):
         computed_theme = 'christmas'
         decoration_level = 'ultra'
         festival_title = "🎄 Merry Christmas Grand Holiday Sale!"
-        
     elif today.month == 12 and 27 <= today.day <= 31:
         computed_theme = 'newyear'
         decoration_level = 'high'
@@ -548,26 +537,20 @@ def delete_banner(request, id):
         banner.delete()
     return redirect('dashboard_banners')
 
-# 🚀 MULTIPLE IMAGE UPLOAD ADDED HERE
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def add_product_view(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save()
-            
-            # Save multiple gallery images
-            if request.FILES.getlist('gallery_images'):
-                for img in request.FILES.getlist('gallery_images'):
-                    ProductGallery.objects.create(product=product, image=img)
-                    
+            for f in request.FILES.getlist('gallery_images'):
+                ProductGallery.objects.create(product=product, image=f)
             return redirect('custom_dashboard')
     else:
         form = ProductForm()
         
     return render(request, 'add_product.html', {'form': form})
 
-# 🚀 MULTIPLE IMAGE UPLOAD ADDED HERE TOO
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')
 def edit_product_view(request, id):
     product = get_object_or_404(Product, id=id)
@@ -576,12 +559,8 @@ def edit_product_view(request, id):
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             product = form.save()
-            
-            # Save multiple gallery images
-            if request.FILES.getlist('gallery_images'):
-                for img in request.FILES.getlist('gallery_images'):
-                    ProductGallery.objects.create(product=product, image=img)
-                    
+            for f in request.FILES.getlist('gallery_images'):
+                ProductGallery.objects.create(product=product, image=f)
             return redirect('custom_dashboard')
     else:
         form = ProductForm(instance=product)
@@ -597,6 +576,7 @@ def add_category_view(request):
             return redirect('custom_dashboard')
     else:
         form = CategoryForm()
+        
     return render(request, 'add_category.html', {'form': form})
 
 @user_passes_test(lambda u: u.is_staff, login_url='/seller-login/')

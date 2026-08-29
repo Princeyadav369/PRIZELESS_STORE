@@ -3,26 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Product - Prizeless Store</title>
+    <title>Add Product - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen py-10">
-
-    <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-[450px] border border-gray-700 mx-4">
-        <h1 class="text-2xl font-bold mb-2 text-center">Add New Product</h1>
-        <p class="text-gray-400 text-sm mb-6 text-center">Fill in the details to add a product to your store</p>
-
-        <form method="POST" enctype="multipart/form-data" class="space-y-4">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-lg transition shadow-lg mt-4 cursor-pointer">
-                Save Product & Go Live 🚀
-            </button>
-        </form>
+<body class="bg-gray-100 font-sans p-4 md:p-10">
+    
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
         
-        <div class="mt-4 text-center">
-            <a href="/custom-dashboard/" class="text-sm text-gray-400 hover:text-white transition">&larr; Back to Dashboard</a>
+        <div class="bg-gray-900 text-white p-6 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold">📦 Add New Product / Combo</h2>
+                <p class="text-gray-300 text-sm mt-1">Fill the details and upload multiple photos below.</p>
+            </div>
+            <a href="{% url 'custom_dashboard' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-bold text-sm transition">
+                ❮ Back to Dashboard
+            </a>
         </div>
+
+        <form method="POST" enctype="multipart/form-data" class="p-6 md:p-8 space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Django Form Renders Basic Fields (Name, Price, Category, Main Image, etc) -->
+                {{ form.as_p }}
+            </div>
+
+            <!-- 📸 EXTRA MULTIPLE IMAGES UPLOAD SECTION -->
+            <div class="mt-8 p-6 bg-orange-50 border-2 border-dashed border-orange-300 rounded-xl relative">
+                <div class="absolute -top-3 left-4 bg-orange-100 px-2 text-xs font-bold text-orange-600 rounded">AMAZON STYLE GALLERY</div>
+                <label class="block font-bold text-gray-800 text-lg mb-2"><i class="fa-solid fa-images text-orange-500"></i> Upload Extra Photos (Up to 10-15)</label>
+                <p class="text-sm text-gray-500 mb-4">Click below to select multiple images. These will be shown below the main product photo in a gallery.</p>
+                
+                <!-- NOTE: The 'multiple' attribute allows selecting 15 files at once -->
+                <input type="file" name="gallery_images" multiple accept="image/*" class="w-full bg-white border border-gray-300 p-3 rounded-lg cursor-pointer focus:ring-2 focus:ring-orange-500">
+                <p class="text-xs text-orange-600 mt-2 font-bold">💡 Tip: You can select multiple photos at once from your phone or PC folder.</p>
+            </div>
+
+            <div class="pt-6 border-t border-gray-100 flex gap-4">
+                <button type="submit" class="w-full md:w-auto bg-green-600 text-white font-bold px-10 py-3 rounded-lg hover:bg-green-700 transition shadow-md text-lg">
+                    ✅ Save Product to Store
+                </button>
+            </div>
+        </form>
     </div>
 
 </body>

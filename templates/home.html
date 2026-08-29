@@ -97,7 +97,12 @@
 
                 <div class="hidden md:flex items-center space-x-4">
                     <a href="{% url 'notifications' %}" class="text-gray-600 hover:text-orange-500 text-xl relative" title="Notifications">🔔</a>
-                    <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-red-500 text-xl relative" title="Wishlist">❤️</a>
+                    <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-red-500 text-xl relative" title="Wishlist">
+                        ❤️
+                        <span id="wishlist-count-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full transition-transform duration-200">
+                            {{ user_wishlist|length }}
+                        </span>
+                    </a>
                     <button onclick="toggleTheme()" class="text-xl px-2 py-1 rounded hover:bg-gray-100 transition" title="Toggle Dark/Light Mode" id="theme-btn">🌙</button>
                     <a href="{% url 'cart_page' %}" class="text-gray-600 hover:text-orange-500 font-medium text-sm transition flex items-center">
                         🛒 <span class="ml-1" id="cart-count-badge">Cart ({{ cart_count|default:0 }})</span>
@@ -129,7 +134,12 @@
 
                 <div class="flex md:hidden items-center space-x-3.5">
                     <a href="{% if request.user.is_authenticated %}{% url 'account_profile' %}{% else %}{% url 'custom_login' %}{% endif %}" class="text-gray-600 hover:text-orange-500 text-lg">👤</a>
-                    <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-red-500 text-lg">❤️</a>
+                    <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-red-500 text-lg relative">
+                        ❤️
+                        <span id="wishlist-count-badge-mobile" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1 rounded-full">
+                            {{ user_wishlist|length }}
+                        </span>
+                    </a>
                     <a href="{% url 'cart_page' %}" class="text-gray-600 hover:text-orange-500 text-lg">🛒</a>
                 </div>
             </div>
@@ -185,20 +195,20 @@
         </div>
     </nav>
 
-    <!-- 🚀 UPGRADED SLIDER WITH DOTS & ARROWS -->
-    <div class="relative w-full max-w-7xl mx-auto mt-4 overflow-hidden rounded-xl shadow-lg h-[200px] md:h-[400px] group">
+    <!-- 🚀 UPGRADED SLIDER WITH SWIPE & MODERN PILL DOTS -->
+    <div class="relative w-full max-w-7xl mx-auto mt-4 overflow-hidden rounded-xl shadow-lg h-[200px] md:h-[400px] group" id="slider-wrapper">
         <div id="slider" class="slider-container h-full w-full flex transition-transform duration-500">
             {% if banners %}
                 {% for b in banners %}
                 <div class="min-w-full h-full relative flex items-center justify-between px-6 md:px-20 text-white bg-gray-900 slide-item">
                     {% if b.image %}
-                        <img src="{{ b.image.url }}" class="absolute inset-0 w-full h-full object-cover opacity-60">
+                        <img src="{{ b.image.url }}" class="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none">
                     {% endif %}
-                    <div class="relative z-10">
+                    <div class="relative z-10 pointer-events-none">
                         <h2 class="text-xl md:text-5xl font-bold mb-2 md:mb-4">{{ b.title }}</h2>
                         <p class="text-xs md:text-lg mb-4 md:mb-6">Explore our latest collection at Prizeless Store.</p>
                         {% if b.link %}
-                            <a href="{{ b.link }}" class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-4 md:px-6 py-2 rounded-md font-bold text-xs md:text-base transition">Shop Now</a>
+                            <a href="{{ b.link }}" class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-4 md:px-6 py-2 rounded-md font-bold text-xs md:text-base transition pointer-events-auto">Shop Now</a>
                         {% endif %}
                     </div>
                 </div>
@@ -213,13 +223,13 @@
                 </div>
             {% endif %}
         </div>
-
-        <!-- Arrows -->
-        <button onclick="prevSlide()" class="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-40 hover:bg-opacity-80 text-white p-2 md:p-3 rounded-full z-30 transition cursor-pointer opacity-0 group-hover:opacity-100">❮</button>
-        <button onclick="nextSlide()" class="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-40 hover:bg-opacity-80 text-white p-2 md:p-3 rounded-full z-30 transition cursor-pointer opacity-0 group-hover:opacity-100">❯</button>
         
-        <!-- Dots -->
-        <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-20" id="slider-dots"></div>
+        <!-- 👈 👉 Left/Right Navigation Buttons (Visible on hover) -->
+        <button onclick="prevSlide()" class="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-40 hover:bg-opacity-80 text-white p-2 md:p-3 rounded-full z-30 transition opacity-0 group-hover:opacity-100 shadow-lg backdrop-blur-sm">❮</button>
+        <button onclick="nextSlide()" class="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-40 hover:bg-opacity-80 text-white p-2 md:p-3 rounded-full z-30 transition opacity-0 group-hover:opacity-100 shadow-lg backdrop-blur-sm">❯</button>
+        
+        <!-- 🔵 Modern Dots Container -->
+        <div class="absolute bottom-4 left-0 right-0 flex justify-center items-center space-x-2 z-20" id="slider-dots"></div>
     </div>
 
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-10 pb-4">
@@ -262,9 +272,9 @@
                     <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer add-cart-btn">
                         Add to Cart 🛒
                     </button>
-                    <!-- 🚀 WISHLIST BUTTON FIXED -->
+                    <!-- 🛠️ ORIGINAL WISHLIST BUTTON COLORS -->
                     <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
-                        {% if p.id in user_wishlist %}❤️ In Wishlist{% else %}🤍 Wishlist{% endif %}
+                        {% if p.id in user_wishlist %}❤️ Saved{% else %}🤍 Save{% endif %}
                     </button>
                 </div>
             </div>
@@ -301,9 +311,9 @@
                 
                 <div class="p-2.5 md:p-5 pt-0 space-y-1.5 md:space-y-2 mt-auto">
                     <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer add-cart-btn">Add to Cart 🛒</button>
-                    <!-- 🚀 WISHLIST BUTTON FIXED -->
+                    <!-- 🛠️ ORIGINAL WISHLIST BUTTON COLORS -->
                     <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
-                        {% if p.id in user_wishlist %}❤️ In Wishlist{% else %}🤍 Wishlist{% endif %}
+                        {% if p.id in user_wishlist %}❤️ Saved{% else %}🤍 Save{% endif %}
                     </button>
                 </div>
             </div>
@@ -340,9 +350,9 @@
                 
                 <div class="p-2.5 md:p-5 pt-0 space-y-1.5 md:space-y-2 mt-auto">
                     <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer add-cart-btn">Add to Cart 🛒</button>
-                    <!-- 🚀 WISHLIST BUTTON FIXED -->
+                    <!-- 🛠️ ORIGINAL WISHLIST BUTTON COLORS -->
                     <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
-                        {% if p.id in user_wishlist %}❤️ In Wishlist{% else %}🤍 Wishlist{% endif %}
+                        {% if p.id in user_wishlist %}❤️ Saved{% else %}🤍 Save{% endif %}
                     </button>
                 </div>
             </div>
@@ -381,7 +391,6 @@
                     <h2 id="modal-title" class="text-2xl font-bold mb-1 text-gray-900 hover:text-orange-500 cursor-pointer">Product Name</h2>
                     <span id="modal-price" class="text-3xl font-black text-gray-900 block mb-3">₹0</span>
                     
-                    <!-- 📦 Delivery, Stock & Description Details -->
                     <div class="mb-4 text-xs text-gray-600 space-y-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
                         <p>🚚 <strong class="text-gray-800">Delivery:</strong> Usually delivered in 3-5 business days.</p>
                         <p>📦 <strong class="text-gray-800">Stock Status:</strong> <span class="text-green-600 font-bold">In Stock & Ready to Ship</span></p>
@@ -399,16 +408,12 @@
                         <button id="modal-cart-btn" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded font-bold transition shadow-sm text-sm add-cart-btn">Add to Cart 🛒</button>
                         <button id="modal-buy-btn" class="flex-1 bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded font-bold transition text-sm">Buy Now</button>
                     </div>
-                    <button id="modal-wishlist-btn" class="w-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 py-2 rounded font-bold transition text-xs flex items-center justify-center gap-1.5">
-                        🤍 Save to Wishlist
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // 📱 MOBILE MENU TOGGLE FIX
         function toggleMobileMenu() {
             let menu = document.getElementById('mobile-menu');
             if (menu) {
@@ -418,7 +423,6 @@
 
         let qvTimer;
         
-        // 🚀 8.0 SECOND DELAY (Amazon-style hover experience)
         function startQuickView(id, name, price, imgUrl, colorsList, description) {
             qvTimer = setTimeout(() => {
                 openQuickView(id, name, price, imgUrl, colorsList, description);
@@ -436,7 +440,6 @@
             document.getElementById('modal-img-link').href = fullUrl;
             document.getElementById('modal-title').onclick = function() { window.location.href = fullUrl; };
             document.getElementById('modal-cart-btn').setAttribute('onclick', `addToCartAjax('${id}', this)`);
-            document.getElementById('modal-wishlist-btn').setAttribute('onclick', `toggleWishlistAjax('${id}', this)`);
             
             document.getElementById('modal-buy-btn').onclick = function() {
                 fetch(`/add-to-cart/${id}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' }}).then(() => window.location.href = "/checkout/");
@@ -593,19 +596,43 @@
                 btn.innerText = 'Added! ✓'; setTimeout(() => { btn.innerText = 'Add to Cart 🛒'; }, 1000);
             });
         }
+        
+        // 🛠️ SMART WISHLIST AJAX WITH REDIRECT & LIVE BADGE UPDATE
         function toggleWishlistAjax(productId, btn) {
             fetch(`/wishlist/add/${productId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(res => res.json()).then(data => {
-                if(data.status === 'success') {
+            .then(res => {
+                if (res.url.includes('login') || res.url.includes('signin')) {
+                    window.location.href = res.url; // Redirect unauthenticated users
+                    return null;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if(data && data.status === 'success') {
+                    // Update Button Colors (Original Gray/Red)
                     if(data.action === 'added') {
-                        btn.innerText = '❤️ In Wishlist';
+                        btn.innerHTML = '❤️ Saved';
                         btn.className = 'w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border bg-red-50 text-red-600 border-red-200';
                     } else {
-                        btn.innerText = '🤍 Wishlist';
+                        btn.innerHTML = '🤍 Save';
                         btn.className = 'w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100';
                     }
+
+                    // Update Top Navbar Live Badge
+                    let deskBadge = document.getElementById('wishlist-count-badge');
+                    let mobBadge = document.getElementById('wishlist-count-badge-mobile');
+                    if(deskBadge) {
+                        let currentCount = parseInt(deskBadge.innerText) || 0;
+                        let newCount = data.action === 'added' ? currentCount + 1 : Math.max(0, currentCount - 1);
+                        deskBadge.innerText = newCount;
+                        if(mobBadge) mobBadge.innerText = newCount;
+                        
+                        deskBadge.classList.add('scale-150');
+                        setTimeout(() => deskBadge.classList.remove('scale-150'), 200);
+                    }
                 }
-            });
+            })
+            .catch(error => console.error('Error:', error));
         }
         
         // 🌓 ROBUST DARK/LIGHT MODE TOGGLE
@@ -624,15 +651,14 @@
             document.documentElement.classList.add('dark');
         }
 
-        // 🎠 ADVANCED AUTO BANNER SLIDER WITH DOTS & ARROWS
+        // 🎠 ADVANCED SLIDER: MOBILE SWIPE + MODERN PILL DOTS
         let currentSlide = 0;
         let slides = document.querySelectorAll('.slide-item');
         let dotsContainer = document.getElementById('slider-dots');
 
-        if(dotsContainer && slides.length > 0) {
+        if(slides.length > 0) {
             slides.forEach((_, i) => {
                 let dot = document.createElement('div');
-                dot.className = `h-2 w-2 md:h-3 md:w-3 mx-1 rounded-full cursor-pointer transition-colors duration-300 ${i === 0 ? 'bg-orange-500' : 'bg-gray-300'}`;
                 dot.onclick = () => showSlide(i);
                 dotsContainer.appendChild(dot);
             });
@@ -650,18 +676,43 @@
             if(dotsContainer) {
                 let dots = dotsContainer.children;
                 for(let i = 0; i < dots.length; i++) {
-                    dots[i].classList.replace('bg-orange-500', 'bg-gray-300');
+                    // Inactive Dot (Small Circle)
+                    dots[i].className = `h-2 md:h-3 rounded-full cursor-pointer transition-all duration-300 mx-1 bg-white bg-opacity-50 w-2 md:w-3 shadow-md backdrop-blur-sm`; 
                 }
-                if(dots[currentSlide]) dots[currentSlide].classList.replace('bg-gray-300', 'bg-orange-500');
+                if(dots[currentSlide]) {
+                    // Active Dot (Wide Pill Shape)
+                    dots[currentSlide].className = `h-2 md:h-3 rounded-full cursor-pointer transition-all duration-300 mx-1 bg-orange-500 w-6 md:w-8 shadow-md`; 
+                }
             }
         }
 
         function nextSlide() { showSlide(currentSlide + 1); }
         function prevSlide() { showSlide(currentSlide - 1); }
 
-        if (slides.length > 1) {
-            setInterval(nextSlide, 4000);
+        let slideInterval;
+        if (slides.length > 1) slideInterval = setInterval(nextSlide, 4000);
+
+        // 👉 Mobile Touch Swipe Logic
+        let touchstartX = 0;
+        let touchendX = 0;
+        const sliderContainer = document.getElementById('slider-wrapper');
+        
+        if(sliderContainer) {
+            sliderContainer.addEventListener('touchstart', e => {
+                touchstartX = e.changedTouches[0].screenX;
+                clearInterval(slideInterval); // Stop auto-slide on touch
+            });
+
+            sliderContainer.addEventListener('touchend', e => {
+                touchendX = e.changedTouches[0].screenX;
+                if (touchendX < touchstartX - 50) nextSlide();
+                if (touchendX > touchstartX + 50) prevSlide();
+                slideInterval = setInterval(nextSlide, 4000); // Resume auto-slide
+            });
         }
+        
+        // Initialize first slide
+        showSlide(0);
     </script>
 </body>
 </html>
