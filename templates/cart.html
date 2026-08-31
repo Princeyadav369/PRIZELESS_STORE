@@ -5,11 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart - Prizeless Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 🌙 GLOBAL DARK MODE SCRIPT & CSS -->
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+    <style>
+        .dark body { background-color: #111827 !important; color: #f3f4f6 !important; }
+        .dark nav, .dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; color: #f3f4f6 !important; }
+        .dark .text-gray-900, .dark .text-gray-800 { color: #f3f4f6 !important; }
+        .dark .text-gray-700, .dark .text-gray-600 { color: #d1d5db !important; }
+        .dark .text-gray-500 { color: #9ca3af !important; }
+        .dark .bg-gray-50, .dark .bg-gray-100 { background-color: #111827 !important; border-color: #374151 !important; color: #f3f4f6 !important; }
+        .dark .border-gray-100, .dark .border-gray-200 { border-color: #374151 !important; }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="bg-gray-50 text-gray-800 font-sans transition-colors duration-300">
 
-    <!-- NAVBAR WITH NOTIFICATION ICON -->
-    <nav class="bg-white shadow-sm border-b border-gray-100 w-full z-50">
+    <nav class="bg-white shadow-sm border-b border-gray-100 w-full z-50 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16 md:h-20">
                 <a href="{% url 'home' %}" class="flex items-center space-x-2 text-xl md:text-2xl font-bold text-gray-900">
@@ -19,7 +35,7 @@
                 
                 <div class="flex items-center space-x-5 text-2xl md:text-xl">
                     <a href="{% url 'notifications' %}" class="text-gray-700 hover:text-orange-500">🔔</a>
-                    <a href="{% url 'wishlist' %}" class="text-gray-700 hover:text-red-500">❤️</a>
+                    <a href="{% url 'wishlist' %}" class="text-gray-700 hover:text-rose-500">❤️</a>
                     <a href="{% url 'account_profile' %}" class="text-gray-700 hover:text-orange-500">👤</a>
                 </div>
             </div>
@@ -30,7 +46,7 @@
         {% if cart_items %}
             <div class="space-y-4 mb-8">
                 {% for item in cart_items %}
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between transition-colors duration-300">
                     <div class="flex items-center space-x-4">
                         {% if item.product.image %}
                             <img src="{{ item.product.image.url }}" class="w-20 h-20 md:w-24 md:h-24 object-cover rounded-md border border-gray-100">
@@ -55,8 +71,7 @@
                 {% endfor %}
             </div>
 
-            <!-- ORDER SUMMARY -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-20">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-20 transition-colors duration-300">
                 <h3 class="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Order Summary</h3>
                 <div class="flex justify-between text-lg text-gray-600 mb-3">
                     <span>Subtotal</span>
@@ -76,7 +91,7 @@
                 </a>
             </div>
         {% else %}
-            <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-200 transition-colors duration-300">
                 <span class="text-6xl">🛒</span>
                 <h2 class="text-2xl font-bold text-gray-900 mt-4">Your cart is empty!</h2>
                 <p class="text-gray-500 text-lg mt-2 mb-6">Looks like you haven't added anything yet.</p>

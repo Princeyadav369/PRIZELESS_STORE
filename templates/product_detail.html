@@ -6,7 +6,23 @@
     <title>{{ product.name }} - Prizeless Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 🌙 GLOBAL DARK MODE SCRIPT & CSS -->
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     <style>
+        .dark body { background-color: #111827 !important; color: #f3f4f6 !important; }
+        .dark .nav-bar, .dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; color: #f3f4f6 !important; }
+        .dark .text-gray-900, .dark .text-gray-800 { color: #f3f4f6 !important; }
+        .dark .text-gray-700, .dark .text-gray-600 { color: #d1d5db !important; }
+        .dark .text-gray-500, .dark .text-gray-400 { color: #9ca3af !important; }
+        .dark .bg-gray-50, .dark .bg-gray-100 { background-color: #111827 !important; border-color: #374151 !important; }
+        .dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300 { border-color: #374151 !important; }
+        
         body { background-color: #f1f3f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .zoom-container { position: relative; overflow: hidden; border-radius: 8px; cursor: crosshair; background-color: #fff; box-shadow: 0 0 5px rgba(0,0,0,0.05); }
         .zoom-image { width: 100%; height: 400px; object-fit: contain; transition: transform 0.2s ease-out; transform-origin: center center; }
@@ -17,13 +33,14 @@
         .btn-cart { background: #ff6161; color: #fff; transition: 0.3s; }
         .btn-cart:hover { background: #e05353; }
         .trust-badge { display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 11px; color: #333; font-weight: 600; }
+        .dark .trust-badge { color: #d1d5db; }
         .trust-badge i { margin-bottom: 5px; }
         .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
-    <nav class="nav-bar w-full py-4 px-6 flex justify-between items-center sticky top-0 z-50">
+    <nav class="nav-bar w-full py-4 px-6 flex justify-between items-center sticky top-0 z-50 transition-colors duration-300">
         <a href="{% url 'home' %}" class="text-2xl font-bold text-gray-900 tracking-tight">Prizeless<span class="text-orange-500">.</span></a>
         <div class="flex space-x-4">
             <a href="{% url 'cart_page' %}" class="text-gray-700 font-bold hover:text-orange-500">🛒 Cart (<span id="cart-count-badge">{{ cart_count }}</span>)</a>
@@ -37,7 +54,7 @@
             <span class="text-gray-800 font-semibold">{{ product.name }}</span>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm flex flex-col md:flex-row p-4 md:p-8 gap-8">
+        <div class="bg-white rounded-lg shadow-sm flex flex-col md:flex-row p-4 md:p-8 gap-8 transition-colors duration-300">
             
             <div class="w-full md:w-5/12 flex flex-col gap-4">
                 <div class="zoom-container" id="zoom-container">
@@ -118,7 +135,6 @@
                 </div>
                 
                 <div class="mt-auto">
-                    <!-- 🛠️ NEW BEAUTIFUL SOFT ROSE COLOR BUTTON (NO GREY) -->
                     <button onclick="toggleWishlistAjax('{{ product.id }}', this)" class="w-full md:w-1/2 text-center text-sm font-bold py-3 rounded-sm transition border shadow-sm {% if in_wishlist %}bg-rose-500 text-white border-rose-500{% else %}bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100{% endif %}">
                         {% if in_wishlist %}❤️ Saved{% else %}🤍 Save{% endif %}
                     </button>
@@ -133,8 +149,12 @@
             document.querySelectorAll('.thumbnail-btn').forEach(btn => {
                 btn.classList.remove('border-orange-500');
                 btn.classList.add('border-gray-200');
+                if (document.documentElement.classList.contains('dark')) {
+                    btn.classList.add('dark:border-gray-700');
+                }
             });
             element.classList.remove('border-gray-200');
+            element.classList.remove('dark:border-gray-700');
             element.classList.add('border-orange-500');
         }
 
@@ -156,6 +176,19 @@
             });
         }
 
+        document.addEventListener("DOMContentLoaded", function() {
+            let colorBox = document.getElementById('detail-colors');
+            if(colorBox) {
+                let colors = colorBox.getAttribute('data-raw-colors').split(',');
+                colors.forEach(color => {
+                    let c = color.trim().toLowerCase();
+                    if(c) {
+                        colorBox.innerHTML += `<div class="w-8 h-8 rounded-full border-2 border-gray-300 shadow-sm cursor-pointer hover:scale-110 transition hover:border-gray-900" style="background-color: ${c};" title="${c}"></div>`;
+                    }
+                });
+            }
+        });
+
         function addToCartAjax(productId) {
             const btn = document.getElementById('cart-btn');
             fetch(`/add-to-cart/${productId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
@@ -176,7 +209,6 @@
         }
 
         function toggleWishlistAjax(productId, btn) {
-            // FIXED THE URL TO MATCH urls.py
             fetch(`/add-to-wishlist/${productId}/`, { 
                 headers: { 'X-Requested-With': 'XMLHttpRequest' } 
             })
@@ -189,7 +221,6 @@
             })
             .then(data => {
                 if(data && data.status === 'success') {
-                    // Update Button Colors (NEW SOFT ROSE COLOR)
                     if(data.action === 'added') {
                         btn.innerHTML = '❤️ Saved';
                         btn.className = 'w-full md:w-1/2 text-center text-sm font-bold py-3 rounded-sm transition border shadow-sm bg-rose-500 text-white border-rose-500';
