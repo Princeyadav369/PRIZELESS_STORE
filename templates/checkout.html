@@ -4,12 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Prizeless Store</title>
+    
+    <!-- 🌙 GLOBAL DARK MODE SCRIPT -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
     <style>
+        /* TUMHARA ORIGINAL STYLING YAHAN HAI */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
         }
         .container {
             max-width: 800px;
@@ -18,6 +28,7 @@
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: background-color 0.3s, color 0.3s;
         }
         h2 {
             color: #333;
@@ -78,6 +89,15 @@
         .btn-login-prompt:hover {
             background: #0056b3;
         }
+
+        /* 🌙 DARK MODE OVERRIDES (Bas ye naya add kiya hai) */
+        html.dark body { background-color: #111827 !important; color: #f3f4f6 !important; }
+        html.dark .container { background-color: #1f2937 !important; color: #f3f4f6 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        html.dark h2 { color: #f3f4f6 !important; border-bottom: 2px solid #374151 !important; }
+        html.dark label { color: #d1d5db !important; }
+        html.dark .user-status { background-color: #374151 !important; color: #f3f4f6 !important; }
+        html.dark input, html.dark textarea, html.dark select { background-color: #374151 !important; color: #ffffff !important; border: 1px solid #4b5563 !important; }
+        html.dark p { color: #9ca3af !important; }
     </style>
 </head>
 <body>
@@ -122,7 +142,7 @@
                 <label for="payment_method">Payment Method</label>
                 <select id="payment_method" name="payment_method">
                     <option value="COD">Cash on Delivery (COD)</option>
-                    <option value="Online">Online Payment (UPI / Card)</option>
+                <option value="Online">Online Payment (UPI / Card)</option>
                 </select>
             </div>
 
