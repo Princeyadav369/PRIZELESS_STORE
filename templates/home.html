@@ -98,9 +98,8 @@
                 <div class="hidden md:flex items-center space-x-4">
                     <a href="{% url 'notifications' %}" class="text-gray-600 hover:text-orange-500 text-xl relative" title="Notifications">🔔</a>
                     
-                    <!-- 🛠️ ORIGINAL CLEAN NAVBAR WISHLIST ICON -->
-                    <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-red-500 text-xl relative" title="Wishlist">❤️</a>
-                    
+                    <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-rose-500 text-xl" title="Wishlist">❤️</a>
+
                     <button onclick="toggleTheme()" class="text-xl px-2 py-1 rounded hover:bg-gray-100 transition" title="Toggle Dark/Light Mode" id="theme-btn">🌙</button>
                     <a href="{% url 'cart_page' %}" class="text-gray-600 hover:text-orange-500 font-medium text-sm transition flex items-center">
                         🛒 <span class="ml-1" id="cart-count-badge">Cart ({{ cart_count|default:0 }})</span>
@@ -132,8 +131,7 @@
 
                 <div class="flex md:hidden items-center space-x-3.5">
                     <a href="{% if request.user.is_authenticated %}{% url 'account_profile' %}{% else %}{% url 'custom_login' %}{% endif %}" class="text-gray-600 hover:text-orange-500 text-lg">👤</a>
-                    <!-- 🛠️ ORIGINAL CLEAN NAVBAR WISHLIST ICON FOR MOBILE -->
-                    <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-red-500 text-lg">❤️</a>
+                    <a href="{% url 'wishlist' %}" class="text-gray-600 hover:text-rose-500 text-lg">❤️</a>
                     <a href="{% url 'cart_page' %}" class="text-gray-600 hover:text-orange-500 text-lg">🛒</a>
                 </div>
             </div>
@@ -218,11 +216,9 @@
             {% endif %}
         </div>
         
-        <!-- 👈 👉 Left/Right Navigation Buttons (Visible on hover) -->
         <button onclick="prevSlide()" class="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-40 hover:bg-opacity-80 text-white p-2 md:p-3 rounded-full z-30 transition opacity-0 group-hover:opacity-100 shadow-lg backdrop-blur-sm">❮</button>
         <button onclick="nextSlide()" class="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-40 hover:bg-opacity-80 text-white p-2 md:p-3 rounded-full z-30 transition opacity-0 group-hover:opacity-100 shadow-lg backdrop-blur-sm">❯</button>
         
-        <!-- 🔵 Modern Dots Container -->
         <div class="absolute bottom-4 left-0 right-0 flex justify-center items-center space-x-2 z-20" id="slider-dots"></div>
     </div>
 
@@ -266,8 +262,8 @@
                     <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer add-cart-btn">
                         Add to Cart 🛒
                     </button>
-                    <!-- 🛠️ ORIGINAL WISHLIST BUTTON COLORS -->
-                    <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
+                    <!-- 🛠️ NEW BEAUTIFUL SOFT ROSE COLOR BUTTON (NO GREY) -->
+                    <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border shadow-sm {% if p.id in user_wishlist %}bg-rose-500 text-white border-rose-500{% else %}bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100{% endif %}">
                         {% if p.id in user_wishlist %}❤️ Saved{% else %}🤍 Save{% endif %}
                     </button>
                 </div>
@@ -305,8 +301,8 @@
                 
                 <div class="p-2.5 md:p-5 pt-0 space-y-1.5 md:space-y-2 mt-auto">
                     <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer add-cart-btn">Add to Cart 🛒</button>
-                    <!-- 🛠️ ORIGINAL WISHLIST BUTTON COLORS -->
-                    <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
+                    <!-- 🛠️ NEW BEAUTIFUL SOFT ROSE COLOR BUTTON (NO GREY) -->
+                    <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border shadow-sm {% if p.id in user_wishlist %}bg-rose-500 text-white border-rose-500{% else %}bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100{% endif %}">
                         {% if p.id in user_wishlist %}❤️ Saved{% else %}🤍 Save{% endif %}
                     </button>
                 </div>
@@ -344,8 +340,8 @@
                 
                 <div class="p-2.5 md:p-5 pt-0 space-y-1.5 md:space-y-2 mt-auto">
                     <button onclick="addToCartAjax('{{ p.id }}', this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-1.5 md:py-2 rounded-md text-[10px] md:text-sm font-bold transition shadow-sm cursor-pointer add-cart-btn">Add to Cart 🛒</button>
-                    <!-- 🛠️ ORIGINAL WISHLIST BUTTON COLORS -->
-                    <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border {% if p.id in user_wishlist %}bg-red-50 text-red-600 border-red-200{% else %}bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100{% endif %}">
+                    <!-- 🛠️ NEW BEAUTIFUL SOFT ROSE COLOR BUTTON (NO GREY) -->
+                    <button onclick="toggleWishlistAjax('{{ p.id }}', this)" class="w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border shadow-sm {% if p.id in user_wishlist %}bg-rose-500 text-white border-rose-500{% else %}bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100{% endif %}">
                         {% if p.id in user_wishlist %}❤️ Saved{% else %}🤍 Save{% endif %}
                     </button>
                 </div>
@@ -455,7 +451,7 @@
             });
         });
 
-        // 💥 ULTIMATE FESTIVAL ANIMATIONS & CULTURAL EFFECTS ENGINE
+        // 💥 ULTIMATE FESTIVAL ANIMATIONS
         let activeFest = "{{ active_festival }}";
         let festAnim = "{{ fest_config.anim }}";
         let decorationLevel = "{{ decoration_level }}"; 
@@ -468,9 +464,7 @@
                 festTitle.style.fontSize = "2.4rem";
                 festTitle.style.color = "var(--fest-c1)";
             }
-            
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
             if (festAnim === 'fireworks') {
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
@@ -487,7 +481,6 @@
                         ticks: 100
                     });
                 }, 500);
-
             } else if (festAnim === 'splash') {
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
@@ -505,7 +498,6 @@
                         scalar: randomInRange(1.2, 2.0)
                     });
                 }, 700);
-
             } else if (festAnim === 'confetti' || festAnim === 'flower') {
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
@@ -523,7 +515,6 @@
                         scalar: 1.5
                     });
                 }, 600);
-
             } else if (festAnim === 'snow') {
                 let duration = 15 * 1000;
                 let animationEnd = Date.now() + duration;
@@ -542,7 +533,6 @@
                     });
                     if (Date.now() < animationEnd) requestAnimationFrame(frame);
                 }());
-
             } else if (festAnim === 'stars') {
                 let duration = 12 * 1000;
                 let animationEnd = Date.now() + duration;
@@ -563,7 +553,6 @@
             }
         }
 
-        // 🎵 ROBUST MUSIC AUTOPLAY
         let musicStarted = false;
         let bgMusic = document.getElementById('relaxing-bg-music');
         
@@ -586,13 +575,13 @@
             });
         }
         
-        // 🛠️ BUG-FREE FOOLPROOF WISHLIST AJAX
+        // 🛠️ BUG-FREE FOOLPROOF WISHLIST AJAX WITH CORRECTED URL
         function toggleWishlistAjax(productId, btn) {
-            fetch(`/wishlist/add/${productId}/`, { 
+            // FIXED THE URL TO MATCH urls.py
+            fetch(`/add-to-wishlist/${productId}/`, { 
                 headers: { 'X-Requested-With': 'XMLHttpRequest' } 
             })
             .then(res => {
-                // Agar user login nahi hai, to response login page ka aayega ya redirect hoga
                 if (res.redirected || res.url.includes('login') || res.url.includes('signin')) {
                     window.location.href = res.url || '/login/';
                     return null;
@@ -601,24 +590,22 @@
             })
             .then(data => {
                 if(data && data.status === 'success') {
-                    // Update Button Colors (Original Gray/Red)
+                    // Update Button Colors (NEW SOFT ROSE COLOR)
                     if(data.action === 'added') {
                         btn.innerHTML = '❤️ Saved';
-                        btn.className = 'w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border bg-red-50 text-red-600 border-red-200 shadow-sm';
+                        btn.className = 'w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border shadow-sm bg-rose-500 text-white border-rose-500';
                     } else {
                         btn.innerHTML = '🤍 Save';
-                        btn.className = 'w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 shadow-sm';
+                        btn.className = 'w-full text-center text-[10px] md:text-xs font-bold py-1 md:py-1.5 rounded-md transition border shadow-sm bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100';
                     }
                 }
             })
             .catch(error => {
-                // AGAR JAVASCRIPT MEIN KOI BHI ERROR AATA HAI, TO CHUPCHAP PAGE KO NORMAL REDIRECT KAR DEGA BINA FASE!
                 console.error("Ajax fail ho gaya, redirecting...", error);
-                window.location.href = `/wishlist/add/${productId}/`;
+                window.location.href = `/add-to-wishlist/${productId}/`;
             });
         }
         
-        // 🌓 ROBUST DARK/LIGHT MODE TOGGLE
         function toggleTheme() {
             let htmlRoot = document.documentElement;
             if (htmlRoot.classList.contains('dark')) {
@@ -629,10 +616,7 @@
                 localStorage.setItem('theme', 'dark');
             }
         }
-
-        if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.classList.add('dark');
-        }
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
 
         // 🎠 ADVANCED SLIDER: MOBILE SWIPE + MODERN PILL DOTS
         let currentSlide = 0;
@@ -681,18 +665,17 @@
         if(sliderContainer) {
             sliderContainer.addEventListener('touchstart', e => {
                 touchstartX = e.changedTouches[0].screenX;
-                clearInterval(slideInterval); // Stop auto-slide on touch
+                clearInterval(slideInterval); 
             });
 
             sliderContainer.addEventListener('touchend', e => {
                 touchendX = e.changedTouches[0].screenX;
                 if (touchendX < touchstartX - 50) nextSlide();
                 if (touchendX > touchstartX + 50) prevSlide();
-                slideInterval = setInterval(nextSlide, 4000); // Resume auto-slide
+                slideInterval = setInterval(nextSlide, 4000); 
             });
         }
         
-        // Initialize first slide
         showSlide(0);
     </script>
 </body>
