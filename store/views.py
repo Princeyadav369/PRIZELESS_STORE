@@ -19,6 +19,7 @@ import os
 import traceback
 import datetime
 from django.db import connection 
+import threading # 🚀 NAYA FEATURE: Background Processing ke liye
 
 FESTIVAL_CONFIG = {
     'auto': {'title': '🤖 Auto-Pilot Mode (Date-based)', 'c1': '#4b5563', 'c2': '#1f2937', 'emoji': '⚙️', 'anim': 'none'},
@@ -366,7 +367,16 @@ def checkout_view(request):
         'cart_count': cart_count
     })
 
-# 🛠️ ERROR 500 FIX & SAFELY DELETING SESSION
+# 🚀 NAYA HELPER FUNCTION: EMAIL KO BACKGROUND MEIN BHEJNE KE LIYE
+def background_order_email(email, first_name, order_id, total_amount):
+    try:
+        subject = 'Order Confirmed - Prizeless Store'
+        message = f"Hi {first_name},\n\nYour order has been successfully placed and confirmed! Thank you for shopping with Prizeless Store.\n\nOrder ID: #{order_id}\nTotal Amount: ₹{total_amount}\n\nWe will notify you once it ships."
+        send_mail(subject, message, 'prizelessstore@gmail.com', [email], fail_silently=True)
+    except Exception as e:
+        print("Background email error:", e)
+
+# 🛠️ ERROR 500 FIX & INSTANT REDIRECT
 def payment_page_view(request):
     order_id = request.session.get('pending_order_id')
     
@@ -389,13 +399,9 @@ def payment_page_view(request):
                 order.status = 'Confirmed'
                 order.save()
                 
+                # NAYA: Email ab background mein jayega (Fast Load)
                 if order.email:
-                    try:
-                        subject = 'Order Confirmed - Prizeless Store'
-                        message = f"Hi {order.first_name},\n\nYour order has been successfully placed and confirmed! Thank you for shopping with Prizeless Store.\n\nOrder ID: #{order.id}\nTotal Amount: ₹{order.total_amount}\n\nWe will notify you once it ships."
-                        send_mail(subject, message, 'prizelessstore@gmail.com', [order.email], fail_silently=True)
-                    except Exception as e:
-                        pass # Silently fail email so page doesn't crash
+                    threading.Thread(target=background_order_email, args=(order.email, order.first_name, order.id, order.total_amount)).start()
 
                 if 'pending_order_id' in request.session:
                     del request.session['pending_order_id']
@@ -405,13 +411,9 @@ def payment_page_view(request):
             order.status = 'Confirmed'
             order.save()
             
+            # NAYA: Email ab background mein jayega (Fast Load)
             if order.email:
-                try:
-                    subject = 'Order Confirmed - Prizeless Store'
-                    message = f"Hi {order.first_name},\n\nYour order has been successfully placed and confirmed! Thank you for shopping with Prizeless Store.\n\nOrder ID: #{order.id}\nTotal Amount: ₹{order.total_amount}\n\nWe will notify you once it ships."
-                    send_mail(subject, message, 'prizelessstore@gmail.com', [order.email], fail_silently=True)
-                except Exception as e:
-                    pass # Silently fail email so page doesn't crash
+                threading.Thread(target=background_order_email, args=(order.email, order.first_name, order.id, order.total_amount)).start()
 
             # Safely delete session to prevent 500 double-click crash
             if 'pending_order_id' in request.session:
