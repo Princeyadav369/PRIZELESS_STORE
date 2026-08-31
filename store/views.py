@@ -366,6 +366,7 @@ def checkout_view(request):
         'cart_count': cart_count
     })
 
+# 🛠️ ERROR 500 FIX & SAFELY DELETING SESSION
 def payment_page_view(request):
     order_id = request.session.get('pending_order_id')
     
@@ -392,11 +393,12 @@ def payment_page_view(request):
                     try:
                         subject = 'Order Confirmed - Prizeless Store'
                         message = f"Hi {order.first_name},\n\nYour order has been successfully placed and confirmed! Thank you for shopping with Prizeless Store.\n\nOrder ID: #{order.id}\nTotal Amount: ₹{order.total_amount}\n\nWe will notify you once it ships."
-                        send_mail(subject, message, 'prizelessstore@gmail.com', [order.email], fail_silently=False)
+                        send_mail(subject, message, 'prizelessstore@gmail.com', [order.email], fail_silently=True)
                     except Exception as e:
-                        print("Email sending failed:", e)
+                        pass # Silently fail email so page doesn't crash
 
-                del request.session['pending_order_id']
+                if 'pending_order_id' in request.session:
+                    del request.session['pending_order_id']
                 return redirect('order_success', order_id=order.id)
                 
         elif action == 'confirm_upi':
@@ -407,11 +409,13 @@ def payment_page_view(request):
                 try:
                     subject = 'Order Confirmed - Prizeless Store'
                     message = f"Hi {order.first_name},\n\nYour order has been successfully placed and confirmed! Thank you for shopping with Prizeless Store.\n\nOrder ID: #{order.id}\nTotal Amount: ₹{order.total_amount}\n\nWe will notify you once it ships."
-                    send_mail(subject, message, 'prizelessstore@gmail.com', [order.email], fail_silently=False)
+                    send_mail(subject, message, 'prizelessstore@gmail.com', [order.email], fail_silently=True)
                 except Exception as e:
-                    print("Email sending failed:", e)
+                    pass # Silently fail email so page doesn't crash
 
-            del request.session['pending_order_id']
+            # Safely delete session to prevent 500 double-click crash
+            if 'pending_order_id' in request.session:
+                del request.session['pending_order_id']
             return redirect('order_success', order_id=order.id)
             
     return render(request, 'payment.html', {'order': order, 'step': 'selection'})

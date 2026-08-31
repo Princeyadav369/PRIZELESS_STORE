@@ -3,33 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Success - Prizeless Store</title>
+    <title>Order Confirmed - Prizeless Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- 🌙 GLOBAL DARK MODE SCRIPT -->
+    <script>
+        tailwind.config = { darkMode: 'class' }
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+    
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .success-card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 400px; box-sizing: border-box; }
-        .success-icon { font-size: 50px; color: #28a745; margin-bottom: 15px; }
-        h2 { color: #333; margin-bottom: 10px; font-size: 24px; }
-        p { color: #666; margin-bottom: 5px; font-size: 15px; }
-        .order-id { font-weight: bold; color: #ff8c00; margin: 15px 0; font-size: 18px; }
-        .btn-home { display: inline-block; background: #ff8c00; color: white; padding: 14px 20px; text-decoration: none; border-radius: 8px; margin-top: 20px; width: 100%; font-size: 16px; font-weight: bold; box-sizing: border-box; }
-        .btn-home:hover { background: #e07b00; }
+        .dark body { background-color: #111827 !important; color: #f3f4f6 !important; }
+        .dark .bg-white { background-color: #1f2937 !important; border-color: #374151 !important; color: #f3f4f6 !important; }
+        .dark .text-gray-900, .dark .text-gray-800 { color: #f3f4f6 !important; }
+        .dark .text-gray-600, .dark .text-gray-500 { color: #d1d5db !important; }
+
+        /* 🟢 BEAUTIFUL SUCCESS ANIMATION CSS */
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            background-color: #4ade80;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform: scale(0);
+        }
+        .success-checkmark svg {
+            width: 40px;
+            height: 40px;
+            color: white;
+            animation: checkDraw 0.4s 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        @keyframes checkDraw {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen transition-colors duration-300">
 
-    <div class="success-card">
-        <div class="success-icon">✅</div>
-        <h2>Order Placed Successfully!</h2>
-        <p>Thank you for shopping with Prizeless Store</p>
-        
-        <div class="order-id">ORDER ID: #PRZ-00{{ order_id }}</div>
-        
-        <p style="font-size: 13px; background: #eef2f7; padding: 10px; border-radius: 5px; margin-top: 15px;">
-            We will process your order soon.
-        </p>
-        
-        <a href="{% url 'home' %}" class="btn-home">Return to Home Store 🏠</a>
+    <div class="max-w-md w-full mx-4 bg-white p-8 rounded-2xl shadow-xl border border-gray-100 text-center relative overflow-hidden transition-colors duration-300">
+
+        <!-- 🟢 SUCCESS ANIMATION TICK -->
+        <div class="success-checkmark mb-6 shadow-lg shadow-green-200 dark:shadow-none">
+            <svg fill="none" stroke="currentColor" stroke-width="4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+
+        <h1 class="text-3xl font-black text-gray-900 mb-2">Order Confirmed!</h1>
+        <p class="text-gray-600 mb-6">Thank you for shopping with Prizeless Store. Your payment has been successfully verified.</p>
+
+        <!-- 📦 ORDER DETAILS BOX -->
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 mb-8 border border-gray-100 dark:border-gray-700 text-left">
+            <div class="mb-3 border-b border-gray-200 dark:border-gray-700 pb-3">
+                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Order ID</p>
+                <p class="text-lg font-bold text-gray-900">#PRZ-{{ order.id }}</p>
+            </div>
+            <div class="mb-3 border-b border-gray-200 dark:border-gray-700 pb-3">
+                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Amount Paid</p>
+                <p class="text-lg font-bold text-green-600">₹{{ order.total_amount }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Email Confirmation Sent To</p>
+                <p class="text-sm font-medium text-gray-900">{{ order.email }}</p>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <a href="{% url 'home' %}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg transition dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white">Back to Home</a>
+            <a href="{% url 'my_orders' %}" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition shadow-md">View Order Track</a>
+        </div>
     </div>
 
+    <!-- 🎉 AMAZON STYLE CONFETTI ANIMATION SCRIPT -->
+    <script>
+        window.onload = function() {
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+                }));
+                confetti(Object.assign({}, defaults, { particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+                }));
+            }, 250);
+        };
+    </script>
 </body>
 </html>
